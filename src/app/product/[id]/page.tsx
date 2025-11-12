@@ -34,12 +34,14 @@ export default function ProductPage() {
               const relatedQuery = query(
                 collection(firestore, 'products'), 
                 where('category', '==', productData.category),
-                where('id', '!=', productData.id),
-                limit(4)
+                limit(5) // Fetch one extra to filter out the current product
               );
 
               onSnapshot(relatedQuery, (snapshot) => {
-                const relProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+                const relProducts = snapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+                    .filter(p => p.id !== productData.id) // Filter on the client side
+                    .slice(0, 4); // Take the first 4
                 setRelatedProducts(relProducts);
               });
             }
