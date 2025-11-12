@@ -20,4 +20,3 @@ if (apiKey) {
 export const ai = genkit({
   plugins,
 });
-
