@@ -101,3 +101,11 @@ export interface PaymentGatewaySettings {
   nagad: boolean;
   rocket: boolean;
 }
+
+export interface ThemeSettings {
+    primary: string;
+    background: string;
+    accent: string;
+}
+
+    

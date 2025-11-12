@@ -11,11 +11,14 @@ import { Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings } from '@/lib/types';
+
 
 const SLIDER_IMAGES_KEY = 'heroSliderImages';
 const WEBSITE_SETTINGS_KEY = 'websiteSettings';
 const AI_SETTINGS_KEY = 'aiSettings';
 const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
+const THEME_SETTINGS_KEY = 'themeSettings';
 
 const defaultImages = [
   { url: 'https://img.lazcdn.com/us/domino/df7d0dca-dc55-4a5c-8cb2-dcf2b2a2f1cc_BD-1976-688.jpg_2200x2200q80.jpg_.webp', dataAiHint: 'electronics sale' },
@@ -32,27 +35,11 @@ interface Slide {
   dataAiHint: string;
 }
 
-interface WebsiteSettings {
-  storeName: string;
-  logoUrl: string;
-  contactEmail: string;
-  contactPhone: string;
-  address: string;
-}
-
 interface AiSettings {
   recommendationsEnabled: boolean;
 }
 
-interface PaymentGatewaySettings {
-  cashOnDelivery: boolean;
-  bkash: boolean;
-  bkashNumber: string;
-  nagad: boolean;
-  rocket: boolean;
-}
-
-const defaultSettings: WebsiteSettings = {
+const defaultWebsiteSettings: WebsiteSettings = {
   storeName: 'BazaarGo',
   logoUrl: '',
   contactEmail: 'support@bazaargo.com',
@@ -70,6 +57,12 @@ const defaultPaymentSettings: PaymentGatewaySettings = {
   bkashNumber: '',
   nagad: true,
   rocket: false,
+};
+
+const defaultThemeSettings: ThemeSettings = {
+    primary: "19 89% 54%",
+    background: "24 69% 93%",
+    accent: "354 89% 54%",
 };
 
 // Helper function to safely parse JSON from localStorage
@@ -94,9 +87,10 @@ function safeJSONParse<T>(key: string, fallback: T): T {
 export default function AdminSettingsPage() {
     const { toast } = useToast();
     const [slides, setSlides] = useState<Slide[]>([]);
-    const [settings, setSettings] = useState<WebsiteSettings>(defaultSettings);
+    const [settings, setSettings] = useState<WebsiteSettings>(defaultWebsiteSettings);
     const [aiSettings, setAiSettings] = useState<AiSettings>(defaultAiSettings);
     const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>(defaultPaymentSettings);
+    const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
     const [isLoading, setIsLoading] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -119,9 +113,10 @@ export default function AdminSettingsPage() {
         }
 
         // Load Settings
-        setSettings(safeJSONParse(WEBSITE_SETTINGS_KEY, defaultSettings));
+        setSettings(safeJSONParse(WEBSITE_SETTINGS_KEY, defaultWebsiteSettings));
         setAiSettings(safeJSONParse(AI_SETTINGS_KEY, defaultAiSettings));
         setPaymentSettings(safeJSONParse(PAYMENT_SETTINGS_KEY, defaultPaymentSettings));
+        setThemeSettings(safeJSONParse(THEME_SETTINGS_KEY, defaultThemeSettings));
         
         setIsMounted(true);
     }, []);
@@ -146,6 +141,10 @@ export default function AdminSettingsPage() {
         setPaymentSettings(prev => ({ ...prev, [field]: value }));
     };
 
+    const handleThemeSettingChange = (field: keyof ThemeSettings, value: string) => {
+        setThemeSettings(prev => ({ ...prev, [field]: value }));
+    }
+
     const addSlide = () => {
         setSlides(prevSlides => [...prevSlides, { id: Date.now(), url: '', dataAiHint: '' }]);
     };
@@ -162,6 +161,8 @@ export default function AdminSettingsPage() {
             localStorage.setItem(WEBSITE_SETTINGS_KEY, JSON.stringify(settings));
             localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(aiSettings));
             localStorage.setItem(PAYMENT_SETTINGS_KEY, JSON.stringify(paymentSettings));
+            localStorage.setItem(THEME_SETTINGS_KEY, JSON.stringify(themeSettings));
+
 
             await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
             toast({
@@ -242,6 +243,45 @@ export default function AdminSettingsPage() {
                             placeholder="123 Bazaar Street, Dhaka, Bangladesh"
                             rows={3}
                         />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Theme Customization</CardTitle>
+                    <CardDescription>Customize the main colors of your website. Use HSL values without the `hsl()` wrapper.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="primaryColor">Primary Color</Label>
+                        <Input
+                            id="primaryColor"
+                            value={themeSettings.primary}
+                            onChange={(e) => handleThemeSettingChange('primary', e.target.value)}
+                            placeholder="e.g., 19 89% 54%"
+                        />
+                        <p className="text-sm text-muted-foreground">Used for buttons, links, and important elements.</p>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="backgroundColor">Background Color</Label>
+                        <Input
+                            id="backgroundColor"
+                            value={themeSettings.background}
+                            onChange={(e) => handleThemeSettingChange('background', e.target.value)}
+                            placeholder="e.g., 24 69% 93%"
+                        />
+                         <p className="text-sm text-muted-foreground">The main background color of the site.</p>
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="accentColor">Accent Color</Label>
+                        <Input
+                            id="accentColor"
+                            value={themeSettings.accent}
+                            onChange={(e) => handleThemeSettingChange('accent', e.target.value)}
+                            placeholder="e.g., 354 89% 54%"
+                        />
+                         <p className="text-sm text-muted-foreground">Used for highlights and secondary actions.</p>
                     </div>
                 </CardContent>
             </Card>
@@ -392,3 +432,5 @@ export default function AdminSettingsPage() {
         </div>
     );
 }
+
+    
