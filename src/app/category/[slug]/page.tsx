@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import { initialCategories, products as initialProducts } from '@/lib/data';
 import { ProductCard } from '@/components/product-card';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
@@ -12,51 +11,54 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import type { Product, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot, query, where, doc, getDoc } from 'firebase/firestore';
 
-const PRODUCTS_KEY = 'appProducts';
-const CATEGORIES_KEY = 'appCategories';
 
 export default function CategoryPage() {
   const params = useParams();
   const slug = params.slug as string;
   
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [category, setCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const category = categories.find((c) => c.id === slug);
-  const filteredProducts = products.filter((p) => p.category === slug);
 
   useEffect(() => {
-    const loadData = () => {
-        try {
-            const savedProductsJSON = localStorage.getItem(PRODUCTS_KEY);
-            const newProducts = savedProductsJSON ? JSON.parse(savedProductsJSON) : initialProducts;
-            setProducts(prev => JSON.stringify(prev) !== JSON.stringify(newProducts) ? newProducts : prev);
-
-            const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-            const newCategories = savedCategoriesJSON ? JSON.parse(savedCategoriesJSON) : initialCategories;
-            setCategories(prev => JSON.stringify(prev) !== JSON.stringify(newCategories) ? newCategories : prev);
-        } catch (error) {
-            console.error("Failed to load data from localStorage, using defaults.", error);
-            setProducts(initialProducts);
-            setCategories(initialCategories);
-        } finally {
-            setIsLoading(false);
-        }
+    if (!slug) {
+        setIsLoading(false);
+        return;
     };
     
     setIsLoading(true);
-    loadData();
-    const interval = setInterval(loadData, 2000);
-    return () => clearInterval(interval);
-  }, []);
+
+    const categoryRef = doc(firestore, 'categories', slug);
+    const categoryUnsub = onSnapshot(categoryRef, (docSnap) => {
+        if (docSnap.exists()) {
+            setCategory({ id: docSnap.id, ...docSnap.data() } as Category);
+        } else {
+            setCategory(null);
+        }
+    });
+
+    const productsQuery = query(collection(firestore, 'products'), where('category', '==', slug));
+    const productsUnsub = onSnapshot(productsQuery, (snapshot) => {
+        const productData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(productData);
+        setIsLoading(false);
+    });
+
+    return () => {
+        categoryUnsub();
+        productsUnsub();
+    }
+  }, [slug]);
 
   useEffect(() => {
     if (!isLoading && !category) {
       notFound();
     }
-  }, [isLoading, category, slug]);
+  }, [isLoading, category]);
 
 
   if (isLoading || !category) {
@@ -112,9 +114,9 @@ export default function CategoryPage() {
               <span>{category.name}</span>
             </div>
 
-            {filteredProducts.length > 0 ? (
+            {products.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {filteredProducts.map((product) => (
+                    {products.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                 </div>

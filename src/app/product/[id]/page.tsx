@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,44 +7,53 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { ProductDetailsClient } from './product-details-client';
 import type { Product } from '@/lib/types';
-import { products as initialProducts } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProductCard } from '@/components/product-card';
+import { firestore } from '@/lib/firebase';
+import { doc, onSnapshot, getDoc, collection, getDocs, query, where, limit } from 'firebase/firestore';
 
-const PRODUCTS_KEY = 'appProducts';
 
 export default function ProductPage() {
   const params = useParams();
   const id = params.id as string;
   const [product, setProduct] = useState<Product | null>(null);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
     setIsLoading(true);
-    try {
-      const savedProductsJSON = localStorage.getItem(PRODUCTS_KEY);
-      let products: Product[] = initialProducts;
-      if (savedProductsJSON) {
-          const parsed = JSON.parse(savedProductsJSON);
-          if (Array.isArray(parsed)) {
-              products = parsed;
-          }
-      }
-      setAllProducts(products);
-      const foundProduct = products.find((p: Product) => p.id === id);
-      if (foundProduct) {
-        setProduct(foundProduct);
-      }
-    } catch (error) {
-      console.error("Failed to load product from localStorage, trying fallback", error);
-      const foundProduct = initialProducts.find((p: Product) => p.id === id);
-      if(foundProduct) setProduct(foundProduct);
-      setAllProducts(initialProducts);
-    } finally {
-      setIsLoading(false);
-    }
+    
+    const docRef = doc(firestore, 'products', id);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const productData = { id: docSnap.id, ...docSnap.data() } as Product;
+            setProduct(productData);
+
+            if (productData.category) {
+              const relatedQuery = query(
+                collection(firestore, 'products'), 
+                where('category', '==', productData.category),
+                where('id', '!=', productData.id),
+                limit(4)
+              );
+
+              onSnapshot(relatedQuery, (snapshot) => {
+                const relProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+                setRelatedProducts(relProducts);
+              });
+            }
+        } else {
+            setProduct(null);
+        }
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Error fetching product:", error);
+        setProduct(null);
+        setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [id]);
 
   useEffect(() => {
@@ -52,11 +62,6 @@ export default function ProductPage() {
     }
   }, [isLoading, product]);
 
-  const relatedProducts = product 
-    ? allProducts
-        .filter(p => p.category === product.category && p.id !== product.id)
-        .slice(0, 4)
-    : [];
 
   return (
     <div className="flex flex-col min-h-screen">
