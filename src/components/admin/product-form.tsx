@@ -16,6 +16,7 @@ import type { Product, Category } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle } from 'lucide-react';
 import { firestore } from '@/lib/firebase';
 import { collection, doc, getDoc, setDoc, addDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { Label } from '@/components/ui/label';
 
 const productSchema = z.object({
   name: z.string().min(3, { message: 'Product name must be at least 3 characters.' }),
