@@ -47,6 +47,7 @@ interface AiSettings {
 interface PaymentGatewaySettings {
   cashOnDelivery: boolean;
   bkash: boolean;
+  bkashNumber: string;
   nagad: boolean;
   rocket: boolean;
 }
@@ -66,6 +67,7 @@ const defaultAiSettings: AiSettings = {
 const defaultPaymentSettings: PaymentGatewaySettings = {
   cashOnDelivery: true,
   bkash: true,
+  bkashNumber: '',
   nagad: true,
   rocket: false,
 };
@@ -140,7 +142,7 @@ export default function AdminSettingsPage() {
         setAiSettings(prev => ({ ...prev, [field]: value }));
     };
 
-    const handlePaymentSettingChange = (field: keyof PaymentGatewaySettings, value: boolean) => {
+    const handlePaymentSettingChange = (field: keyof PaymentGatewaySettings, value: boolean | string) => {
         setPaymentSettings(prev => ({ ...prev, [field]: value }));
     };
 
@@ -332,16 +334,29 @@ export default function AdminSettingsPage() {
                             onCheckedChange={(checked) => handlePaymentSettingChange('cashOnDelivery', checked)} 
                         />
                     </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <div>
-                            <Label htmlFor="pg-bkash" className="font-medium">bKash</Label>
-                            <p className="text-sm text-muted-foreground">Allow customers to pay via bKash.</p>
+                    <div className="rounded-lg border p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <Label htmlFor="pg-bkash" className="font-medium">bKash</Label>
+                                <p className="text-sm text-muted-foreground">Allow customers to pay via bKash.</p>
+                            </div>
+                            <Switch 
+                                id="pg-bkash" 
+                                checked={paymentSettings.bkash} 
+                                onCheckedChange={(checked) => handlePaymentSettingChange('bkash', checked)} 
+                            />
                         </div>
-                        <Switch 
-                            id="pg-bkash" 
-                            checked={paymentSettings.bkash} 
-                            onCheckedChange={(checked) => handlePaymentSettingChange('bkash', checked)} 
-                        />
+                        {paymentSettings.bkash && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="bkashNumber">bKash Personal Number</Label>
+                                <Input
+                                    id="bkashNumber"
+                                    value={paymentSettings.bkashNumber}
+                                    onChange={(e) => handlePaymentSettingChange('bkashNumber', e.target.value)}
+                                    placeholder="e.g., 01xxxxxxxxx"
+                                />
+                            </div>
+                        )}
                     </div>
                     <div className="flex items-center justify-between rounded-lg border p-4">
                         <div>

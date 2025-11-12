@@ -93,3 +93,11 @@ export interface PromoSection {
     id: string;
     cards: PromoCard[];
 }
+
+export interface PaymentGatewaySettings {
+  cashOnDelivery: boolean;
+  bkash: boolean;
+  bkashNumber: string;
+  nagad: boolean;
+  rocket: boolean;
+}

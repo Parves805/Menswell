@@ -20,8 +20,9 @@ import { useToast } from '@/hooks/use-toast';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { CreditCard, Truck, Loader2 } from 'lucide-react';
-import type { Order } from '@/lib/types';
+import type { Order, PaymentGatewaySettings } from '@/lib/types';
 import { generateOrderConfirmationEmail } from '@/ai/flows/generate-order-email';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
 
@@ -47,9 +48,10 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentOptions, setPaymentOptions] = useState({
-    cash: true,
+  const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>({
+    cashOnDelivery: true,
     bkash: true,
+    bkashNumber: '',
     nagad: true,
     rocket: true,
   });
@@ -67,6 +69,8 @@ export default function CheckoutPage() {
       paymentMethod: 'cash',
     },
   });
+
+  const selectedPaymentMethod = form.watch('paymentMethod');
 
   useEffect(() => {
     // Redirect to home if cart is empty
@@ -98,8 +102,14 @@ export default function CheckoutPage() {
     try {
         const savedPaymentSettings = localStorage.getItem(PAYMENT_SETTINGS_KEY);
         if (savedPaymentSettings) {
-            const { cashOnDelivery, bkash, nagad, rocket } = JSON.parse(savedPaymentSettings);
-            setPaymentOptions({ cash: cashOnDelivery, bkash, nagad, rocket });
+            const settings = JSON.parse(savedPaymentSettings);
+            setPaymentSettings({
+              cashOnDelivery: settings.cashOnDelivery,
+              bkash: settings.bkash,
+              bkashNumber: settings.bkashNumber || '',
+              nagad: settings.nagad,
+              rocket: settings.rocket,
+            });
         }
     } catch (error) {
         console.error("Failed to load payment settings from localStorage", error);
@@ -324,7 +334,7 @@ export default function CheckoutPage() {
                             defaultValue={field.value}
                             className="space-y-4"
                             >
-                                {paymentOptions.cash && (
+                                {paymentSettings.cashOnDelivery && (
                                 <FormItem>
                                     <Label className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                         <FormControl>
@@ -338,21 +348,28 @@ export default function CheckoutPage() {
                                     </Label>
                                 </FormItem>
                                 )}
-                                {paymentOptions.bkash && (
+                                {paymentSettings.bkash && (
                                 <FormItem>
-                                    <Label className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                    <Label className="flex items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                         <FormControl>
-                                            <RadioGroupItem value="bkash" />
+                                            <RadioGroupItem value="bkash" className="mt-1" />
                                         </FormControl>
                                         <CreditCard className="h-6 w-6" />
                                         <div>
                                             <span className="font-semibold">bKash</span>
                                             <p className="text-sm text-muted-foreground">Pay via bKash mobile banking.</p>
+                                            {selectedPaymentMethod === 'bkash' && paymentSettings.bkashNumber && (
+                                                <Alert className="mt-2">
+                                                    <AlertDescription>
+                                                        Please Send Money to the bKash personal number: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>. Then, proceed to place the order.
+                                                    </AlertDescription>
+                                                </Alert>
+                                            )}
                                         </div>
                                     </Label>
                                 </FormItem>
                                 )}
-                                {paymentOptions.nagad && (
+                                {paymentSettings.nagad && (
                                 <FormItem>
                                     <Label className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                         <FormControl>
@@ -366,7 +383,7 @@ export default function CheckoutPage() {
                                     </Label>
                                 </FormItem>
                                 )}
-                                {paymentOptions.rocket && (
+                                {paymentSettings.rocket && (
                                 <FormItem>
                                     <Label className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                                         <FormControl>
