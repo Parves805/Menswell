@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -46,6 +47,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'scontent.fcgp7-1.fna.fbcdn.net',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
 };
