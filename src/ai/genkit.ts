@@ -9,7 +9,7 @@ const plugins = [];
 const apiKey = process.env.GOOGLE_API_KEY;
 
 if (apiKey) {
-  plugins.push(googleAI({ apiKey }));
+  plugins.push(googleAI({ apiKey, model: 'gemini-1.5-flash-latest' }));
 } else {
   // This warning will appear in the server console if the key is missing.
   console.warn("\n[BazaarGo] WARNING: GOOGLE_API_KEY is not set.");
@@ -19,5 +19,5 @@ if (apiKey) {
 
 export const ai = genkit({
   plugins,
-  model: 'googleai/gemini-1.5-flash-latest',
 });
+
