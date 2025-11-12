@@ -13,12 +13,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
-import { initialCategories } from '@/lib/data';
 import type { Category } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const CATEGORIES_KEY = 'appCategories';
+import { firestore } from '@/lib/firebase';
+import { collection, addDoc, onSnapshot, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 
 const categorySchema = z.object({
     name: z.string().min(2, { message: 'Category name must be at least 2 characters.' }),
@@ -42,77 +41,71 @@ export default function AdminCategoriesPage() {
     });
 
     useEffect(() => {
-        const loadCategories = () => {
-            try {
-                const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-                if (savedCategoriesJSON) {
-                    const parsed = JSON.parse(savedCategoriesJSON);
-                    if (Array.isArray(parsed)) {
-                        setCategories(parsed);
-                    } else {
-                        setCategories(initialCategories);
-                        localStorage.setItem(CATEGORIES_KEY, JSON.stringify(initialCategories));
-                    }
-                } else {
-                    setCategories(initialCategories);
-                    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(initialCategories));
-                }
-            } catch (error) {
-                console.error("Failed to load categories, re-initializing.", error);
-                setCategories(initialCategories);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        const unsubscribe = onSnapshot(collection(firestore, "categories"), (snapshot) => {
+            const cats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+            setCategories(cats);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching categories: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch categories.' });
+            setIsLoading(false);
+        });
 
-        loadCategories();
-        const interval = setInterval(loadCategories, 3000);
-        return () => clearInterval(interval);
-    }, []);
+        return () => unsubscribe();
+    }, [toast]);
 
-    const handleAddCategory = (data: CategoryFormValues) => {
+    const handleAddCategory = async (data: CategoryFormValues) => {
         setIsSubmitting(true);
         const newId = slugify(data.name);
 
-        if (categories.some(c => c.id === newId)) {
+        const q = query(collection(firestore, "categories"), where("id", "==", newId));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
             toast({
                 variant: 'destructive',
                 title: "Error",
-                description: "A category with this name already exists. Please choose a different name.",
+                description: "A category with this slug already exists. Please choose a different name.",
             });
             setIsSubmitting(false);
             return;
         }
 
-        const newCategory: Category = {
-            id: newId,
-            name: data.name,
-            image: data.image,
-            bannerImage: data.bannerImage
-        };
-        const updatedCategories = [...categories, newCategory];
-        
-        localStorage.setItem(CATEGORIES_KEY, JSON.stringify(updatedCategories));
-        setCategories(updatedCategories);
+        try {
+            const docRef = doc(firestore, 'categories', newId);
+            await setDoc(docRef, { 
+                id: newId,
+                name: data.name,
+                image: data.image,
+                bannerImage: data.bannerImage
+             });
 
-        toast({
-            title: "Category Added",
-            description: `The category "${data.name}" has been successfully added.`,
-        });
-        
-        setIsSubmitting(false);
-        setIsAddDialogOpen(false);
-        form.reset();
+            toast({
+                title: "Category Added",
+                description: `The category "${data.name}" has been successfully added.`,
+            });
+            
+            setIsSubmitting(false);
+            setIsAddDialogOpen(false);
+            form.reset();
+        } catch (error) {
+            console.error("Error adding category: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not add the category.' });
+            setIsSubmitting(false);
+        }
     };
 
-    const handleDeleteCategory = (categoryId: string) => {
-        const updatedCategories = categories.filter(c => c.id !== categoryId);
-        localStorage.setItem(CATEGORIES_KEY, JSON.stringify(updatedCategories));
-        setCategories(updatedCategories);
-        toast({
-            title: "Category Deleted",
-            description: "The category has been successfully deleted.",
-        });
+    const handleDeleteCategory = async (categoryId: string) => {
+        try {
+            await deleteDoc(doc(firestore, "categories", categoryId));
+            toast({
+                title: "Category Deleted",
+                description: "The category has been successfully deleted.",
+            });
+        } catch (error) {
+            console.error("Error deleting category: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not delete the category.' });
+        }
     };
 
     return (

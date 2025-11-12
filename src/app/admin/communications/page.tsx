@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -12,8 +11,10 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format, formatDistanceToNow, parseISO, isToday, isYesterday } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot, doc, updateDoc, setDoc, arrayUnion } from 'firebase/firestore';
 
-const ALL_CHATS_KEY = 'bazaargoAllChatThreads';
+
 const ADMIN_LAST_SEEN_KEY = 'bazaargoAdminLastSeenCounts';
 
 interface Message {
@@ -54,21 +55,19 @@ export default function CommunicationsPage() {
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const loadThreads = () => {
+        const unsub = onSnapshot(collection(firestore, 'chatThreads'), (snapshot) => {
             try {
-                const allThreadsJson = localStorage.getItem(ALL_CHATS_KEY);
-                const allThreads = allThreadsJson ? JSON.parse(allThreadsJson) : {};
+                const allThreads = snapshot.docs.map(doc => doc.data());
 
                 const lastSeenCountsJson = localStorage.getItem(ADMIN_LAST_SEEN_KEY);
                 const lastSeenCounts = lastSeenCountsJson ? JSON.parse(lastSeenCountsJson) : {};
                 
-                const loadedThreads: UserThread[] = Object.values(allThreads).map((thread: any) => {
+                const loadedThreads: UserThread[] = allThreads.map((thread: any) => {
                     const totalMessages = thread.messages?.length || 0;
                     if (totalMessages === 0) return null; // Don't show empty threads
                     const seenCount = lastSeenCounts[thread.threadId] || 0;
                     return {
                         ...thread,
-                        lastMessageTimestamp: thread.messages[totalMessages - 1]?.timestamp || new Date(0).toISOString(),
                         unreadCount: totalMessages - seenCount,
                     };
                 }).filter((t): t is UserThread => t !== null);
@@ -83,21 +82,18 @@ export default function CommunicationsPage() {
                 
                 setThreads(loadedThreads);
 
-                setSelectedThread(currentThread => {
-                    if (!currentThread) return null;
-                    const updatedSelectedThread = loadedThreads.find(t => t.threadId === currentThread.threadId);
-                    return updatedSelectedThread || null;
-                });
+                if (selectedThread) {
+                    const updatedSelectedThread = loadedThreads.find(t => t.threadId === selectedThread.threadId);
+                    setSelectedThread(updatedSelectedThread || null);
+                }
 
             } catch (error) {
                 console.error("Failed to load threads", error);
             }
-        }
-        
-        loadThreads();
-        const interval = setInterval(loadThreads, 3000);
-        return () => clearInterval(interval);
-    }, []);
+        });
+
+        return () => unsub();
+    }, [selectedThread]);
 
     useEffect(() => {
         const viewport = scrollAreaRef.current?.querySelector('div[data-radix-scroll-area-viewport]');
@@ -121,24 +117,20 @@ export default function CommunicationsPage() {
         }
     };
 
-    const handleReply = () => {
+    const handleReply = async () => {
         if (!replyMessage.trim() || !selectedThread) return;
         setIsReplying(true);
 
         const newReply: Message = { sender: 'admin', text: replyMessage, timestamp: new Date().toISOString() };
-
+        
+        const threadRef = doc(firestore, 'chatThreads', selectedThread.threadId);
+        
         try {
-            const allThreadsJson = localStorage.getItem(ALL_CHATS_KEY);
-            const allThreads = allThreadsJson ? JSON.parse(allThreadsJson) : {};
-            const threadToUpdate = allThreads[selectedThread.threadId];
-
-            if (threadToUpdate) {
-                threadToUpdate.messages.push(newReply);
-                threadToUpdate.lastMessageTimestamp = newReply.timestamp;
-                localStorage.setItem(ALL_CHATS_KEY, JSON.stringify(allThreads));
-                
-                setReplyMessage('');
-            }
+            await updateDoc(threadRef, {
+                messages: arrayUnion(newReply),
+                lastMessageTimestamp: newReply.timestamp,
+            });
+            setReplyMessage('');
         } catch(e) {
             console.error("Failed to send reply", e);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to send reply.' });

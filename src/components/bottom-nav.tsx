@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -14,12 +13,13 @@ import {
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
-import { initialCategories } from '@/lib/data';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
 import type { Category } from '@/lib/types';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const NavLink = ({ href, pathname, children }: { href: string, pathname: string, children: React.ReactNode }) => (
   <Link href={href} className={cn(
@@ -40,8 +40,6 @@ const MenuLink = ({ href, children, onSelect }: { href: string, children: React.
     </Link>
 );
 
-const CATEGORIES_KEY = 'appCategories';
-
 export function BottomNav() {
   const pathname = usePathname();
   const { wishlistCount } = useWishlist();
@@ -52,26 +50,26 @@ export function BottomNav() {
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    const loadData = () => {
-        const authStatus = localStorage.getItem('isAuthenticated');
-        setIsAuthenticated(authStatus === 'true');
-
-        try {
-            const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-            const newCategories = savedCategoriesJSON ? JSON.parse(savedCategoriesJSON) : initialCategories;
-            setCategories(currentCategories => {
-                 return JSON.stringify(currentCategories) !== JSON.stringify(newCategories) ? newCategories : currentCategories;
-            });
-        } catch(e) {
-            setCategories(initialCategories);
-            console.error(e);
+    // Auth status from localStorage
+    const authStatus = localStorage.getItem('isAuthenticated');
+    setIsAuthenticated(authStatus === 'true');
+    const authInterval = setInterval(() => {
+        const currentStatus = localStorage.getItem('isAuthenticated') === 'true';
+        if(currentStatus !== isAuthenticated) {
+            setIsAuthenticated(currentStatus);
         }
-    }
-    
-    loadData();
-    const interval = setInterval(loadData, 2000);
-    return () => clearInterval(interval);
-  }, []);
+    }, 1000);
+
+    const unsubCategories = onSnapshot(collection(firestore, 'categories'), (snapshot) => {
+        const cats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+        setCategories(cats);
+    });
+
+    return () => {
+        clearInterval(authInterval);
+        unsubCategories();
+    };
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');

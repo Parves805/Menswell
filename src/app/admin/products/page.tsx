@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { products as initialProducts } from "@/lib/data";
 import type { Product } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,8 +23,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const PRODUCTS_KEY = 'appProducts';
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { firestore } from "@/lib/firebase";
 
 export default function AdminProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -33,42 +32,33 @@ export default function AdminProductsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const loadProducts = () => {
-            try {
-                const savedProductsJSON = localStorage.getItem(PRODUCTS_KEY);
-                if (savedProductsJSON) {
-                    const parsed = JSON.parse(savedProductsJSON);
-                    if (Array.isArray(parsed)) {
-                        setProducts(parsed);
-                    } else {
-                        setProducts(initialProducts);
-                        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(initialProducts));
-                    }
-                } else {
-                    setProducts(initialProducts);
-                    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(initialProducts));
-                }
-            } catch (error) {
-                console.error("Failed to load products, re-initializing.", error);
-                setProducts(initialProducts);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        
-        loadProducts();
-        const interval = setInterval(loadProducts, 3000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const handleDeleteProduct = (productId: string) => {
-        const updatedProducts = products.filter(p => p.id !== productId);
-        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
-        setProducts(updatedProducts);
-        toast({
-            title: "Product Deleted",
-            description: "The product has been successfully deleted.",
+        const unsubscribe = onSnapshot(collection(firestore, "products"), (snapshot) => {
+            const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            setProducts(productsData);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching products: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch products.' });
+            setIsLoading(false);
         });
+
+        return () => unsubscribe();
+    }, [toast]);
+
+    const handleDeleteProduct = async (productId: string) => {
+        try {
+            await deleteDoc(doc(firestore, "products", productId));
+            toast({
+                title: "Product Deleted",
+                description: "The product has been successfully deleted.",
+            });
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not delete the product.",
+            });
+        }
     };
 
     return (

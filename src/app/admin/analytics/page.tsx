@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,6 +6,8 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, XAx
 import type { Order } from '@/lib/types';
 import { format, subMonths, subDays } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -34,67 +35,56 @@ export default function AnalyticsPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const loadAnalyticsData = () => {
-            try {
-                const savedOrders = localStorage.getItem('bazaargoUserOrders');
-                let orders: Order[] = [];
-                if (savedOrders) {
-                    const parsed = JSON.parse(savedOrders);
-                    if (Array.isArray(parsed)) {
-                        orders = parsed;
+        const unsub = onSnapshot(collection(firestore, 'orders'), (snapshot) => {
+            const orders = snapshot.docs.map(doc => doc.data() as Order);
+            
+            const now = new Date();
+            
+            // --- Process Sales Data for Chart (last 6 months) ---
+            const monthlySalesArray = Array.from({ length: 6 }, (_, i) => {
+                const d = subMonths(now, 5 - i);
+                return { name: format(d, 'MMM'), sales: 0 };
+            });
+
+            orders.forEach(order => {
+                 if (order.status !== 'Cancelled') {
+                    const orderDate = new Date(order.date);
+                    if (orderDate >= subMonths(now, 6)) {
+                        const monthName = format(orderDate, 'MMM');
+                        const monthData = monthlySalesArray.find(m => m.name === monthName);
+                        if (monthData) {
+                            monthData.sales += order.total;
+                        }
                     }
                 }
-                
-                const now = new Date();
-                
-                // --- Process Sales Data for Chart (last 6 months) ---
-                const monthlySalesArray = Array.from({ length: 6 }, (_, i) => {
-                    const d = subMonths(now, 5 - i);
-                    return { name: format(d, 'MMM'), sales: 0 };
-                });
+            });
+            setSalesData(monthlySalesArray);
+            
+             // --- Process Daily Orders for Chart (last 7 days) ---
+            const dailyOrdersArray = Array.from({ length: 7 }, (_, i) => {
+                const d = subDays(now, 6 - i);
+                return { name: format(d, 'EEE'), orders: 0 };
+            });
 
-                orders.forEach(order => {
-                     if (order.status !== 'Cancelled') {
-                        const orderDate = new Date(order.date);
-                        if (orderDate >= subMonths(now, 6)) {
-                            const monthName = format(orderDate, 'MMM');
-                            const monthData = monthlySalesArray.find(m => m.name === monthName);
-                            if (monthData) {
-                                monthData.sales += order.total;
-                            }
-                        }
+            orders.forEach(order => {
+                const orderDate = new Date(order.date);
+                if (orderDate >= subDays(now, 7)) {
+                    const dayName = format(orderDate, 'EEE');
+                    const dayData = dailyOrdersArray.find(d => d.name === dayName);
+                    if (dayData) {
+                        dayData.orders++;
                     }
-                });
-                setSalesData(monthlySalesArray);
-                
-                 // --- Process Daily Orders for Chart (last 7 days) ---
-                const dailyOrdersArray = Array.from({ length: 7 }, (_, i) => {
-                    const d = subDays(now, 6 - i);
-                    return { name: format(d, 'EEE'), orders: 0 };
-                });
+                }
+            });
+            setDailyOrdersData(dailyOrdersArray);
+            setIsLoading(false);
 
-                orders.forEach(order => {
-                    const orderDate = new Date(order.date);
-                    if (orderDate >= subDays(now, 7)) {
-                        const dayName = format(orderDate, 'EEE');
-                        const dayData = dailyOrdersArray.find(d => d.name === dayName);
-                        if (dayData) {
-                            dayData.orders++;
-                        }
-                    }
-                });
-                setDailyOrdersData(dailyOrdersArray);
+        }, (error) => {
+            console.error("Failed to load analytics data from Firestore", error);
+            setIsLoading(false);
+        });
 
-            } catch (error) {
-                console.error("Failed to load analytics data from localStorage", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadAnalyticsData();
-        const interval = setInterval(loadAnalyticsData, 3000);
-        return () => clearInterval(interval);
+        return () => unsub();
     }, []);
 
     return (

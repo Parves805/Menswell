@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -8,7 +7,6 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Card, CardContent } from '@/components/ui/card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import { initialCategories, products as initialProducts } from '@/lib/data';
 import type { Product, Category, PopupCampaign, WebsiteSettings, HomepageSection as HomepageSectionType, PromoSection } from '@/lib/types';
 import { ProductCard } from '@/components/product-card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -17,52 +15,16 @@ import { ProductRecommendations } from '@/components/product-recommendations';
 import { PopupModal } from '@/components/popup-modal';
 import { HomepageSection } from '@/components/homepage-section';
 import { PromoGrid } from '@/components/promo-grid';
+import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
 
-const SLIDER_IMAGES_KEY = 'heroSliderImages';
-const PRODUCTS_KEY = 'appProducts';
-const CATEGORIES_KEY = 'appCategories';
 const VIEWING_HISTORY_KEY = 'bazaargoProductViewHistory';
-const AI_SETTINGS_KEY = 'aiSettings';
-const POPUP_CAMPAIGN_KEY = 'popupCampaignSettings';
-const WEBSITE_SETTINGS_KEY = 'websiteSettings';
-const HOMEPAGE_SECTIONS_KEY = 'homepageSections';
-const PROMO_SECTIONS_KEY = 'promoCardSections';
 const POPUP_SEEN_SESSION_KEY = 'bazaargoPopupSeenSession';
-
-
-const defaultSlides = [
-    { url: 'https://img.lazcdn.com/us/domino/df7d0dca-dc55-4a5c-8cb2-dcf2b2a2f1cc_BD-1976-688.jpg_2200x2200q80.jpg_.webp', dataAiHint: 'electronics sale' },
-    { url: 'https://placehold.co/1200x400.png', dataAiHint: 'mens fashion' },
-    { url: 'https://placehold.co/1200x400.png', dataAiHint: 'winter collection' },
-    { url: 'https://placehold.co/1200x400.png', dataAiHint: 't-shirt sale' },
-    { url: 'https://placehold.co/1200x400.png', dataAiHint: 'polo shirts' },
-    { url: 'https://placehold.co/1200x400.png', dataAiHint: 'new arrivals' },
-];
 
 interface Slide {
     url: string;
     dataAiHint: string;
 }
-
-const defaultHomepageSections: HomepageSectionType[] = [
-  {
-    id: 'default-polo-section',
-    title: 'Designer Polo',
-    mainImageUrl: 'https://lzd-img-global.slatic.net/g/p/mdc/89839425a81a7114b341496a75f10255.jpg_720x720q80.jpg',
-    categorySlug: 'polo-tshirt',
-  }
-];
-
-const defaultPromoSections: PromoSection[] = [
-    { 
-        id: 'section_1',
-        cards: [
-            { id: '1', title: 'Classic Polo', imageUrl: 'https://fabrilife.com/products/650182af39a77-square.jpeg', link: '/category/polo-tshirt' },
-            { id: '2', title: 'Designer Polo', imageUrl: 'https://img.drz.lazcdn.com/g/p/mdc/d08e501aee3431a41857876ab4646a5a.jpg_720x720q80.jpg', link: '/category/polo-tshirt' },
-            { id: '3', title: 'Kids Polo', imageUrl: 'https://placehold.co/400x500.png', link: '/category/polo-tshirt' },
-        ]
-    }
-];
 
 export default function Home() {
   const [heroSlides, setHeroSlides] = React.useState<Slide[]>([]);
@@ -74,84 +36,50 @@ export default function Home() {
   const [showPopup, setShowPopup] = React.useState(false);
   const [homepageSections, setHomepageSections] = React.useState<HomepageSectionType[]>([]);
   const [promoSections, setPromoSections] = React.useState<PromoSection[]>([]);
-
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const loadData = () => {
-      try {
-        // Load hero slides
-        const savedImages = localStorage.getItem(SLIDER_IMAGES_KEY);
-        setHeroSlides(prev => {
-            const parsed = savedImages ? JSON.parse(savedImages) : defaultSlides;
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                const newSlides = parsed.filter((slide: Slide) => slide.url);
-                return JSON.stringify(prev) !== JSON.stringify(newSlides) ? newSlides : prev;
-            } else if (!savedImages) {
-                 return defaultSlides;
-            }
-            return prev;
-        });
-        
-        // Load products
-        const savedProductsJSON = localStorage.getItem(PRODUCTS_KEY);
-        setProducts(prev => {
-            const allProducts = savedProductsJSON ? JSON.parse(savedProductsJSON) : initialProducts;
-            return JSON.stringify(prev) !== JSON.stringify(allProducts) ? allProducts : prev;
-        });
-        
-        // Load categories
-        const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-        setCategories(prev => {
-            const newCategories = savedCategoriesJSON ? JSON.parse(savedCategoriesJSON) : initialCategories;
-            return JSON.stringify(prev) !== JSON.stringify(newCategories) ? newCategories : prev;
-        });
-
-        // Load viewing history
-        const historyJson = localStorage.getItem(VIEWING_HISTORY_KEY);
-        setViewingHistory(prev => {
-            const newHistory = historyJson ? JSON.parse(historyJson) : [];
-            return JSON.stringify(prev) !== JSON.stringify(newHistory) ? newHistory : prev;
-        });
-
-        // Load AI settings
-        const savedAiSettings = localStorage.getItem(AI_SETTINGS_KEY);
-        setAiSettings(prev => {
-            const newSettings = savedAiSettings ? JSON.parse(savedAiSettings) : { recommendationsEnabled: true };
-            return JSON.stringify(prev) !== JSON.stringify(newSettings) ? newSettings : prev;
-        });
-
-        // Load Popup Campaign
-        const savedPopupCampaign = localStorage.getItem(POPUP_CAMPAIGN_KEY);
-        if (savedPopupCampaign) {
-          const campaign = JSON.parse(savedPopupCampaign);
-          setPopupCampaign(campaign);
-          const popupSeen = sessionStorage.getItem(POPUP_SEEN_SESSION_KEY);
-          if (campaign.enabled && !popupSeen) {
-              setShowPopup(true);
-              sessionStorage.setItem(POPUP_SEEN_SESSION_KEY, 'true');
-          }
-        }
-        
-        // Load Homepage Sections
-        const savedHomepageSections = localStorage.getItem(HOMEPAGE_SECTIONS_KEY);
-        setHomepageSections(savedHomepageSections ? JSON.parse(savedHomepageSections) : defaultHomepageSections);
-
-        // Load Promo Card Sections
-        const savedPromoSections = localStorage.getItem(PROMO_SECTIONS_KEY);
-        setPromoSections(savedPromoSections ? JSON.parse(savedPromoSections) : defaultPromoSections);
-
-      } catch (error) {
-        console.error("Failed to load data from localStorage, using defaults.", error);
-      } finally {
+    const unsubProducts = onSnapshot(collection(firestore, "products"), (snapshot) => {
+        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
         setIsLoading(false);
-      }
+    });
+
+    const unsubCategories = onSnapshot(collection(firestore, "categories"), (snapshot) => {
+        setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category)));
+    });
+
+    const unsubSettings = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+        if (doc.exists()) {
+            const settings = doc.data();
+            setHeroSlides(settings.heroSliderImages || []);
+            setAiSettings(settings.aiSettings || { recommendationsEnabled: true });
+            setHomepageSections(settings.homepageSections || []);
+            setPromoSections(settings.promoCardSections || []);
+            
+            const campaign = settings.popupCampaign;
+            if (campaign) {
+                setPopupCampaign(campaign);
+                const popupSeen = sessionStorage.getItem(POPUP_SEEN_SESSION_KEY);
+                if (campaign.enabled && !popupSeen) {
+                    setShowPopup(true);
+                    sessionStorage.setItem(POPUP_SEEN_SESSION_KEY, 'true');
+                }
+            }
+        }
+    });
+
+    try {
+      const historyJson = localStorage.getItem(VIEWING_HISTORY_KEY);
+      setViewingHistory(historyJson ? JSON.parse(historyJson) : []);
+    } catch (e) {
+      console.error(e);
     }
     
-    setIsLoading(true);
-    loadData();
-    const interval = setInterval(loadData, 2000); // Poll every 2 seconds
-    return () => clearInterval(interval);
+    return () => {
+        unsubProducts();
+        unsubCategories();
+        unsubSettings();
+    };
   }, []);
 
   const handlePopupClose = () => {
@@ -162,7 +90,7 @@ export default function Home() {
   const recentProducts = [...products]
     .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
     .slice(0, 8);
-  const saleProducts = products.filter((p: Product) => p.tags.includes('sale'));
+  const saleProducts = products.filter((p: Product) => p.tags && p.tags.includes('sale'));
 
   const plugin = React.useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })

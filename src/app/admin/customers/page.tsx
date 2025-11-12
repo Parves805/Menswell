@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,6 +26,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
 
 interface Customer {
   email: string;
@@ -37,11 +38,6 @@ interface Customer {
   orders: Order[];
 }
 
-interface RegisteredUser {
-    name: string;
-    email: string;
-}
-
 const statusColors: { [key: string]: string } = {
   Delivered: 'bg-green-500',
   Processing: 'bg-yellow-500',
@@ -49,85 +45,56 @@ const statusColors: { [key: string]: string } = {
   Cancelled: 'bg-red-500',
 };
 
-const ORDERS_KEY = 'bazaargoUserOrders';
-const ALL_USERS_KEY = 'bazaargoAllUsers';
-
 export default function AdminCustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
     useEffect(() => {
-        const loadCustomerData = () => {
-            try {
-                const customerMap = new Map<string, Customer>();
+        const q = query(collection(firestore, "orders"));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const orders: Order[] = [];
+            querySnapshot.forEach((doc) => {
+                orders.push({ id: doc.id, ...doc.data() } as Order);
+            });
+            
+            const customerMap = new Map<string, Customer>();
 
-                // Step 1: Load all registered users to create a base list
-                const allUsersJson = localStorage.getItem(ALL_USERS_KEY);
-                if (allUsersJson) {
-                    const allUsers: RegisteredUser[] = JSON.parse(allUsersJson);
-                    allUsers.forEach(user => {
-                        if (user && user.email) {
-                            customerMap.set(user.email, {
-                                email: user.email,
-                                name: user.name,
-                                phone: '', // Will be populated from orders if available
-                                orderCount: 0,
-                                totalSpent: 0,
-                                orders: [],
-                            });
-                        }
-                    });
+            orders.forEach(order => {
+                if (!order || !order.shippingInfo || !order.shippingInfo.email) {
+                    return;
                 }
 
-                // Step 2: Process orders and merge data
-                const savedOrders = localStorage.getItem(ORDERS_KEY);
-                if (savedOrders) {
-                    const orders: Order[] = JSON.parse(savedOrders);
-                    
-                    orders.forEach(order => {
-                        if (!order || !order.shippingInfo || !order.shippingInfo.email) {
-                            return;
-                        }
+                const email = order.shippingInfo.email;
+                let customer = customerMap.get(email);
 
-                        const email = order.shippingInfo.email;
-                        let customer = customerMap.get(email);
-
-                        if (customer) {
-                            // Existing user (registered or from a previous order)
-                            customer.orderCount += 1;
-                            customer.totalSpent += order.total;
-                            customer.orders.push(order);
-                            // Update name and phone from the latest order info, as it might be more current
-                            customer.name = order.shippingInfo.name || customer.name;
-                            customer.phone = order.shippingInfo.phone || customer.phone;
-                        } else {
-                            // Guest user (not in the registered list)
-                            customerMap.set(email, {
-                                email: email,
-                                name: order.shippingInfo.name || 'N/A',
-                                phone: order.shippingInfo.phone || 'N/A',
-                                orderCount: 1,
-                                totalSpent: order.total,
-                                orders: [order],
-                            });
-                        }
+                if (customer) {
+                    customer.orderCount += 1;
+                    customer.totalSpent += order.total;
+                    customer.orders.push(order);
+                    customer.name = order.shippingInfo.name || customer.name;
+                    customer.phone = order.shippingInfo.phone || customer.phone;
+                } else {
+                    customerMap.set(email, {
+                        email: email,
+                        name: order.shippingInfo.name || 'N/A',
+                        phone: order.shippingInfo.phone || 'N/A',
+                        orderCount: 1,
+                        totalSpent: order.total,
+                        orders: [order],
                     });
                 }
-                
-                const sortedCustomers = Array.from(customerMap.values()).sort((a, b) => b.totalSpent - a.totalSpent);
-                setCustomers(sortedCustomers);
+            });
+            
+            const sortedCustomers = Array.from(customerMap.values()).sort((a, b) => b.totalSpent - a.totalSpent);
+            setCustomers(sortedCustomers);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Failed to process customer data from Firestore", error);
+            setIsLoading(false);
+        });
 
-            } catch (error) {
-                console.error("Failed to process customer data from localStorage", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadCustomerData();
-        const interval = setInterval(loadCustomerData, 3000);
-        return () => clearInterval(interval);
+        return () => unsubscribe();
     }, []);
 
     const CustomerRowSkeleton = () => (

@@ -1,26 +1,21 @@
-
 'use client';
 
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { initialCategories } from '@/lib/data';
 import type { Product, Category } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle } from 'lucide-react';
-import { products as initialProducts } from '@/lib/data';
-
-const PRODUCTS_KEY = 'appProducts';
-const CATEGORIES_KEY = 'appCategories';
+import { firestore } from '@/lib/firebase';
+import { collection, doc, getDoc, setDoc, addDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 
 const productSchema = z.object({
   name: z.string().min(3, { message: 'Product name must be at least 3 characters.' }),
@@ -78,24 +73,22 @@ export function ProductForm({ productId }: ProductFormProps) {
     const { fields: colorFields, append: appendColor, remove: removeColor } = useFieldArray({ control: form.control, name: "colors" });
 
     useEffect(() => {
-      try {
-        const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-        if (savedCategoriesJSON) {
-            setCategories(JSON.parse(savedCategoriesJSON));
-        } else {
-            setCategories(initialCategories);
-        }
-      } catch (e) {
-        setCategories(initialCategories);
-      }
+        const unsubscribe = onSnapshot(collection(firestore, 'categories'), (snapshot) => {
+            const cats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+            setCategories(cats);
+        });
+        return () => unsubscribe();
+    }, []);
 
+    useEffect(() => {
+      async function fetchProduct() {
         if (isEditMode) {
             try {
-                const savedProducts = localStorage.getItem(PRODUCTS_KEY);
-                const products: Product[] = savedProducts ? JSON.parse(savedProducts) : initialProducts;
-                const productToEdit = products.find(p => p.id === productId);
+                const docRef = doc(firestore, "products", productId);
+                const docSnap = await getDoc(docRef);
 
-                if (productToEdit) {
+                if (docSnap.exists()) {
+                    const productToEdit = docSnap.data() as Product;
                     form.reset({
                         name: productToEdit.name,
                         shortDescription: productToEdit.shortDescription,
@@ -121,25 +114,22 @@ export function ProductForm({ productId }: ProductFormProps) {
         } else {
             form.reset({
                 name: '',
-                shortDescription: '',
-                longDescription: '',
                 price: 0,
                 stock: 0,
                 category: '',
                 brand: '',
                 images: [{value: ''}],
-                sizes: [],
-                tags: [],
-                colors: [],
             });
             setIsFetching(false);
         }
+      }
+      fetchProduct();
     }, [productId, isEditMode, form, router, toast]);
 
-    const onSubmit = (data: ProductFormValues) => {
+    const onSubmit = async (data: ProductFormValues) => {
         setIsLoading(true);
 
-        const transformedData = {
+        const transformedData: Omit<Product, 'id' | 'rating' | 'reviewCount' | 'createdAt'> & { createdAt?: any } = {
             name: data.name,
             shortDescription: data.shortDescription || '',
             longDescription: data.longDescription || '',
@@ -154,39 +144,19 @@ export function ProductForm({ productId }: ProductFormProps) {
         };
         
         try {
-            const savedProductsJSON = localStorage.getItem(PRODUCTS_KEY);
-            let products: Product[] = [];
-            if (savedProductsJSON) {
-                try {
-                    const parsed = JSON.parse(savedProductsJSON);
-                    if (Array.isArray(parsed)) {
-                        products = parsed;
-                    }
-                } catch (e) {
-                    console.error("Could not parse products from localStorage, starting with a new list.", e);
-                }
-            }
-
             if (isEditMode) {
-                const productIndex = products.findIndex(p => p.id === productId);
-                if (productIndex !== -1) {
-                    products[productIndex] = { 
-                        ...products[productIndex], 
-                        ...transformedData 
-                    };
-                }
+                const productRef = doc(firestore, "products", productId);
+                await setDoc(productRef, transformedData, { merge: true });
             } else {
-                const newProduct: Product = {
+                const newProduct: Omit<Product, 'id'> = {
                     ...transformedData,
-                    id: `p${new Date().getTime()}`,
                     rating: Math.round((Math.random() * 1.5 + 3.5) * 10) / 10,
                     reviewCount: Math.floor(Math.random() * 200) + 20,
                     createdAt: new Date().toISOString(),
                 };
-                products.push(newProduct);
+                await addDoc(collection(firestore, "products"), newProduct);
             }
 
-            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
             toast({
                 title: isEditMode ? 'Product Updated' : 'Product Created',
                 description: `Product "${data.name}" has been successfully saved.`,
@@ -304,7 +274,7 @@ export function ProductForm({ productId }: ProductFormProps) {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Category</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
                                                 </FormControl>

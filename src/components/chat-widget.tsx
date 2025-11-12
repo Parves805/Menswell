@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -11,8 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { MessageSquare, Send, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/context/chat-context';
+import { firestore } from '@/lib/firebase';
+import { doc, onSnapshot, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 
-const ALL_CHATS_KEY = 'bazaargoAllChatThreads';
+
 const GUEST_ID_KEY = 'bazaargoGuestId';
 const USER_PROFILE_KEY = 'userProfile';
 
@@ -69,29 +70,23 @@ export function ChatWidget() {
         }
     }, []);
 
-    const loadMessages = () => {
-        if (!currentUser) return;
-        try {
-            const allThreadsJson = localStorage.getItem(ALL_CHATS_KEY);
-            const allThreads = allThreadsJson ? JSON.parse(allThreadsJson) : {};
-            const userThread = allThreads[currentUser.id] || { 
-                threadId: currentUser.id, 
-                userName: currentUser.name,
-                messages: [],
-                lastMessageTimestamp: new Date().toISOString()
-            };
-            setMessageThread(userThread);
-        } catch (error) {
-            console.error("Failed to load messages from localStorage", error);
-        }
-    }
-
     useEffect(() => {
-        if (currentUser) {
-            loadMessages();
-            const interval = setInterval(loadMessages, 5000);
-            return () => clearInterval(interval);
-        }
+        if (!currentUser) return;
+        
+        const unsub = onSnapshot(doc(firestore, "chatThreads", currentUser.id), (doc) => {
+            if (doc.exists()) {
+                setMessageThread(doc.data() as MessageThread);
+            } else {
+                 setMessageThread({ 
+                    threadId: currentUser.id, 
+                    userName: currentUser.name,
+                    messages: [],
+                    lastMessageTimestamp: new Date().toISOString()
+                });
+            }
+        });
+        
+        return () => unsub();
     }, [currentUser]);
 
     useEffect(() => {
@@ -110,32 +105,29 @@ export function ChatWidget() {
       }
     }, [isChatOpen]);
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (!messageText.trim() || !currentUser) return;
         setIsSending(true);
 
         const newMessage: Message = { sender: 'user', text: messageText, timestamp: new Date().toISOString() };
+        
+        const threadRef = doc(firestore, "chatThreads", currentUser.id);
 
         try {
-            const allThreadsJson = localStorage.getItem(ALL_CHATS_KEY);
-            const allThreads = allThreadsJson ? JSON.parse(allThreadsJson) : {};
-            
-            const currentThread = allThreads[currentUser.id] || {
-                threadId: currentUser.id,
-                userName: currentUser.name,
-                messages: [],
-            };
-            
-            const updatedThread: MessageThread = {
-                ...currentThread,
-                messages: [...currentThread.messages, newMessage],
-                lastMessageTimestamp: newMessage.timestamp,
-            };
+            if (messageThread && messageThread.messages.length > 0) {
+                 await updateDoc(threadRef, {
+                    messages: arrayUnion(newMessage),
+                    lastMessageTimestamp: newMessage.timestamp,
+                });
+            } else {
+                await setDoc(threadRef, {
+                    threadId: currentUser.id,
+                    userName: currentUser.name,
+                    messages: [newMessage],
+                    lastMessageTimestamp: newMessage.timestamp,
+                });
+            }
 
-            allThreads[currentUser.id] = updatedThread;
-
-            localStorage.setItem(ALL_CHATS_KEY, JSON.stringify(allThreads));
-            setMessageThread(updatedThread);
             setMessageText('');
             toast({ title: 'Message Sent', description: 'The admin has received your message.' });
         } catch(e) {

@@ -1,46 +1,34 @@
-
 'use client';
 
 import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { initialCategories } from '@/lib/data';
 import { useState, useEffect } from 'react';
-import type { Category } from '@/lib/types';
+import type { Category, WebsiteSettings } from '@/lib/types';
 import Image from 'next/image';
+import { firestore } from '@/lib/firebase';
+import { collection, doc, onSnapshot } from 'firebase/firestore';
 
-const WEBSITE_SETTINGS_KEY = 'websiteSettings';
-const CATEGORIES_KEY = 'appCategories';
 
 export function SiteFooter() {
-  const [settings, setSettings] = useState({ storeName: 'BazaarGo', logoUrl: '' });
+  const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ storeName: 'BazaarGo' });
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    const loadData = () => {
-        try {
-            const savedSettingsJson = localStorage.getItem(WEBSITE_SETTINGS_KEY);
-            if (savedSettingsJson) {
-                const savedSettings = JSON.parse(savedSettingsJson);
-                setSettings(currentSettings => {
-                    const newSettings = { ...currentSettings, ...savedSettings };
-                    return JSON.stringify(currentSettings) !== JSON.stringify(newSettings) ? newSettings : currentSettings;
-                });
-            }
-            
-            const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-            const newCategories = savedCategoriesJSON ? JSON.parse(savedCategoriesJSON) : initialCategories;
-            setCategories(currentCategories => {
-                 return JSON.stringify(currentCategories) !== JSON.stringify(newCategories) ? newCategories : currentCategories;
-            });
-        } catch (error) {
-            console.error("Failed to load settings for footer", error);
+    const unsubSettings = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+        if (doc.exists()) {
+            setSettings(s => ({ ...s, ...doc.data().websiteSettings }));
         }
-    };
-    
-    loadData();
-    const interval = setInterval(loadData, 2000);
-    return () => clearInterval(interval);
+    });
 
+    const unsubCategories = onSnapshot(collection(firestore, 'categories'), (snapshot) => {
+        const cats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+        setCategories(cats);
+    });
+
+    return () => {
+        unsubSettings();
+        unsubCategories();
+    };
   }, []);
 
   return (
@@ -51,7 +39,7 @@ export function SiteFooter() {
              <Link href="/" className="mb-4 flex items-center space-x-2">
                 {settings.logoUrl ? (
                     <div className="relative" style={{width: '100px', height: '24px'}}>
-                       <Image src={settings.logoUrl} alt={settings.storeName} fill style={{objectFit: 'contain'}} />
+                       <Image src={settings.logoUrl} alt={settings.storeName || 'BazaarGo'} fill style={{objectFit: 'contain'}} />
                     </div>
                 ) : (
                     <ShoppingBag className="h-6 w-6 text-primary" />

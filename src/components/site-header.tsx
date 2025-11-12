@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Search, User, Heart, ShoppingBag, Menu, LogIn, UserPlus, UserCircle, Settings, LogOut, ListOrdered, ShoppingCart, ChevronDown, Bell } from 'lucide-react';
@@ -18,13 +17,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { initialCategories } from '@/lib/data';
-import type { Category } from '@/lib/types';
+import type { Category, WebsiteSettings } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-
-const WEBSITE_SETTINGS_KEY = 'websiteSettings';
-const CATEGORIES_KEY = 'appCategories';
+import { firestore } from '@/lib/firebase';
+import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 export function SiteHeader() {
   const { toast } = useToast();
@@ -35,55 +32,48 @@ export function SiteHeader() {
   const [isMounted, setIsMounted] = useState(false);
   const [notifications, setNotifications] = useState<{ id: string; message: string; imageUrl?: string; timestamp: string; read: boolean }[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [settings, setSettings] = useState({ storeName: 'BazaarGo', logoUrl: '' });
+  const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ storeName: 'BazaarGo' });
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    const loadData = () => {
-        // Auth status
-        const authStatus = localStorage.getItem('isAuthenticated');
-        setIsAuthenticated(authStatus === 'true');
-
-        // Notifications
-        const savedNotifications = localStorage.getItem('bazaargoNotifications');
-        if (savedNotifications) {
-            try {
-                const parsed = JSON.parse(savedNotifications);
-                if(Array.isArray(parsed)) {
-                    setNotifications(parsed);
-                    setUnreadCount(parsed.filter((n: any) => !n.read).length);
-                }
-            } catch(e) { console.error("Failed to parse notifications", e); }
-        }
-
-        // Website Settings (Name and Logo)
-        try {
-            const savedSettingsJson = localStorage.getItem(WEBSITE_SETTINGS_KEY);
-            if (savedSettingsJson) {
-                const savedSettings = JSON.parse(savedSettingsJson);
-                setSettings(currentSettings => {
-                    const newSettings = { ...currentSettings, ...savedSettings };
-                    return JSON.stringify(currentSettings) !== JSON.stringify(newSettings) ? newSettings : currentSettings;
-                });
-            }
-        } catch (error) { console.error("Failed to load settings for header", error); }
-
-        // Categories
-        try {
-            const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-            const newCategories = savedCategoriesJSON ? JSON.parse(savedCategoriesJSON) : initialCategories;
-            setCategories(currentCategories => {
-                 return JSON.stringify(currentCategories) !== JSON.stringify(newCategories) ? newCategories : currentCategories;
-            });
-        } catch (error) { console.error("Failed to load categories for header", error); }
-    };
-    
     setIsMounted(true);
-    loadData(); // Initial load
-    const interval = setInterval(loadData, 2000); // Poll for changes
     
-    return () => clearInterval(interval);
-  }, []);
+    // Auth status from localStorage
+    const authStatus = localStorage.getItem('isAuthenticated');
+    setIsAuthenticated(authStatus === 'true');
+    const authInterval = setInterval(() => {
+        const currentStatus = localStorage.getItem('isAuthenticated') === 'true';
+        if(currentStatus !== isAuthenticated) {
+            setIsAuthenticated(currentStatus);
+        }
+    }, 1000);
+
+
+    // Firestore listeners
+    const unsubSettings = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+        if (doc.exists()) {
+            const data = doc.data();
+            setSettings(s => ({ ...s, ...data.websiteSettings }));
+        }
+    });
+
+    const unsubCategories = onSnapshot(collection(firestore, "categories"), (snapshot) => {
+        setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category)));
+    });
+
+    const unsubNotifications = onSnapshot(collection(firestore, "notifications"), (snapshot) => {
+        const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any)).sort((a, b) => b.timestamp - a.timestamp);
+        setNotifications(notifs);
+        setUnreadCount(notifs.filter(n => !n.read).length);
+    });
+
+    return () => {
+        clearInterval(authInterval);
+        unsubSettings();
+        unsubCategories();
+        unsubNotifications();
+    };
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
@@ -95,13 +85,14 @@ export function SiteHeader() {
     router.push('/');
   };
   
-  const handleMarkNotificationsAsRead = () => {
+  const handleMarkNotificationsAsRead = async () => {
       if (unreadCount === 0) return;
       try {
-        const updatedNotifications = notifications.map(n => ({ ...n, read: true }));
-        setNotifications(updatedNotifications);
-        setUnreadCount(0);
-        localStorage.setItem('bazaargoNotifications', JSON.stringify(updatedNotifications));
+        const unreadNotifs = notifications.filter(n => !n.read);
+        for(const notif of unreadNotifs) {
+            const notifRef = doc(firestore, 'notifications', notif.id);
+            await setDoc(notifRef, { read: true }, { merge: true });
+        }
       } catch (e) {
         console.error("Failed to mark notifications as read", e);
       }
@@ -111,12 +102,12 @@ export function SiteHeader() {
     <>
       {settings.logoUrl ? (
          <div className="relative" style={{width: '120px', height: isMobile ? '24px' : '32px'}}>
-            <Image src={settings.logoUrl} alt={settings.storeName} fill style={{objectFit: 'contain'}} />
+            <Image src={settings.logoUrl} alt={settings.storeName || 'BazaarGo'} fill style={{objectFit: 'contain'}} />
          </div>
       ) : (
         <ShoppingBag className="h-6 w-6 text-primary" />
       )}
-      <span className="font-bold font-headline">{settings.storeName}</span>
+      <span className="font-bold font-headline">{settings.storeName || 'BazaarGo'}</span>
     </>
   );
 

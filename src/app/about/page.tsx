@@ -1,4 +1,3 @@
-
 'use client';
 
 import { SiteHeader } from '@/components/site-header';
@@ -7,36 +6,30 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Building2, Users, Target } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import type { WebsiteSettings } from '@/lib/types';
 
-const WEBSITE_SETTINGS_KEY = 'websiteSettings';
 
 export default function AboutPage() {
   const [storeName, setStoreName] = useState('BazaarGo');
 
   useEffect(() => {
-    const loadSettings = () => {
-        try {
-            const savedSettingsJson = localStorage.getItem(WEBSITE_SETTINGS_KEY);
-            if (savedSettingsJson) {
-                const settings = JSON.parse(savedSettingsJson);
-                if (settings && settings.storeName) {
-                    setStoreName(currentName => {
-                        if (currentName !== settings.storeName) {
-                            document.title = `About Us | ${settings.storeName}`;
-                            return settings.storeName;
-                        }
-                        return currentName;
-                    });
-                }
+    const unsub = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+        if (doc.exists()) {
+            const settings = doc.data().websiteSettings as WebsiteSettings;
+            if (settings && settings.storeName) {
+                setStoreName(currentName => {
+                    if (currentName !== settings.storeName) {
+                        document.title = `About Us | ${settings.storeName}`;
+                        return settings.storeName;
+                    }
+                    return currentName;
+                });
             }
-        } catch (error) {
-            console.error("Failed to load store name for About page", error);
         }
-    };
-
-    loadSettings();
-    const interval = setInterval(loadSettings, 2000);
-    return () => clearInterval(interval);
+    });
+    return () => unsub();
   }, []);
 
   return (
