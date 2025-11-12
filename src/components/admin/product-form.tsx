@@ -141,7 +141,13 @@ export function ProductForm({ productId }: ProductFormProps) {
             images: data.images.map(i => i.value),
             sizes: data.sizes ? data.sizes.map(s => s.value) : [],
             tags: data.tags ? data.tags.map(t => t.value) : [],
-            colors: data.colors ? data.colors.map(c => ({...c, image: c.image || undefined })) : [],
+            colors: data.colors ? data.colors.map(c => {
+                const colorObj: { name: string; hex: string; image?: string } = { name: c.name, hex: c.hex };
+                if (c.image) {
+                    colorObj.image = c.image;
+                }
+                return colorObj;
+            }) : [],
         };
         
         try {
