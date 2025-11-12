@@ -133,7 +133,13 @@ export default function OrdersPage() {
                                         </div>
                                          <div>
                                             <h4 className="font-semibold mb-2">Payment Method</h4>
-                                            <p className="text-sm text-muted-foreground capitalize">{order.shippingInfo.paymentMethod}</p>
+                                            <p className="text-sm text-muted-foreground capitalize">{order.paymentDetails?.method}</p>
+                                            {order.paymentDetails?.method === 'bkash' && order.paymentDetails?.transactionId && (
+                                                <>
+                                                    <h4 className="font-semibold mt-2 mb-1">Transaction ID</h4>
+                                                    <p className="text-sm text-muted-foreground font-mono">{order.paymentDetails.transactionId}</p>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </AccordionContent>

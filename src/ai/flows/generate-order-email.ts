@@ -29,8 +29,12 @@ const ShippingInfoSchema = z.object({
   city: z.string(),
   state: z.string(),
   zip: z.string(),
-  paymentMethod: z.string(),
 });
+
+const PaymentDetailsSchema = z.object({
+    method: z.string(),
+    transactionId: z.string().optional(),
+}).optional();
 
 const OrderSchema = z.object({
   id: z.string(),
@@ -39,6 +43,7 @@ const OrderSchema = z.object({
   total: z.number(),
   status: z.string(),
   shippingInfo: ShippingInfoSchema,
+  paymentDetails: PaymentDetailsSchema,
 });
 
 const GenerateOrderEmailInputSchema = z.object({
@@ -71,6 +76,7 @@ Your task is to generate a professional, modern, and clean HTML order confirmati
 8.  **Do NOT include any placeholders.** Generate the full, complete HTML.
 9.  **Date Formatting:** Format the order date nicely (e.g., July 20, 2024).
 10. **Currency:** The currency is Bangladeshi Taka (৳). Ensure you use the '৳' symbol before all prices.
+11. **Transaction ID:** If a transaction ID is provided with the payment details (e.g., for bKash), display it clearly in the payment information section.
 
 **Order Details (JSON):**
 \`\`\`json

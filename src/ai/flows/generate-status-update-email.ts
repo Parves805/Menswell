@@ -29,8 +29,12 @@ const ShippingInfoSchema = z.object({
   city: z.string(),
   state: z.string(),
   zip: z.string(),
-  paymentMethod: z.string(),
 });
+
+const PaymentDetailsSchema = z.object({
+    method: z.string(),
+    transactionId: z.string().optional(),
+}).optional();
 
 const OrderSchema = z.object({
   id: z.string(),
@@ -39,6 +43,7 @@ const OrderSchema = z.object({
   total: z.number(),
   status: z.string(),
   shippingInfo: ShippingInfoSchema,
+  paymentDetails: PaymentDetailsSchema,
 });
 
 const GenerateStatusUpdateEmailInputSchema = z.object({

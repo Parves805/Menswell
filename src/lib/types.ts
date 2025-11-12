@@ -32,7 +32,7 @@ export interface CartItem extends Product {
 
 export interface Order {
   id: string;
-  date: string;
+  date: string; // ISO Date String
   items: CartItem[];
   total: number;
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
@@ -44,7 +44,10 @@ export interface Order {
     city: string;
     state: string;
     zip: string;
-    paymentMethod: string;
+  };
+  paymentDetails?: {
+      method: string;
+      transactionId?: string;
   };
 }
 
@@ -107,5 +110,3 @@ export interface ThemeSettings {
     background: string;
     accent: string;
 }
-
-    

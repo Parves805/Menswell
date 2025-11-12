@@ -37,6 +37,15 @@ const checkoutSchema = z.object({
   paymentMethod: z.enum(['cash', 'bkash', 'nagad', 'rocket'], {
     required_error: "You need to select a payment method.",
   }),
+  transactionId: z.string().optional(),
+}).refine(data => {
+    if (data.paymentMethod === 'bkash' && (!data.transactionId || data.transactionId.trim().length < 5)) {
+        return false;
+    }
+    return true;
+}, {
+    message: "A valid bKash Transaction ID is required.",
+    path: ["transactionId"],
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -67,6 +76,7 @@ export default function CheckoutPage() {
       state: '',
       zip: '',
       paymentMethod: 'cash',
+      transactionId: '',
     },
   });
 
@@ -128,7 +138,19 @@ export default function CheckoutPage() {
       date: new Date().toISOString(),
       items: cartItems,
       total: subtotal + shippingCost,
-      shippingInfo: data,
+      shippingInfo: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        zip: data.zip,
+      },
+      paymentDetails: {
+          method: data.paymentMethod,
+          transactionId: data.transactionId,
+      },
       status: 'Processing' as const,
     };
 
@@ -350,22 +372,41 @@ export default function CheckoutPage() {
                                 )}
                                 {paymentSettings.bkash && (
                                 <FormItem>
-                                    <Label className="flex items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                                        <FormControl>
-                                            <RadioGroupItem value="bkash" className="mt-1" />
-                                        </FormControl>
-                                        <CreditCard className="h-6 w-6" />
-                                        <div>
-                                            <span className="font-semibold">bKash</span>
-                                            <p className="text-sm text-muted-foreground">Pay via bKash mobile banking.</p>
-                                            {selectedPaymentMethod === 'bkash' && paymentSettings.bkashNumber && (
-                                                <Alert className="mt-2">
-                                                    <AlertDescription>
-                                                        Please Send Money to the bKash personal number: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>. Then, proceed to place the order.
-                                                    </AlertDescription>
-                                                </Alert>
-                                            )}
+                                    <Label className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                        <div className="flex items-start gap-4 w-full">
+                                            <FormControl>
+                                                <RadioGroupItem value="bkash" className="mt-1" />
+                                            </FormControl>
+                                            <CreditCard className="h-6 w-6" />
+                                            <div className="flex-grow">
+                                                <span className="font-semibold">bKash</span>
+                                                <p className="text-sm text-muted-foreground">Pay via bKash mobile banking.</p>
+                                            </div>
                                         </div>
+                                        {selectedPaymentMethod === 'bkash' && (
+                                            <div className="w-full pl-10 space-y-3">
+                                                {paymentSettings.bkashNumber && (
+                                                    <Alert>
+                                                        <AlertDescription>
+                                                            Please Send Money to the bKash personal number: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>.
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                )}
+                                                <FormField
+                                                    control={form.control}
+                                                    name="transactionId"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>bKash Transaction ID</FormLabel>
+                                                            <FormControl>
+                                                                <Input {...field} placeholder="e.g., 9X7Y6Z5A4B" />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        )}
                                     </Label>
                                 </FormItem>
                                 )}

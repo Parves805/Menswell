@@ -252,8 +252,14 @@ export default function AdminOrdersPage() {
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-muted-foreground">Payment</span>
-                                                <span className="capitalize">{selectedOrder.shippingInfo.paymentMethod}</span>
+                                                <span className="capitalize">{selectedOrder.paymentDetails?.method}</span>
                                             </div>
+                                            {selectedOrder.paymentDetails?.transactionId && (
+                                                <div className="flex justify-between">
+                                                    <span className="text-muted-foreground">Trx ID</span>
+                                                    <span className="font-mono text-xs">{selectedOrder.paymentDetails.transactionId}</span>
+                                                </div>
+                                            )}
                                             <div className="flex justify-between items-center">
                                                 <span className="text-muted-foreground">Status</span>
                                                 <Badge variant="outline" className="flex items-center gap-2 w-fit">
