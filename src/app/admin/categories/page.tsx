@@ -17,7 +17,7 @@ import type { Category } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { firestore } from '@/lib/firebase';
-import { collection, addDoc, onSnapshot, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc, getDocs, query, where, setDoc } from 'firebase/firestore';
 
 const categorySchema = z.object({
     name: z.string().min(2, { message: 'Category name must be at least 2 characters.' }),
