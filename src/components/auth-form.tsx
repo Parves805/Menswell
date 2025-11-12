@@ -18,8 +18,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { auth, isFirebaseConfigured } from '@/lib/firebase';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth, isFirebaseConfigured, firestore } from '@/lib/firebase';
+import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Define keys
 const ALL_USERS_KEY = 'bazaargoAllUsers';
@@ -70,7 +71,7 @@ export function AuthForm({ type }: AuthFormProps) {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
-    if (!isFirebaseConfigured) {
+    if (!isFirebaseConfigured || !firestore) {
         toast({
             variant: 'destructive',
             title: 'Firebase Not Configured',
@@ -94,16 +95,15 @@ export function AuthForm({ type }: AuthFormProps) {
             setIsGoogleLoading(false);
             return;
         }
+        
+        const userDocRef = doc(firestore, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
 
-        const allUsersJson = localStorage.getItem(ALL_USERS_KEY);
-        let allUsers: User[] = allUsersJson ? JSON.parse(allUsersJson) : [];
-        const emailExists = allUsers.some(u => u.email === user.email);
-
-        if (!emailExists) {
-            // New user, treat as signup
-            const newUser: User = { name: user.displayName, email: user.email };
-            allUsers.push(newUser);
-            localStorage.setItem(ALL_USERS_KEY, JSON.stringify(allUsers));
+        if (!userDoc.exists()) {
+            await setDoc(userDocRef, {
+                name: user.displayName,
+                email: user.email,
+            });
         }
 
         const profileToSave = {
@@ -157,34 +157,33 @@ export function AuthForm({ type }: AuthFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // Mock API call to your backend
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+     if (!isFirebaseConfigured || !firestore) {
+        toast({
+            variant: 'destructive',
+            title: 'Firebase Not Configured',
+            description: 'Authentication is currently disabled.',
+        });
+        setIsLoading(false);
+        return;
+    }
     
     if (type === 'signup') {
         try {
-            const allUsersJson = localStorage.getItem(ALL_USERS_KEY);
-            let allUsers: User[] = allUsersJson ? JSON.parse(allUsersJson) : [];
+            const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+            const user = userCredential.user;
             
-            const emailExists = allUsers.some(user => user.email === values.email);
-            if (emailExists) {
-                toast({
-                    variant: 'destructive',
-                    title: 'Signup Failed',
-                    description: 'An account with this email already exists.',
-                });
-                setIsLoading(false);
-                return;
-            }
+            // Save user info to Firestore
+            await setDoc(doc(firestore, "users", user.uid), {
+                name: values.name,
+                email: user.email,
+            });
 
-            const newUser: User = { name: values.name!, email: values.email };
-            allUsers.push(newUser);
-            localStorage.setItem(ALL_USERS_KEY, JSON.stringify(allUsers));
-            
             // Also save to profile for auto-login
             const profileToSave = {
                 savedUser: {
-                    name: newUser.name,
-                    email: newUser.email,
+                    name: values.name,
+                    email: user.email,
                     phone: '',
                     address: { street: '', city: '', state: '', zip: '' },
                     avatar: '',
@@ -192,30 +191,39 @@ export function AuthForm({ type }: AuthFormProps) {
                 savedPic: null,
             };
             localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profileToSave));
-
             localStorage.setItem('isAuthenticated', 'true');
+
             toast({
                 title: 'Signup Successful',
                 description: 'Your account has been created.',
             });
-
-        } catch (error) {
+            router.push('/');
+        } catch (error: any) {
             console.error('Signup error:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not create your account.' });
-            setIsLoading(false);
-            return;
+            const errorCode = error.code;
+            let description = 'Could not create your account.';
+            if (errorCode === 'auth/email-already-in-use') {
+                description = 'An account with this email already exists.';
+            }
+            toast({ variant: 'destructive', title: 'Signup Failed', description });
         }
 
     } else { // Login
-        localStorage.setItem('isAuthenticated', 'true');
-        toast({
-            title: 'Login Successful',
-            description: `Welcome back!`,
-        });
+        try {
+            await signInWithEmailAndPassword(auth, values.email, values.password);
+            localStorage.setItem('isAuthenticated', 'true');
+            toast({
+                title: 'Login Successful',
+                description: `Welcome back!`,
+            });
+            router.push('/');
+        } catch (error: any) {
+             console.error('Login error:', error);
+             toast({ variant: 'destructive', title: 'Login Failed', description: 'Invalid email or password.' });
+        }
     }
 
     setIsLoading(false);
-    router.push('/');
   }
 
   return (

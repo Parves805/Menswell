@@ -1,6 +1,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 // These variables are loaded from .env file by Next.js
 const firebaseConfig = {
@@ -14,6 +15,7 @@ const firebaseConfig = {
 
 let app: FirebaseApp;
 let auth: Auth;
+let firestore: Firestore;
 let isFirebaseConfigured = false;
 
 // Check if all required Firebase config values are present and valid
@@ -25,18 +27,21 @@ if (
     try {
         app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
         auth = getAuth(app);
+        firestore = getFirestore(app);
         isFirebaseConfigured = true;
     } catch (e) {
         console.error("Firebase initialization failed:", e);
         // Fallback to unconfigured state
         app = {} as FirebaseApp;
         auth = {} as Auth;
+        firestore = {} as Firestore;
         isFirebaseConfigured = false;
     }
 } else {
     // Silently fail if config is not set, the UI will adapt by disabling auth features.
     app = {} as FirebaseApp;
     auth = {} as Auth;
+    firestore = {} as Firestore;
     isFirebaseConfigured = false;
 
     if (typeof window !== 'undefined') {
@@ -46,4 +51,4 @@ if (
     }
 }
 
-export { app, auth, isFirebaseConfigured };
+export { app, auth, firestore, isFirebaseConfigured };
