@@ -49,7 +49,10 @@ export default function ProfilePage() {
               ...savedUser,
               address: {
                 ...defaultUser.address,
-                ...address,
+                street: address.street || '',
+                city: address.city || '',
+                state: address.state || '',
+                zip: address.zip || '',
               },
             });
         }
