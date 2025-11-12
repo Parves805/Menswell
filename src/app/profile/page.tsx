@@ -16,12 +16,12 @@ import { useToast } from "@/hooks/use-toast";
 const defaultUser = {
   name: 'John Doe',
   email: 'john.doe@example.com',
-  phone: '123-456-7890',
+  phone: '',
   address: {
-    street: '123 Main St',
-    city: 'Anytown',
-    state: 'CA',
-    zip: '12345',
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
   },
   avatar: '', // Initially empty
 };
@@ -41,7 +41,18 @@ export default function ProfilePage() {
       const savedProfile = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedProfile) {
         const { savedUser, savedPic } = JSON.parse(savedProfile);
-        if (savedUser) setUser(savedUser);
+        if (savedUser) {
+            // Ensure address object and its properties exist
+            const address = savedUser.address || {};
+            setUser({
+              ...defaultUser,
+              ...savedUser,
+              address: {
+                ...defaultUser.address,
+                ...address,
+              },
+            });
+        }
         if (savedPic) setProfilePic(savedPic);
       }
     } catch (error) {
@@ -157,32 +168,32 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" name="name" value={user.name} onChange={handleInputChange} />
+                  <Input id="name" name="name" value={user.name || ''} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" name="email" type="email" value={user.email} disabled />
+                  <Input id="email" name="email" type="email" value={user.email || ''} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" name="phone" type="tel" value={user.phone} onChange={handleInputChange} />
+                  <Input id="phone" name="phone" type="tel" value={user.phone || ''} onChange={handleInputChange} />
                 </div>
                  <div className="space-y-2">
                   <Label htmlFor="street">Street Address</Label>
-                  <Input id="street" name="address.street" value={user.address.street} onChange={handleInputChange} />
+                  <Input id="street" name="address.street" value={user.address.street || ''} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">City</Label>
-                  <Input id="city" name="address.city" value={user.address.city} onChange={handleInputChange} />
+                  <Input id="city" name="address.city" value={user.address.city || ''} onChange={handleInputChange} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
                     <Label htmlFor="state">State</Label>
-                    <Input id="state" name="address.state" value={user.address.state} onChange={handleInputChange} />
+                    <Input id="state" name="address.state" value={user.address.state || ''} onChange={handleInputChange} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="zip">Zip Code</Label>
-                    <Input id="zip" name="address.zip" value={user.address.zip} onChange={handleInputChange} />
+                    <Input id="zip" name="address.zip" value={user.address.zip || ''} onChange={handleInputChange} />
                   </div>
                 </div>
               </div>

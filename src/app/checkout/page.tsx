@@ -23,6 +23,9 @@ import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings } from '@/lib/types';
 import { generateOrderConfirmationEmail } from '@/ai/flows/generate-order-email';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { doc, setDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+
 
 const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
 
@@ -133,8 +136,9 @@ export default function CheckoutPage() {
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
 
+    const orderId = new Date().getTime().toString();
     const order: Order = {
-      id: new Date().getTime().toString(),
+      id: orderId,
       date: new Date().toISOString(),
       items: cartItems,
       total: subtotal + shippingCost,
@@ -155,20 +159,8 @@ export default function CheckoutPage() {
     };
 
     try {
-        const saved = localStorage.getItem('bazaargoUserOrders');
-        let existingOrders: Order[] = [];
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed)) {
-                    existingOrders = parsed;
-                }
-            } catch (e) {
-                console.error("Could not parse existing orders, starting with a new list.", e);
-            }
-        }
-        const newOrders = [order, ...existingOrders];
-        localStorage.setItem('bazaargoUserOrders', JSON.stringify(newOrders));
+        const orderRef = doc(firestore, 'orders', orderId);
+        await setDoc(orderRef, order);
 
         // Generate and log the email content
         try {
@@ -191,7 +183,7 @@ export default function CheckoutPage() {
         }
 
     } catch (error) {
-        console.error("Failed to save order to localStorage", error);
+        console.error("Failed to save order to Firestore", error);
     }
 
     clearCart();
