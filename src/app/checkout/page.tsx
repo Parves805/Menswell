@@ -22,7 +22,6 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings, ShippingRate } from '@/lib/types';
-import { sendOrderConfirmationEmail } from '@/lib/email';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
@@ -161,14 +160,6 @@ export default function CheckoutPage() {
     try {
         const orderRef = doc(firestore, 'orders', orderId);
         await setDoc(orderRef, order);
-        
-        await sendOrderConfirmationEmail(order);
-
-        toast({
-            title: "Email Sent",
-            description: "An order confirmation email has been sent to you.",
-        });
-
     } catch (error: any) {
         console.error("Failed to save order or send email", error);
          toast({
