@@ -30,15 +30,15 @@ import { firestore } from '@/lib/firebase';
 const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
 
 const checkoutSchema = z.object({
-  name: z.string().min(2, { message: 'Full name is required' }),
-  email: z.string().email({ message: 'Invalid email address' }),
-  phone: z.string().min(10, { message: 'Invalid phone number' }),
-  street: z.string().min(3, { message: 'Street address is required' }),
-  city: z.string().min(2, { message: 'City is required' }),
-  state: z.string().min(2, { message: 'State is required' }),
-  zip: z.string().min(4, { message: 'Zip code is required' }),
+  name: z.string().min(2, { message: 'সম্পূর্ণ নাম आवश्यक' }),
+  email: z.string().email({ message: 'সঠিক ইমেল ঠিকানা দিন' }),
+  phone: z.string().min(10, { message: 'সঠিক ফোন নম্বর দিন' }),
+  street: z.string().min(3, { message: 'রাস্তার ঠিকানা आवश्यक' }),
+  city: z.string().min(2, { message: 'শহরের নাম आवश्यक' }),
+  state: z.string().min(2, { message: 'বিভাগের নাম आवश्यक' }),
+  zip: z.string().min(4, { message: 'পোস্ট কোড आवश्यक' }),
   paymentMethod: z.enum(['cash', 'bkash', 'nagad', 'rocket'], {
-    required_error: "You need to select a payment method.",
+    required_error: "আপনাকে একটি পেমেন্ট পদ্ধতি বেছে নিতে হবে।",
   }),
   transactionId: z.string().optional(),
 }).refine(data => {
@@ -47,7 +47,7 @@ const checkoutSchema = z.object({
     }
     return true;
 }, {
-    message: "A valid bKash Transaction ID is required.",
+    message: "একটি সঠিক বিকাশ লেনদেন আইডি প্রয়োজন।",
     path: ["transactionId"],
 });
 
@@ -105,6 +105,7 @@ export default function CheckoutPage() {
             state: savedUser.address?.state || '',
             zip: savedUser.address?.zip || '',
             paymentMethod: form.getValues('paymentMethod'),
+            transactionId: '',
           });
         }
       }
@@ -188,8 +189,8 @@ export default function CheckoutPage() {
 
     clearCart();
     toast({
-      title: 'Order Placed Successfully!',
-      description: 'Thank you for your purchase. We will notify you once your order has shipped.',
+      title: 'অর্ডার সফল হয়েছে!',
+      description: 'আপনার কেনাকাটার জন্য ধন্যবাদ। আপনার অর্ডারটি পাঠানো হলে আপনাকে জানানো হবে।',
     });
 
     router.push('/orders');
@@ -200,7 +201,7 @@ export default function CheckoutPage() {
         <div className="flex flex-col min-h-screen">
             <SiteHeader />
             <main className="flex-grow flex items-center justify-center pb-16 md:pb-0">
-                <p>Your cart is empty. Redirecting...</p>
+                <p>আপনার কার্ট খালি। আপনাকে হোমপেজে পাঠানো হচ্ছে...</p>
             </main>
             <SiteFooter />
         </div>
@@ -211,7 +212,7 @@ export default function CheckoutPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-grow container pt-8 pb-24 md:pt-12 md:pb-12">
-        <h1 className="text-3xl md:text-4xl font-bold font-headline mb-8 text-center">Checkout</h1>
+        <h1 className="text-3xl md:text-4xl font-bold font-headline mb-8 text-center">চেকআউট</h1>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
@@ -219,7 +220,7 @@ export default function CheckoutPage() {
             <div className="lg:col-span-2 space-y-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Shipping Information</CardTitle>
+                  <CardTitle>ডেলিভারির তথ্য</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
@@ -228,7 +229,7 @@ export default function CheckoutPage() {
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Full Name</FormLabel>
+                            <FormLabel>পুরো নাম</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -243,7 +244,7 @@ export default function CheckoutPage() {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>ইমেল</FormLabel>
                             <FormControl>
                                 <Input type="email" {...field} />
                             </FormControl>
@@ -258,7 +259,7 @@ export default function CheckoutPage() {
                         name="phone"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Phone</FormLabel>
+                            <FormLabel>ফোন</FormLabel>
                             <FormControl>
                                 <Input type="tel" {...field} />
                             </FormControl>
@@ -273,7 +274,7 @@ export default function CheckoutPage() {
                         name="street"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Street Address</FormLabel>
+                            <FormLabel>রাস্তার ঠিকানা</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -288,7 +289,7 @@ export default function CheckoutPage() {
                         name="city"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>City</FormLabel>
+                            <FormLabel>শহর</FormLabel>
                             <FormControl>
                                 <Input {...field} />
                             </FormControl>
@@ -304,7 +305,7 @@ export default function CheckoutPage() {
                             name="state"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>State</FormLabel>
+                                <FormLabel>বিভাগ</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -319,7 +320,7 @@ export default function CheckoutPage() {
                             name="zip"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Zip Code</FormLabel>
+                                <FormLabel>পোস্ট কোড</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -334,7 +335,7 @@ export default function CheckoutPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Payment Method</CardTitle>
+                  <CardTitle>পেমেন্ট পদ্ধতি</CardTitle>
                 </CardHeader>
                 <CardContent>
                    <FormField
@@ -356,8 +357,8 @@ export default function CheckoutPage() {
                                         </FormControl>
                                         <Truck className="h-6 w-6" />
                                         <div>
-                                            <span className="font-semibold">Cash on Delivery</span>
-                                            <p className="text-sm text-muted-foreground">Pay with cash upon receiving your order.</p>
+                                            <span className="font-semibold">ক্যাশ অন ডেলিভারি</span>
+                                            <p className="text-sm text-muted-foreground">আপনার অর্ডার হাতে পেয়ে নগদ অর্থে পরিশোধ করুন।</p>
                                         </div>
                                     </Label>
                                 </FormItem>
@@ -371,8 +372,8 @@ export default function CheckoutPage() {
                                             </FormControl>
                                             <CreditCard className="h-6 w-6" />
                                             <div className="flex-grow">
-                                                <span className="font-semibold">bKash</span>
-                                                <p className="text-sm text-muted-foreground">Pay via bKash mobile banking.</p>
+                                                <span className="font-semibold">বিকাশ</span>
+                                                <p className="text-sm text-muted-foreground">বিকাশ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p>
                                             </div>
                                         </div>
                                         {selectedPaymentMethod === 'bkash' && (
@@ -380,7 +381,7 @@ export default function CheckoutPage() {
                                                 {paymentSettings.bkashNumber && (
                                                     <Alert>
                                                         <AlertDescription>
-                                                            Please Send Money to the bKash personal number: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>.
+                                                            অনুগ্রহ করে এই বিকাশ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>.
                                                         </AlertDescription>
                                                     </Alert>
                                                 )}
@@ -389,9 +390,9 @@ export default function CheckoutPage() {
                                                     name="transactionId"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>bKash Transaction ID</FormLabel>
+                                                            <FormLabel>বিকাশ লেনদেন আইডি</FormLabel>
                                                             <FormControl>
-                                                                <Input {...field} placeholder="e.g., 9X7Y6Z5A4B" />
+                                                                <Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" />
                                                             </FormControl>
                                                             <FormMessage />
                                                         </FormItem>
@@ -410,8 +411,8 @@ export default function CheckoutPage() {
                                         </FormControl>
                                         <CreditCard className="h-6 w-6" />
                                         <div>
-                                            <span className="font-semibold">Nagad</span>
-                                            <p className="text-sm text-muted-foreground">Pay via Nagad mobile banking.</p>
+                                            <span className="font-semibold">নগদ</span>
+                                            <p className="text-sm text-muted-foreground">নগদ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p>
                                         </div>
                                     </Label>
                                 </FormItem>
@@ -424,8 +425,8 @@ export default function CheckoutPage() {
                                         </FormControl>
                                         <CreditCard className="h-6 w-6" />
                                         <div>
-                                            <span className="font-semibold">Rocket</span>
-                                            <p className="text-sm text-muted-foreground">Pay via Rocket mobile banking.</p>
+                                            <span className="font-semibold">রকেট</span>
+                                            <p className="text-sm text-muted-foreground">রকেট মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p>
                                         </div>
                                     </Label>
                                 </FormItem>
@@ -444,7 +445,7 @@ export default function CheckoutPage() {
             <div className="lg:col-span-1">
               <Card className="sticky top-24">
                 <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
+                  <CardTitle>অর্ডারের সারাংশ</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="max-h-64 overflow-y-auto pr-2 space-y-4">
@@ -460,7 +461,7 @@ export default function CheckoutPage() {
                                 {[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}
                             </p>
                           )}
-                          <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
+                          <p className="text-sm text-muted-foreground">পরিমাণ: {item.quantity}</p>
                         </div>
                         <p className="font-medium">
                           ৳{(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -471,16 +472,16 @@ export default function CheckoutPage() {
                   <Separator />
                   <div className="space-y-2">
                       <div className="flex justify-between">
-                          <span className="text-muted-foreground">Subtotal</span>
+                          <span className="text-muted-foreground">মোট মূল্য</span>
                           <span>৳{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <div className="flex justify-between">
-                          <span className="text-muted-foreground">Shipping</span>
+                          <span className="text-muted-foreground">ডেলিভারি চার্জ</span>
                           <span>৳{shippingCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between font-bold text-lg">
-                          <span>Total</span>
+                          <span>সর্বমোট</span>
                           <span>৳{(subtotal + shippingCost).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                   </div>
@@ -490,11 +491,11 @@ export default function CheckoutPage() {
                       {isProcessing ? (
                           <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Processing...
+                              প্রসেসিং...
                           </>
                       ) : (
                           <>
-                              Place Order (৳{(subtotal + shippingCost).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                              অর্ডার করুন (৳{(subtotal + shippingCost).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
                           </>
                       )}
                   </Button>
