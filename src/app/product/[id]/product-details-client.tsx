@@ -11,7 +11,7 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/cart-context';
 import { useWishlist } from '@/context/wishlist-context';
-import type { Product, Review, Order } from '@/lib/types';
+import type { Product, Review, Order, CartItem } from '@/lib/types';
 import { Star, StarHalf, Heart, Check, Minus, Plus, MessageSquare, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -24,6 +24,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { QuickCheckoutSheet } from '@/components/quick-checkout-sheet';
+
 
 const VIEWING_HISTORY_KEY = 'bazaargoProductViewHistory';
 const MAX_HISTORY_LENGTH = 10;
@@ -92,6 +94,9 @@ export function ProductDetailsClient({ product }: { product: Product }) {
   const [userCanReview, setUserCanReview] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  const [isCheckoutSheetOpen, setIsCheckoutSheetOpen] = useState(false);
+  const [checkoutItem, setCheckoutItem] = useState<CartItem | null>(null);
 
   const reviewForm = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
@@ -172,8 +177,14 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       return;
     }
     const { image, ...colorData } = selectedColor || {};
-    addItem(product, quantity, selectedSize === 'N/A' ? undefined : selectedSize, selectedColor?.name === 'N/A' ? undefined : colorData);
-    router.push('/checkout');
+    const itemForCheckout: CartItem = {
+      ...product,
+      quantity: quantity,
+      selectedSize: selectedSize === 'N/A' ? undefined : selectedSize,
+      selectedColor: selectedColor?.name === 'N/A' ? undefined : colorData,
+    };
+    setCheckoutItem(itemForCheckout);
+    setIsCheckoutSheetOpen(true);
   };
 
   const handleMessageSeller = () => {
@@ -453,6 +464,13 @@ export function ProductDetailsClient({ product }: { product: Product }) {
             )}
         </div>
       </div>
+      {checkoutItem && (
+        <QuickCheckoutSheet
+            isOpen={isCheckoutSheetOpen}
+            onOpenChange={setIsCheckoutSheetOpen}
+            item={checkoutItem}
+        />
+      )}
     </>
   );
 }
