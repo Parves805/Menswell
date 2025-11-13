@@ -74,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardContent className="p-4 flex-grow flex flex-col">
         <div className="flex-grow">
           <p className="text-xs text-muted-foreground uppercase">{product.brand}</p>
-          <CardTitle className="text-lg leading-tight font-headline mt-1">
+          <CardTitle className="text-lg leading-tight font-headline mt-1 truncate">
               <Link href={`/product/${product.id}`} className="hover:text-primary">{product.name}</Link>
           </CardTitle>
         </div>
