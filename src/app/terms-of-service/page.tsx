@@ -22,7 +22,7 @@ export default function TermsOfServicePage() {
                     <CardDescription>Last Updated: November 2025</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 text-muted-foreground leading-relaxed">
-                    <p>Welcome to Menswell. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services.</p>
+                    <p>Welcome to BazaarGo. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services.</p>
                     
                     <div className="space-y-2">
                         <h3 className="font-semibold text-lg text-foreground">1. General</h3>

@@ -3,7 +3,7 @@
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Building2, Users, Target } from 'lucide-react';
+import { Users, Target, Rocket } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -37,8 +37,8 @@ export default function AboutPage() {
       <SiteHeader />
       <main className="flex-grow container pt-8 pb-24 md:pt-12 md:pb-12">
         <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold font-headline">About {storeName}</h1>
-            <p className="text-muted-foreground mt-2">Your favorite online shopping destination.</p>
+            <h1 className="text-4xl font-bold font-headline">Welcome to {storeName}</h1>
+            <p className="text-muted-foreground mt-2">— Where Style Meets Confidence —</p>
         </div>
         
         <div className="max-w-4xl mx-auto space-y-12">
@@ -47,7 +47,7 @@ export default function AboutPage() {
                     <div className="p-8 flex flex-col justify-center">
                         <h2 className="text-3xl font-bold font-headline mb-4">Our Story</h2>
                         <p className="text-muted-foreground leading-relaxed">
-                            {storeName} started with a simple idea: to make quality products accessible to everyone. We are a passionate team dedicated to curating the best items and providing an exceptional shopping experience. From trendy fashion to everyday essentials, we bring the bazaar to your fingertips.
+                            {storeName} is a young and vibrant clothing brand built for today’s generation. We design fashion that blends comfort, confidence, and creativity — made especially for students and young adults who want to look sharp without trying too hard.
                         </p>
                     </div>
                      <div className="relative h-64 md:h-auto rounded-b-lg md:rounded-r-lg md:rounded-bl-none overflow-hidden">
@@ -61,23 +61,23 @@ export default function AboutPage() {
                     </div>
                 </div>
             </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
-                <Card className="p-6">
-                    <Target className="mx-auto h-12 w-12 text-primary mb-4" />
-                    <CardTitle className="text-2xl font-headline">Our Mission</CardTitle>
-                    <CardContent className="pt-4">
-                        <p className="text-muted-foreground">To provide a seamless and enjoyable online shopping experience with a wide range of high-quality products at competitive prices.</p>
-                    </CardContent>
-                </Card>
-                <Card className="p-6">
-                    <Building2 className="mx-auto h-12 w-12 text-primary mb-4" />
-                    <CardTitle className="text-2xl font-headline">Our Vision</CardTitle>
-                    <CardContent className="pt-4">
-                        <p className="text-muted-foreground">To become the most trusted and beloved online marketplace, known for our commitment to quality, customer satisfaction, and innovation.</p>
-                    </CardContent>
-                </Card>
+            
+            <div className="text-center">
+                <Users className="mx-auto h-12 w-12 text-primary mb-4" />
+                <h2 className="text-3xl font-bold font-headline mb-4">Our Audience</h2>
+                <p className="max-w-2xl mx-auto text-muted-foreground leading-relaxed">
+                    Our target customers are 16–28-year-old school, college, and university students who believe that style is more than just what you wear — it’s how you express yourself.
+                </p>
             </div>
+
+            <Card className="p-6 text-center">
+                <Rocket className="mx-auto h-12 w-12 text-primary mb-4" />
+                <CardTitle className="text-2xl font-headline">Our Mission</CardTitle>
+                <CardContent className="pt-4 max-w-3xl mx-auto">
+                    <p className="text-muted-foreground">To make everyday fashion accessible, stylish, and full of attitude — empowering young people to express who they are through what they wear.</p>
+                    <p className="text-muted-foreground mt-4">We aim to deliver premium-quality apparel that reflects the latest trends while staying affordable for students and youth communities.</p>
+                </CardContent>
+            </Card>
             
         </div>
       </main>
