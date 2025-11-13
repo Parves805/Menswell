@@ -33,6 +33,7 @@ import {
   View,
   SquareCheck,
   Truck,
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -65,18 +66,24 @@ export default function AdminLayout({
     '/admin/settings',
     '/admin/analytics',
     '/admin/seo',
-    '/admin/sections'
+    '/admin/shipping',
   ].some(p => pathname === p);
 
   const areMarketingActive = [
     '/admin/marketing/email',
     '/admin/marketing/popup',
-    '/admin/marketing/promo-cards',
+  ].some(p => pathname.startsWith(p));
+  
+  const arePagesActive = [
+    '/admin/pages',
+    '/admin/pages/homepage',
+    '/admin/pages/promo-cards',
   ].some(p => pathname.startsWith(p));
 
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(areSettingsActive);
   const [isMarketingOpen, setIsMarketingOpen] = useState(areMarketingActive);
+  const [isPagesOpen, setIsPagesOpen] = useState(arePagesActive);
 
   useEffect(() => {
     const authStatus = localStorage.getItem('isAdminAuthenticated');
@@ -115,6 +122,10 @@ export default function AdminLayout({
   useEffect(() => {
     setIsMarketingOpen(areMarketingActive);
   }, [areMarketingActive]);
+
+  useEffect(() => {
+    setIsPagesOpen(arePagesActive);
+  }, [arePagesActive]);
 
 
   const handleLogout = () => {
@@ -233,14 +244,46 @@ export default function AdminLayout({
                     <Link href="/admin/marketing/popup">Popup Campaign</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive('/admin/marketing/promo-cards')}>
-                    <Link href="/admin/marketing/promo-cards">Promo Cards</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive('/admin/marketing/email')}>
                     <Link href="/admin/marketing/email">Email Marketing</Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+          </CollapsibleContent>
+        </SidebarMenuItem>
+      </Collapsible>
+
+      <Collapsible asChild open={isPagesOpen} onOpenChange={setIsPagesOpen}>
+        <SidebarMenuItem className="flex flex-col">
+          <CollapsibleTrigger asChild>
+              <SidebarMenuButton
+                className="justify-between w-full"
+                isActive={arePagesActive}
+                closeSheetOnClick={false}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText />
+                  <span>Page Settings</span>
+                </div>
+                <ChevronDown className={cn("h-4 w-4 transition-transform", isPagesOpen && "rotate-180")} />
+              </SidebarMenuButton>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="w-full">
+            <SidebarMenu className="pl-6 pt-1">
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive('/admin/pages')}>
+                    <Link href="/admin/pages">About & Legal</Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive('/admin/pages/homepage')}>
+                    <Link href="/admin/pages/homepage">Homepage Sections</Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive('/admin/pages/promo-cards')}>
+                    <Link href="/admin/pages/promo-cards">Promo Cards</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
@@ -273,11 +316,6 @@ export default function AdminLayout({
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive('/admin/shipping')}>
                     <Link href="/admin/shipping">Shipping Rates</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive('/admin/sections')}>
-                    <Link href="/admin/sections">Homepage Sections</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
