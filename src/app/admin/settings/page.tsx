@@ -11,7 +11,7 @@ import { Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, ShippingRate } from '@/lib/types';
+import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, AboutUsSettings } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
@@ -44,6 +44,19 @@ const defaultWebsiteSettings: WebsiteSettings = {
   shippingRates: [],
 };
 
+const defaultAboutUsSettings: AboutUsSettings = {
+    headline: 'Welcome to BazaarGo',
+    subheadline: '— Where Style Meets Confidence —',
+    storyTitle: 'Our Story',
+    storyText: 'BazaarGo is a young and vibrant clothing brand built for today’s generation. We design fashion that blends comfort, confidence, and creativity — made especially for students and young adults who want to look sharp without trying too hard.',
+    storyImageUrl: 'https://scontent.fcgp7-1.fna.fbcdn.net/v/t39.30808-6/441006129_122158359262109539_589311497273397987_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeGq_vD7gB8fU-1pMv_dJg_i0bRPk42-yObRtE-Tjb7I5rT0Z1-sA3HqU2-F5-7K8P09K7Z7n7f3z8o8y9mY8P09&_nc_ohc=8x2q8p7q8gYQ7kNvgGCtWq-&_nc_ht=scontent.fcgp7-1.fna&oh=00_AYDR_G9WjK_O8zY9g_J8oXf3e9V8k8b7c8d9g_B9a9b8A&oe=669B0B7A',
+    audienceTitle: 'Our Audience',
+    audienceText: 'Our target customers are 16–28-year-old school, college, and university students who believe that style is more than just what you wear — it’s how you express yourself.',
+    missionTitle: 'Our Mission',
+    missionText1: 'To make everyday fashion accessible, stylish, and full of attitude — empowering young people to express who they are through what they wear.',
+    missionText2: 'We aim to deliver premium-quality apparel that reflects the latest trends while staying affordable for students and youth communities.',
+};
+
 const defaultAiSettings: AiSettings = {
   recommendationsEnabled: true,
 };
@@ -69,6 +82,7 @@ export default function AdminSettingsPage() {
     const { toast } = useToast();
     const [slides, setSlides] = useState<Slide[]>([]);
     const [settings, setSettings] = useState<WebsiteSettings>(defaultWebsiteSettings);
+    const [aboutUsSettings, setAboutUsSettings] = useState<AboutUsSettings>(defaultAboutUsSettings);
     const [aiSettings, setAiSettings] = useState<AiSettings>(defaultAiSettings);
     const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>(defaultPaymentSettings);
     const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
@@ -84,6 +98,7 @@ export default function AdminSettingsPage() {
                 
                 setSlides(heroSlidesData.map((slide: any, index: number) => ({ ...slide, id: Date.now() + index })));
                 setSettings(data.websiteSettings || defaultWebsiteSettings);
+                setAboutUsSettings(data.aboutUsSettings || defaultAboutUsSettings);
                 setAiSettings(data.aiSettings || defaultAiSettings);
                 setPaymentSettings(data.paymentGatewaySettings || defaultPaymentSettings);
                 setThemeSettings(data.themeSettings || defaultThemeSettings);
@@ -106,6 +121,10 @@ export default function AdminSettingsPage() {
 
     const handleSettingChange = (field: keyof WebsiteSettings, value: string) => {
         setSettings(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleAboutUsChange = (field: keyof AboutUsSettings, value: string) => {
+        setAboutUsSettings(prev => ({ ...prev, [field]: value }));
     };
 
     const handleAiSettingChange = (field: keyof AiSettings, value: boolean) => {
@@ -137,6 +156,7 @@ export default function AdminSettingsPage() {
             await setDoc(settingsRef, {
                 heroSliderImages: slidesToSave,
                 websiteSettings: settings,
+                aboutUsSettings: aboutUsSettings,
                 aiSettings: aiSettings,
                 paymentGatewaySettings: paymentSettings,
                 themeSettings: themeSettings,
@@ -183,7 +203,7 @@ export default function AdminSettingsPage() {
                         <Label htmlFor="logoUrl">Logo URL</Label>
                         <Input
                             id="logoUrl"
-                            value={settings.logoUrl}
+                            value={settings.logoUrl || ''}
                             onChange={(e) => handleSettingChange('logoUrl', e.target.value)}
                             placeholder="https://example.com/logo.png"
                         />
@@ -220,6 +240,55 @@ export default function AdminSettingsPage() {
                             placeholder="123 Bazaar Street, Dhaka, Bangladesh"
                             rows={3}
                         />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>About Us Page Settings</CardTitle>
+                    <CardDescription>Manage the content for the "About Us" page.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-headline">Headline</Label>
+                        <Input id="about-headline" value={aboutUsSettings.headline} onChange={(e) => handleAboutUsChange('headline', e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-subheadline">Sub-headline</Label>
+                        <Input id="about-subheadline" value={aboutUsSettings.subheadline} onChange={(e) => handleAboutUsChange('subheadline', e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-story-title">Story Title</Label>
+                        <Input id="about-story-title" value={aboutUsSettings.storyTitle} onChange={(e) => handleAboutUsChange('storyTitle', e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-story-text">Story Text</Label>
+                        <Textarea id="about-story-text" value={aboutUsSettings.storyText} onChange={(e) => handleAboutUsChange('storyText', e.target.value)} rows={4} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-story-image">Story Image URL</Label>
+                        <Input id="about-story-image" value={aboutUsSettings.storyImageUrl} onChange={(e) => handleAboutUsChange('storyImageUrl', e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-audience-title">Audience Title</Label>
+                        <Input id="about-audience-title" value={aboutUsSettings.audienceTitle} onChange={(e) => handleAboutUsChange('audienceTitle', e.target.value)} />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="about-audience-text">Audience Text</Label>
+                        <Textarea id="about-audience-text" value={aboutUsSettings.audienceText} onChange={(e) => handleAboutUsChange('audienceText', e.target.value)} rows={3} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-mission-title">Mission Title</Label>
+                        <Input id="about-mission-title" value={aboutUsSettings.missionTitle} onChange={(e) => handleAboutUsChange('missionTitle', e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-mission-text1">Mission Text (Paragraph 1)</Label>
+                        <Textarea id="about-mission-text1" value={aboutUsSettings.missionText1} onChange={(e) => handleAboutUsChange('missionText1', e.target.value)} rows={3} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="about-mission-text2">Mission Text (Paragraph 2)</Label>
+                        <Textarea id="about-mission-text2" value={aboutUsSettings.missionText2} onChange={(e) => handleAboutUsChange('missionText2', e.target.value)} rows={3} />
                     </div>
                 </CardContent>
             </Card>
@@ -368,7 +437,7 @@ export default function AdminSettingsPage() {
                                 <Label htmlFor="bkashNumber">bKash Personal Number</Label>
                                 <Input
                                     id="bkashNumber"
-                                    value={paymentSettings.bkashNumber}
+                                    value={paymentSettings.bkashNumber || ''}
                                     onChange={(e) => handlePaymentSettingChange('bkashNumber', e.target.value)}
                                     placeholder="e.g., 01xxxxxxxxx"
                                 />
@@ -392,7 +461,7 @@ export default function AdminSettingsPage() {
                                 <Label htmlFor="nagadNumber">Nagad Personal Number</Label>
                                 <Input
                                     id="nagadNumber"
-                                    value={paymentSettings.nagadNumber}
+                                    value={paymentSettings.nagadNumber || ''}
                                     onChange={(e) => handlePaymentSettingChange('nagadNumber', e.target.value)}
                                     placeholder="e.g., 01xxxxxxxxx"
                                 />
@@ -416,7 +485,7 @@ export default function AdminSettingsPage() {
                                 <Label htmlFor="rocketNumber">Rocket Personal Number</Label>
                                 <Input
                                     id="rocketNumber"
-                                    value={paymentSettings.rocketNumber}
+                                    value={paymentSettings.rocketNumber || ''}
                                     onChange={(e) => handlePaymentSettingChange('rocketNumber', e.target.value)}
                                     placeholder="e.g., 01xxxxxxxxx"
                                 />

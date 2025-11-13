@@ -85,6 +85,19 @@ export interface WebsiteSettings {
   shippingRates: ShippingRate[];
 }
 
+export interface AboutUsSettings {
+    headline: string;
+    subheadline: string;
+    storyTitle: string;
+    storyText: string;
+    storyImageUrl: string;
+    audienceTitle: string;
+    audienceText: string;
+    missionTitle: string;
+    missionText1: string;
+    missionText2: string;
+}
+
 export interface HomepageSection {
   id: string;
   title: string;
