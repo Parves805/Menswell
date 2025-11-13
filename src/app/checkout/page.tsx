@@ -25,6 +25,7 @@ import { generateOrderConfirmationEmail } from '@/ai/flows/generate-order-email'
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
+import { sendOrderConfirmationEmail } from '@/lib/email';
 
 
 const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
@@ -131,8 +132,6 @@ export default function CheckoutPage() {
 
   const onSubmit = async (data: CheckoutFormValues) => {
     setIsProcessing(true);
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const orderId = new Date().getTime().toString();
     const order: Order = {
@@ -159,29 +158,21 @@ export default function CheckoutPage() {
     try {
         const orderRef = doc(firestore, 'orders', orderId);
         await setDoc(orderRef, order);
+        
+        await sendOrderConfirmationEmail(order);
 
-        // Generate and log the email content
-        try {
-            console.log("Generating order confirmation email...");
-            const emailHtml = await generateOrderConfirmationEmail({ order });
-            console.log("----- ORDER CONFIRMATION EMAIL (HTML) -----");
-            console.log(emailHtml);
-            console.log("-------------------------------------------");
-            toast({
-                title: "Email Generation Successful",
-                description: "Order confirmation email HTML has been logged to the console.",
-            });
-        } catch(emailError: any) {
-            console.error("Failed to generate order confirmation email:", emailError);
-            toast({
-                variant: 'destructive',
-                title: 'Email Generation Failed',
-                description: emailError.message || 'Could not generate the confirmation email.',
-            });
-        }
+        toast({
+            title: "Email Sent",
+            description: "An order confirmation email has been sent to you.",
+        });
 
-    } catch (error) {
-        console.error("Failed to save order to Firestore", error);
+    } catch (error: any) {
+        console.error("Failed to save order or send email", error);
+         toast({
+            variant: 'destructive',
+            title: 'Order Failed',
+            description: error.message || 'There was a problem processing your order.',
+        });
     }
 
     clearCart();
