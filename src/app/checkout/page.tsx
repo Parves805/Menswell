@@ -428,20 +428,18 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="max-h-64 overflow-y-auto pr-2 space-y-4">
                     {cartItems.map(item => (
-                      <div key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor?.name || ''}`} className="flex items-center gap-4">
-                        <div className="relative h-16 w-16 rounded-md overflow-hidden border">
+                      <div key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor?.name || ''}`} className="flex items-start gap-4">
+                        <div className="relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border">
                           <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
                         </div>
-                        <div className="flex-grow">
-                          <p className="font-medium">{item.name}</p>
-                          {(item.selectedSize || item.selectedColor) && (
-                            <p className="text-sm text-muted-foreground">
-                                {[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}
-                            </p>
-                          )}
-                          <p className="text-sm text-muted-foreground">পরিমাণ: {item.quantity}</p>
+                        <div className="flex-grow overflow-hidden">
+                          <p className="font-medium truncate">{item.name}</p>
+                          <div className="text-sm text-muted-foreground">
+                            {[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}
+                          </div>
+                          <div className="text-sm text-muted-foreground">পরিমাণ: {item.quantity}</div>
                         </div>
-                        <p className="font-medium">
+                        <p className="font-medium text-right pl-2">
                           ৳{(item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
