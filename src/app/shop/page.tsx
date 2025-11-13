@@ -7,9 +7,9 @@ import { SiteFooter } from '@/components/site-footer';
 import { ProductCard } from '@/components/product-card';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { products as initialProducts } from '@/lib/data';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
-const PRODUCTS_KEY = 'appProducts';
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,24 +17,16 @@ export default function ShopPage() {
 
   useEffect(() => {
     setIsLoading(true);
-    try {
-      const savedProductsJSON = localStorage.getItem(PRODUCTS_KEY);
-      if (savedProductsJSON) {
-        const parsed = JSON.parse(savedProductsJSON);
-        if (Array.isArray(parsed)) {
-          setProducts(parsed);
-        } else {
-          setProducts(initialProducts);
-        }
-      } else {
-        setProducts(initialProducts);
-      }
-    } catch (error) {
-      console.error("Failed to load products from localStorage, using defaults.", error);
-      setProducts(initialProducts);
-    } finally {
-      setIsLoading(false);
-    }
+    const unsubscribe = onSnapshot(collection(firestore, "products"), (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setProducts(productsData);
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Error fetching products: ", error);
+        setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (

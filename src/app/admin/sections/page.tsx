@@ -13,10 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2, PlusCircle, View, GripVertical } from 'lucide-react';
 import type { HomepageSection, Category } from '@/lib/types';
-import { initialCategories } from '@/lib/data';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot, doc, getDoc, setDoc } from 'firebase/firestore';
 
-const HOMEPAGE_SECTIONS_KEY = 'homepageSections';
-const CATEGORIES_KEY = 'appCategories';
 
 const sectionSchema = z.object({
   id: z.string(),
@@ -48,25 +47,32 @@ export default function HomepageSectionsPage() {
     });
 
     useEffect(() => {
-        try {
-            const savedCategoriesJSON = localStorage.getItem(CATEGORIES_KEY);
-            setCategories(savedCategoriesJSON ? JSON.parse(savedCategoriesJSON) : initialCategories);
-            
-            const savedSectionsJSON = localStorage.getItem(HOMEPAGE_SECTIONS_KEY);
-            const savedSections = savedSectionsJSON ? JSON.parse(savedSectionsJSON) : [];
-            form.reset({ sections: savedSections });
+        const unsubCategories = onSnapshot(collection(firestore, 'categories'), (snapshot) => {
+            const cats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+            setCategories(cats);
+        });
 
-        } catch (error) {
-            console.error("Failed to load data from localStorage", error);
-        } finally {
+        const unsubSettings = onSnapshot(doc(firestore, 'settings', 'store'), (docSnap) => {
+            if (docSnap.exists()) {
+                const settings = docSnap.data();
+                if (settings.homepageSections) {
+                    form.reset({ sections: settings.homepageSections });
+                }
+            }
             setIsMounted(true);
-        }
+        });
+
+        return () => {
+            unsubCategories();
+            unsubSettings();
+        };
     }, [form]);
 
-    const onSubmit = (data: FormValues) => {
+    const onSubmit = async (data: FormValues) => {
         setIsLoading(true);
         try {
-            localStorage.setItem(HOMEPAGE_SECTIONS_KEY, JSON.stringify(data.sections));
+            const settingsRef = doc(firestore, 'settings', 'store');
+            await setDoc(settingsRef, { homepageSections: data.sections }, { merge: true });
             toast({
                 title: "Homepage Sections Saved",
                 description: "Your homepage layout has been updated.",

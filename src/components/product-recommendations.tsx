@@ -3,15 +3,15 @@
 
 import { useState, useEffect } from 'react';
 import { getProductRecommendations, type GetProductRecommendationsResult } from '@/ai/flows/product-recommendations';
-import { products as initialProducts } from '@/lib/data';
 import type { Product } from '@/lib/types';
 import { ProductCard } from './product-card';
 import { Skeleton } from './ui/skeleton';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Terminal } from 'lucide-react';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
-const PRODUCTS_KEY = 'appProducts';
 const RECOMMENDATIONS_CACHE_KEY = 'aiProductRecommendations';
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
@@ -26,22 +26,14 @@ export function ProductRecommendations({ viewingHistory }: ProductRecommendation
   const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    try {
-      const savedProductsJSON = localStorage.getItem(PRODUCTS_KEY);
-      if (savedProductsJSON) {
-          const parsed = JSON.parse(savedProductsJSON);
-          if (Array.isArray(parsed)) {
-              setAllProducts(parsed);
-          } else {
-              setAllProducts(initialProducts);
-          }
-      } else {
-        setAllProducts(initialProducts);
-      }
-    } catch (e) {
-      console.error("Failed to load products for recommendations, using defaults", e);
-      setAllProducts(initialProducts);
-    }
+    const unsubscribe = onSnapshot(collection(firestore, "products"), (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setAllProducts(productsData);
+    }, (error) => {
+        console.error("Error fetching products for recommendations: ", error);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
