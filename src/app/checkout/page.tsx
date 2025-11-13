@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
+import { auth, firestore, isFirebaseConfigured } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,12 +23,9 @@ import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings } from '@/lib/types';
 import { generateOrderConfirmationEmail } from '@/ai/flows/generate-order-email';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { doc, setDoc } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 
-
-const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, { message: 'সম্পূর্ণ নাম আবশ্যক' }),
@@ -90,31 +87,32 @@ export default function CheckoutPage() {
       router.replace('/');
     }
 
-    try {
-      const savedProfile = localStorage.getItem('userProfile');
-      if (savedProfile) {
-        const { savedUser } = JSON.parse(savedProfile);
-        if (savedUser) {
-           form.reset({
-            name: savedUser.name || '',
-            email: savedUser.email || '',
-            phone: savedUser.phone || '',
-            street: savedUser.address?.street || '',
-            city: savedUser.address?.city || '',
-            zip: savedUser.address?.zip || '',
-            paymentMethod: form.getValues('paymentMethod'),
-            transactionId: '',
-          });
+    const fetchUserData = async () => {
+        if (isFirebaseConfigured && auth.currentUser) {
+            const userDocRef = doc(firestore, 'users', auth.currentUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                form.reset({
+                    name: userData.name || '',
+                    email: userData.email || '',
+                    phone: userData.phone || '',
+                    street: userData.address?.street || '',
+                    city: userData.address?.city || '',
+                    zip: userData.address?.zip || '',
+                    paymentMethod: form.getValues('paymentMethod'),
+                    transactionId: '',
+                });
+            }
         }
-      }
-    } catch (error) {
-      console.error("Failed to load user profile from localStorage", error);
-    }
+    };
     
-    try {
-        const savedPaymentSettings = localStorage.getItem(PAYMENT_SETTINGS_KEY);
-        if (savedPaymentSettings) {
-            const settings = JSON.parse(savedPaymentSettings);
+    fetchUserData();
+
+    const settingsRef = doc(firestore, 'settings', 'store');
+    const unsub = onSnapshot(settingsRef, (docSnap) => {
+        if (docSnap.exists() && docSnap.data().paymentGatewaySettings) {
+            const settings = docSnap.data().paymentGatewaySettings;
             setPaymentSettings({
               cashOnDelivery: settings.cashOnDelivery,
               bkash: settings.bkash,
@@ -123,10 +121,9 @@ export default function CheckoutPage() {
               rocket: settings.rocket,
             });
         }
-    } catch (error) {
-        console.error("Failed to load payment settings from localStorage", error);
-    }
+    });
 
+    return () => unsub();
   }, [totalItems, router, isProcessing, form]);
 
 
@@ -160,13 +157,7 @@ export default function CheckoutPage() {
         const orderRef = doc(firestore, 'orders', orderId);
         await setDoc(orderRef, order);
         
-        // 2. Save to localStorage (for "My Orders" page)
-        const existingOrdersJson = localStorage.getItem('bazaargoUserOrders');
-        const existingOrders = existingOrdersJson ? JSON.parse(existingOrdersJson) : [];
-        const updatedOrders = [...existingOrders, order];
-        localStorage.setItem('bazaargoUserOrders', JSON.stringify(updatedOrders));
-
-        // 3. Send confirmation email
+        // 2. Send confirmation email
         await sendOrderConfirmationEmail(order);
 
         toast({
@@ -486,3 +477,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    

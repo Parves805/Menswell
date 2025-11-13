@@ -14,6 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Phone, MapPin } from 'lucide-react';
+import { firestore } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+
 
 const contactSchema = z.object({
   name: z.string().min(2, { message: 'Name is required' }),
@@ -23,8 +26,6 @@ const contactSchema = z.object({
 });
 
 type ContactFormInputs = z.infer<typeof contactSchema>;
-
-const WEBSITE_SETTINGS_KEY = 'websiteSettings';
 
 const defaultContactInfo = {
     email: 'support@bazaargo.com',
@@ -41,28 +42,22 @@ export default function ContactPage() {
     const [contactInfo, setContactInfo] = useState(defaultContactInfo);
 
     useEffect(() => {
-        const loadSettings = () => {
-            try {
-                const savedSettingsJson = localStorage.getItem(WEBSITE_SETTINGS_KEY);
-                if (savedSettingsJson) {
-                    const settings = JSON.parse(savedSettingsJson);
-                    setContactInfo(prev => {
-                        const newInfo = {
-                            email: settings.contactEmail || prev.email,
-                            phone: settings.contactPhone || prev.phone,
-                            address: settings.address || prev.address,
-                        };
-                        return JSON.stringify(prev) !== JSON.stringify(newInfo) ? newInfo : prev;
-                    });
+        const settingsRef = doc(firestore, 'settings', 'store');
+        const unsub = onSnapshot(settingsRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const settings = docSnap.data().websiteSettings;
+                if (settings) {
+                    setContactInfo(prev => ({
+                        ...prev,
+                        email: settings.contactEmail || prev.email,
+                        phone: settings.contactPhone || prev.phone,
+                        address: settings.address || prev.address,
+                    }));
                 }
-            } catch (error) {
-                console.error("Failed to load settings for Contact page", error);
             }
-        };
+        });
 
-        loadSettings();
-        const interval = setInterval(loadSettings, 2000);
-        return () => clearInterval(interval);
+        return () => unsub();
     }, []);
 
     const onSubmit: SubmitHandler<ContactFormInputs> = async (data) => {
@@ -161,3 +156,5 @@ export default function ContactPage() {
         </div>
     );
 }
+
+    

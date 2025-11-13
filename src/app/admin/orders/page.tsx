@@ -33,6 +33,9 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { generateStatusUpdateEmail } from '@/ai/flows/generate-status-update-email';
+import { firestore } from '@/lib/firebase';
+import { collection, doc, onSnapshot, query, setDoc, orderBy } from 'firebase/firestore';
+
 
 const statusColors: { [key: string]: string } = {
   Delivered: 'bg-green-500',
@@ -50,57 +53,38 @@ export default function AdminOrdersPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const loadOrders = () => {
-            try {
-                const savedOrders = localStorage.getItem('bazaargoUserOrders');
-                if (savedOrders) {
-                    const parsed = JSON.parse(savedOrders);
-                     if (Array.isArray(parsed)) {
-                        const parsedOrders: Order[] = parsed;
-                        parsedOrders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                        setOrders(parsedOrders);
-                     } else {
-                        setOrders([]);
-                     }
-                } else {
-                    setOrders([]);
-                }
-            } catch (error) {
-                console.error("Failed to load orders from localStorage", error);
-                setOrders([]);
-            } finally {
-                setIsLoading(false);
-            }
-        }
+        const q = query(collection(firestore, "orders"), orderBy("date", "desc"));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+            setOrders(fetchedOrders);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Failed to fetch orders from Firestore:", error);
+            setIsLoading(false);
+        });
 
-        loadOrders();
-        const interval = setInterval(loadOrders, 3000);
-        return () => clearInterval(interval);
+        return () => unsubscribe();
     }, []);
 
     const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
-        let orderToUpdate: Order | undefined;
+        let orderToUpdate = orders.find(o => o.id === orderId);
+
+        if (!orderToUpdate) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Order not found.' });
+            return;
+        }
+
+        orderToUpdate = { ...orderToUpdate, status: newStatus };
+
         try {
-            const savedOrders = localStorage.getItem('bazaargoUserOrders');
-            if (savedOrders) {
-                const parsed = JSON.parse(savedOrders);
-                 if (Array.isArray(parsed)) {
-                    let currentOrders: Order[] = parsed;
-                    const orderIndex = currentOrders.findIndex(o => o.id === orderId);
-
-                    if (orderIndex > -1) {
-                        orderToUpdate = currentOrders[orderIndex];
-                        currentOrders[orderIndex].status = newStatus;
-                        localStorage.setItem('bazaargoUserOrders', JSON.stringify(currentOrders));
-                        
-                        if (selectedOrder && selectedOrder.id === orderId) {
-                            setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
-                        }
-
-                        toast({ title: 'Status Updated', description: `Order status changed to ${newStatus}.` });
-                    }
-                }
+            const orderRef = doc(firestore, 'orders', orderId);
+            await setDoc(orderRef, { status: newStatus }, { merge: true });
+            
+            if (selectedOrder && selectedOrder.id === orderId) {
+                setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
             }
+            toast({ title: 'Status Updated', description: `Order status changed to ${newStatus}.` });
+
         } catch (error) {
             console.error("Failed to update order status", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to update status.' });
@@ -302,3 +286,5 @@ export default function AdminOrdersPage() {
         </Card>
     )
 }
+
+    

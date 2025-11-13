@@ -14,6 +14,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import type { Order } from '@/lib/types';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+
 
 const emailSchema = z.object({
   recipients: z.string().min(1, { message: 'Please select recipients.' }),
@@ -38,16 +41,13 @@ export default function EmailMarketingPage() {
     });
     
     useEffect(() => {
-        try {
-            const savedOrders = localStorage.getItem('bazaargoUserOrders');
-            if (savedOrders) {
-                const orders: Order[] = JSON.parse(savedOrders);
-                const customerEmails = new Set(orders.map(order => order.shippingInfo.email));
-                setCustomerCount(customerEmails.size);
-            }
-        } catch (error) {
+        const unsub = onSnapshot(collection(firestore, 'orders'), (snapshot) => {
+            const customerEmails = new Set(snapshot.docs.map(doc => (doc.data() as Order).shippingInfo.email));
+            setCustomerCount(customerEmails.size);
+        }, (error) => {
             console.error("Failed to load customer data", error);
-        }
+        });
+        return () => unsub();
     }, []);
 
     const onSubmit = async (data: EmailFormValues) => {
@@ -145,3 +145,5 @@ export default function EmailMarketingPage() {
         </div>
     );
 }
+
+    

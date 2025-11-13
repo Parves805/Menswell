@@ -12,15 +12,11 @@ import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings } from '@/lib/types';
+import { firestore } from '@/lib/firebase';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 
-const SLIDER_IMAGES_KEY = 'heroSliderImages';
-const WEBSITE_SETTINGS_KEY = 'websiteSettings';
-const AI_SETTINGS_KEY = 'aiSettings';
-const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
-const THEME_SETTINGS_KEY = 'themeSettings';
-
-const defaultImages = [
+const defaultHeroSlides = [
   { url: 'https://img.lazcdn.com/us/domino/df7d0dca-dc55-4a5c-8cb2-dcf2b2a2f1cc_BD-1976-688.jpg_2200x2200q80.jpg_.webp', dataAiHint: 'electronics sale' },
   { url: 'https://placehold.co/1200x400.png', dataAiHint: 'mens fashion' },
   { url: 'https://placehold.co/1200x400.png', dataAiHint: 'winter collection' },
@@ -65,24 +61,6 @@ const defaultThemeSettings: ThemeSettings = {
     accent: "354 89% 54%",
 };
 
-// Helper function to safely parse JSON from localStorage
-function safeJSONParse<T>(key: string, fallback: T): T {
-    if (typeof window === 'undefined') return fallback;
-    try {
-        const item = localStorage.getItem(key);
-        if (!item) return fallback;
-        const parsed = JSON.parse(item);
-        // Basic check to ensure the parsed object has the expected keys, allows for partial saves
-        if (typeof parsed === 'object' && parsed !== null) {
-            return { ...fallback, ...parsed };
-        }
-        return fallback;
-    } catch (error) {
-        console.error(`Failed to parse ${key} from localStorage`, error);
-        return fallback;
-    }
-}
-
 
 export default function AdminSettingsPage() {
     const { toast } = useToast();
@@ -95,30 +73,24 @@ export default function AdminSettingsPage() {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        // Load Slides
-        const savedImagesJson = localStorage.getItem(SLIDER_IMAGES_KEY);
-        if (savedImagesJson) {
-            try {
-                const savedImages = JSON.parse(savedImagesJson);
-                if (Array.isArray(savedImages) && savedImages.length > 0) {
-                  setSlides(savedImages.map((img: Omit<Slide, 'id'>, i: number) => ({...img, id: Date.now() + i })));
-                } else {
-                  setSlides(defaultImages.map((img, i) => ({ ...img, id: Date.now() + i })));
-                }
-            } catch {
-                setSlides(defaultImages.map((img, i) => ({ ...img, id: Date.now() + i })));
+        const settingsRef = doc(firestore, 'settings', 'store');
+        const unsub = onSnapshot(settingsRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const heroSlidesData = data.heroSliderImages || defaultHeroSlides;
+                
+                setSlides(heroSlidesData.map((slide: any, index: number) => ({ ...slide, id: Date.now() + index })));
+                setSettings(data.websiteSettings || defaultWebsiteSettings);
+                setAiSettings(data.aiSettings || defaultAiSettings);
+                setPaymentSettings(data.paymentGatewaySettings || defaultPaymentSettings);
+                setThemeSettings(data.themeSettings || defaultThemeSettings);
+            } else {
+                 setSlides(defaultHeroSlides.map((img, i) => ({ ...img, id: Date.now() + i })));
             }
-        } else {
-            setSlides(defaultImages.map((img, i) => ({ ...img, id: Date.now() + i })));
-        }
-
-        // Load Settings
-        setSettings(safeJSONParse(WEBSITE_SETTINGS_KEY, defaultWebsiteSettings));
-        setAiSettings(safeJSONParse(AI_SETTINGS_KEY, defaultAiSettings));
-        setPaymentSettings(safeJSONParse(PAYMENT_SETTINGS_KEY, defaultPaymentSettings));
-        setThemeSettings(safeJSONParse(THEME_SETTINGS_KEY, defaultThemeSettings));
+            setIsMounted(true);
+        });
         
-        setIsMounted(true);
+        return () => unsub();
     }, []);
 
     const handleSlideChange = (id: number, field: 'url' | 'dataAiHint', value: string) => {
@@ -156,21 +128,23 @@ export default function AdminSettingsPage() {
     const saveChanges = async () => {
         setIsLoading(true);
         try {
-            const slidesToSave = slides.map(({ id, ...rest }) => rest);
-            localStorage.setItem(SLIDER_IMAGES_KEY, JSON.stringify(slidesToSave.filter(s => s.url)));
-            localStorage.setItem(WEBSITE_SETTINGS_KEY, JSON.stringify(settings));
-            localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(aiSettings));
-            localStorage.setItem(PAYMENT_SETTINGS_KEY, JSON.stringify(paymentSettings));
-            localStorage.setItem(THEME_SETTINGS_KEY, JSON.stringify(themeSettings));
+            const settingsRef = doc(firestore, 'settings', 'store');
+            const slidesToSave = slides.map(({ id, ...rest }) => rest).filter(s => s.url);
+            
+            await setDoc(settingsRef, {
+                heroSliderImages: slidesToSave,
+                websiteSettings: settings,
+                aiSettings: aiSettings,
+                paymentGatewaySettings: paymentSettings,
+                themeSettings: themeSettings,
+            }, { merge: true });
 
-
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
             toast({
                 title: "Settings Saved",
                 description: "All changes have been updated successfully.",
             });
         } catch (error) {
-            console.error("Failed to save settings to localStorage", error);
+            console.error("Failed to save settings to Firestore", error);
             toast({
                 variant: 'destructive',
                 title: "Save Failed",

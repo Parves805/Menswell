@@ -12,8 +12,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send } from 'lucide-react';
 import { useState } from 'react';
+import { firestore } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const NOTIFICATIONS_KEY = 'bazaargoNotifications';
 
 const notificationSchema = z.object({
   message: z.string().min(10, { message: 'Message must be at least 10 characters long.' }),
@@ -34,29 +35,18 @@ export default function AdminNotificationsPage() {
         },
     });
 
-    const onSubmit = (data: NotificationFormValues) => {
+    const onSubmit = async (data: NotificationFormValues) => {
         setIsSending(true);
 
         const newNotification = {
-            id: `notif_${new Date().getTime()}`,
             message: data.message,
-            imageUrl: data.imageUrl || undefined,
-            timestamp: new Date().toISOString(),
+            imageUrl: data.imageUrl || null,
+            timestamp: serverTimestamp(),
             read: false,
         };
 
         try {
-            const existingNotificationsJson = localStorage.getItem(NOTIFICATIONS_KEY);
-            let existingNotifications = [];
-            if (existingNotificationsJson) {
-                const parsed = JSON.parse(existingNotificationsJson);
-                if (Array.isArray(parsed)) {
-                    existingNotifications = parsed;
-                }
-            }
-            
-            const updatedNotifications = [newNotification, ...existingNotifications];
-            localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updatedNotifications));
+            await addDoc(collection(firestore, 'notifications'), newNotification);
             
             toast({
                 title: 'Notification Sent',
@@ -129,3 +119,5 @@ export default function AdminNotificationsPage() {
         </div>
     );
 }
+
+    

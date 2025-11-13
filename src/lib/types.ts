@@ -57,7 +57,7 @@ export interface Review {
   reviewerName: string;
   rating: number;
   comment: string;
-  timestamp: string;
+  timestamp: string; // ISO Date string
 }
 
 export interface PopupCampaign {
@@ -110,3 +110,5 @@ export interface ThemeSettings {
     background: string;
     accent: string;
 }
+
+    

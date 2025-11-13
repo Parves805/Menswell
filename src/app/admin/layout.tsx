@@ -45,9 +45,8 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger, SheetHeader } from '@/components/ui/sheet';
-
-const ALL_CHATS_KEY = 'bazaargoAllChatThreads';
-const ADMIN_LAST_SEEN_KEY = 'bazaargoAdminLastSeenCounts';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 
 export default function AdminLayout({
@@ -91,36 +90,21 @@ export default function AdminLayout({
   }, [pathname, router]);
 
   useEffect(() => {
-    const checkForNewMessages = () => {
-        try {
-            const allThreadsJson = localStorage.getItem(ALL_CHATS_KEY);
-            const lastSeenCountsJson = localStorage.getItem(ADMIN_LAST_SEEN_KEY);
-            
-            const allThreads = allThreadsJson ? JSON.parse(allThreadsJson) : {};
-            const lastSeenCounts = lastSeenCountsJson ? JSON.parse(lastSeenCountsJson) : {};
-
-            let totalNewCount = 0;
-            for (const threadId in allThreads) {
-                const thread = allThreads[threadId];
-                const totalMessages = thread.messages?.length || 0;
-                const seenCount = lastSeenCounts[threadId] || 0;
-                const newCountInThread = totalMessages - seenCount;
-                if (newCountInThread > 0) {
-                    totalNewCount += 1; // Count threads with unread, not total messages
-                }
+    const unsub = onSnapshot(collection(firestore, 'chatThreads'), (snapshot) => {
+        let count = 0;
+        snapshot.docs.forEach(doc => {
+            const thread = doc.data();
+            const lastMessage = thread.messages?.[thread.messages.length - 1];
+            // Simplistic check: count threads where the last message is from a user.
+            // A more robust solution would track read receipts per admin.
+            if (lastMessage?.sender === 'user') {
+                count++;
             }
-            setNewMessagesCount(Object.values(allThreads).filter((thread: any) => (thread.messages?.length || 0) > (lastSeenCounts[thread.threadId] || 0)).length);
+        });
+        setNewMessagesCount(count);
+    });
 
-        } catch(e) {
-            console.error("Failed to check for new messages", e);
-            setNewMessagesCount(0);
-        }
-    };
-    
-    checkForNewMessages();
-    const interval = setInterval(checkForNewMessages, 3000);
-
-    return () => clearInterval(interval);
+    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -390,3 +374,5 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
+
+    

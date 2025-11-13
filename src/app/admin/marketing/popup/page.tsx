@@ -2,21 +2,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Megaphone } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import type { PopupCampaign } from '@/lib/types';
+import { firestore } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const POPUP_CAMPAIGN_KEY = 'popupCampaignSettings';
 
 const popupSchema = z.object({
   enabled: z.boolean(),
@@ -40,17 +40,6 @@ const defaultCampaign: PopupCampaign = {
   displayDuration: 10,
 };
 
-function safeJSONParse<T>(key: string, fallback: T): T {
-    if (typeof window === 'undefined') return fallback;
-    try {
-        const item = localStorage.getItem(key);
-        return item ? { ...fallback, ...JSON.parse(item) } : fallback;
-    } catch (error) {
-        console.error(`Failed to parse ${key} from localStorage`, error);
-        return fallback;
-    }
-}
-
 export default function PopupCampaignPage() {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
@@ -62,17 +51,23 @@ export default function PopupCampaignPage() {
     });
 
     useEffect(() => {
-        const loadedSettings = safeJSONParse(POPUP_CAMPAIGN_KEY, defaultCampaign);
-        form.reset(loadedSettings);
-        setIsMounted(true);
+        const fetchSettings = async () => {
+            const settingsRef = doc(firestore, 'settings', 'store');
+            const docSnap = await getDoc(settingsRef);
+            if (docSnap.exists() && docSnap.data().popupCampaign) {
+                form.reset(docSnap.data().popupCampaign);
+            }
+            setIsMounted(true);
+        };
+        fetchSettings();
     }, [form]);
 
 
     const onSubmit = async (data: PopupFormValues) => {
         setIsLoading(true);
         try {
-            localStorage.setItem(POPUP_CAMPAIGN_KEY, JSON.stringify(data));
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const settingsRef = doc(firestore, 'settings', 'store');
+            await setDoc(settingsRef, { popupCampaign: data }, { merge: true });
             toast({
                 title: "Popup Campaign Saved",
                 description: "Your popup settings have been updated.",
@@ -218,3 +213,5 @@ export default function PopupCampaignPage() {
         </div>
     );
 }
+
+    

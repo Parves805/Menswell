@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Globe } from 'lucide-react';
+import { firestore } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const SEO_SETTINGS_KEY = 'seoSettings';
 
 interface SeoSettings {
   titleTemplate: string;
@@ -23,17 +25,6 @@ const defaultSeoSettings: SeoSettings = {
   metaKeywords: 'mens fashion, t-shirts, polos, shirts, online shopping',
 };
 
-function safeJSONParse<T>(key: string, fallback: T): T {
-    if (typeof window === 'undefined') return fallback;
-    try {
-        const item = localStorage.getItem(key);
-        return item ? { ...fallback, ...JSON.parse(item) } : fallback;
-    } catch (error) {
-        console.error(`Failed to parse ${key} from localStorage`, error);
-        return fallback;
-    }
-}
-
 export default function SeoManagementPage() {
     const { toast } = useToast();
     const [settings, setSettings] = useState<SeoSettings>(defaultSeoSettings);
@@ -41,8 +32,15 @@ export default function SeoManagementPage() {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        setSettings(safeJSONParse(SEO_SETTINGS_KEY, defaultSeoSettings));
-        setIsMounted(true);
+        const fetchSettings = async () => {
+            const settingsRef = doc(firestore, 'settings', 'store');
+            const docSnap = await getDoc(settingsRef);
+            if (docSnap.exists() && docSnap.data().seoSettings) {
+                setSettings({ ...defaultSeoSettings, ...docSnap.data().seoSettings });
+            }
+            setIsMounted(true);
+        };
+        fetchSettings();
     }, []);
 
     const handleSettingChange = (field: keyof SeoSettings, value: string) => {
@@ -52,8 +50,8 @@ export default function SeoManagementPage() {
     const handleSaveChanges = async () => {
         setIsLoading(true);
         try {
-            localStorage.setItem(SEO_SETTINGS_KEY, JSON.stringify(settings));
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const settingsRef = doc(firestore, 'settings', 'store');
+            await setDoc(settingsRef, { seoSettings: settings }, { merge: true });
             toast({
                 title: "SEO Settings Saved",
                 description: "Your SEO settings have been updated.",
@@ -127,3 +125,5 @@ export default function SeoManagementPage() {
         </div>
     );
 }
+
+    

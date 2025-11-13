@@ -12,8 +12,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Trash2, PlusCircle, SquareCheck } from 'lucide-react';
 import type { PromoSection } from '@/lib/types';
+import { firestore } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const PROMO_SECTIONS_KEY = 'promoCardSections';
 
 const cardSchema = z.object({
   id: z.string(),
@@ -60,21 +61,24 @@ export default function PromoCardsPage() {
     });
 
     useEffect(() => {
-        try {
-            const savedSectionsJSON = localStorage.getItem(PROMO_SECTIONS_KEY);
-            const savedSections = savedSectionsJSON ? JSON.parse(savedSectionsJSON) : defaultSections;
-            form.reset({ sections: savedSections });
-        } catch (error) {
-            console.error("Failed to load promo sections from localStorage", error);
-        } finally {
+        const fetchSettings = async () => {
+            const settingsRef = doc(firestore, 'settings', 'store');
+            const docSnap = await getDoc(settingsRef);
+            if (docSnap.exists() && docSnap.data().promoCardSections) {
+                form.reset({ sections: docSnap.data().promoCardSections });
+            } else {
+                form.reset({ sections: defaultSections });
+            }
             setIsMounted(true);
-        }
+        };
+        fetchSettings();
     }, [form]);
 
-    const onSubmit = (data: FormValues) => {
+    const onSubmit = async (data: FormValues) => {
         setIsLoading(true);
         try {
-            localStorage.setItem(PROMO_SECTIONS_KEY, JSON.stringify(data.sections));
+            const settingsRef = doc(firestore, 'settings', 'store');
+            await setDoc(settingsRef, { promoCardSections: data.sections }, { merge: true });
             toast({
                 title: "Promo Sections Saved",
                 description: "Your promotional card sections have been updated.",
@@ -203,3 +207,5 @@ function PromoSectionFields({ control, sectionIndex }: PromoSectionFieldsProps) 
     </div>
   );
 }
+
+    

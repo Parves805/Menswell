@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Package, ShoppingCart, Users, ArrowUp, ArrowDown } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { products as initialProducts } from "@/lib/data";
 import type { Order, Product } from '@/lib/types';
 import { format, subMonths, startOfMonth } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+
 
 const statusColors: { [key: string]: string } = {
   Delivered: 'bg-green-500',
@@ -18,7 +20,6 @@ const statusColors: { [key: string]: string } = {
   Cancelled: 'bg-red-500',
 };
 
-const PRODUCTS_KEY = 'appProducts';
 
 export default function AdminDashboardPage() {
     const [stats, setStats] = useState({
@@ -33,78 +34,68 @@ export default function AdminDashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const loadDashboardData = () => {
-            try {
-                const savedOrders = localStorage.getItem('bazaargoUserOrders');
-                let orders: Order[] = [];
-                if (savedOrders) {
-                    const parsed = JSON.parse(savedOrders);
-                    if (Array.isArray(parsed)) {
-                        orders = parsed;
+        const productsQuery = query(collection(firestore, "products"));
+        const productsUnsub = onSnapshot(productsQuery, (snapshot) => {
+            setTotalProducts(snapshot.size);
+        });
+
+        const ordersQuery = query(collection(firestore, "orders"));
+        const ordersUnsub = onSnapshot(ordersQuery, (snapshot) => {
+            const orders: Order[] = snapshot.docs.map(doc => doc.data() as Order);
+            
+            // --- Calculate Stats ---
+            const now = new Date();
+            const lastMonthStart = startOfMonth(subMonths(now, 1));
+            const thisMonthStart = startOfMonth(now);
+
+            let totalRevenue = 0;
+            let lastMonthRevenue = 0;
+            let thisMonthRevenue = 0;
+            let lastMonthSales = 0;
+            let thisMonthSales = 0;
+
+            const customerEmails = new Set<string>();
+
+            orders.forEach(order => {
+                const orderDate = new Date(order.date);
+                if (order.status !== 'Cancelled') {
+                    totalRevenue += order.total;
+                    if (orderDate >= lastMonthStart && orderDate < thisMonthStart) {
+                        lastMonthRevenue += order.total;
+                        lastMonthSales++;
+                    }
+                    if (orderDate >= thisMonthStart) {
+                        thisMonthRevenue += order.total;
+                        thisMonthSales++;
                     }
                 }
-                
-                const savedProducts = localStorage.getItem(PRODUCTS_KEY);
-                const products: Product[] = savedProducts ? JSON.parse(savedProducts) : initialProducts;
-                setTotalProducts(products.length);
+                if (order.shippingInfo && order.shippingInfo.email) {
+                    customerEmails.add(order.shippingInfo.email);
+                }
+            });
 
-                // --- Calculate Stats ---
-                const now = new Date();
-                const lastMonthStart = startOfMonth(subMonths(now, 1));
-                const thisMonthStart = startOfMonth(now);
+            const revenueChange = lastMonthRevenue > 0 ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : thisMonthRevenue > 0 ? 100 : 0;
+            const salesChange = lastMonthSales > 0 ? ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100 : thisMonthSales > 0 ? 100 : 0;
 
-                let totalRevenue = 0;
-                let lastMonthRevenue = 0;
-                let thisMonthRevenue = 0;
-                let lastMonthSales = 0;
-                let thisMonthSales = 0;
+            setStats({
+                totalRevenue,
+                totalSales: orders.filter(o => o.status !== 'Cancelled').length,
+                totalCustomers: customerEmails.size,
+                revenueChange,
+                salesChange
+            });
 
-                const customerEmails = new Set<string>();
+            // --- Set Recent Orders ---
+            const sortedOrders = [...orders].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            setRecentOrders(sortedOrders.slice(0, 5));
 
-                orders.forEach(order => {
-                    const orderDate = new Date(order.date);
-                    if (order.status !== 'Cancelled') {
-                        totalRevenue += order.total;
-                        if (orderDate >= lastMonthStart && orderDate < thisMonthStart) {
-                            lastMonthRevenue += order.total;
-                            lastMonthSales++;
-                        }
-                        if (orderDate >= thisMonthStart) {
-                            thisMonthRevenue += order.total;
-                            thisMonthSales++;
-                        }
-                    }
-                    if (order.shippingInfo && order.shippingInfo.email) {
-                      customerEmails.add(order.shippingInfo.email);
-                    }
-                });
+            setIsLoading(false);
+        });
 
-                const revenueChange = lastMonthRevenue > 0 ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : thisMonthRevenue > 0 ? 100 : 0;
-                const salesChange = lastMonthSales > 0 ? ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100 : thisMonthSales > 0 ? 100 : 0;
-
-                setStats({
-                    totalRevenue,
-                    totalSales: orders.filter(o => o.status !== 'Cancelled').length,
-                    totalCustomers: customerEmails.size,
-                    revenueChange,
-                    salesChange
-                });
-
-                // --- Set Recent Orders ---
-                const sortedOrders = [...orders].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                setRecentOrders(sortedOrders.slice(0, 5));
-
-            } catch (error) {
-                console.error("Failed to load dashboard data from localStorage", error);
-            } finally {
-                setIsLoading(false);
-            }
+        return () => {
+            productsUnsub();
+            ordersUnsub();
         };
-
-        loadDashboardData();
-        const interval = setInterval(loadDashboardData, 3000);
-
-        return () => clearInterval(interval);
     }, []);
 
     const renderStatCard = (title: string, value: string, change: number, icon: React.ReactNode, changeText: string) => (
@@ -203,5 +194,6 @@ export default function AdminDashboardPage() {
     </div>
   )
 }
+    
 
     
