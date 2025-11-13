@@ -12,6 +12,10 @@ import { format } from 'date-fns';
 import { ListOrdered, Package, Truck, CheckCircle, XCircle } from 'lucide-react';
 import type { Order } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+
+const USER_PROFILE_KEY = 'userProfile';
 
 const statusColors: { [key: string]: string } = {
   Processing: 'bg-yellow-500',
@@ -23,28 +27,49 @@ const statusColors: { [key: string]: string } = {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
     try {
-      const savedOrders = localStorage.getItem('bazaargoUserOrders');
-      if (savedOrders) {
-        const parsed = JSON.parse(savedOrders);
-        if (Array.isArray(parsed)) {
-            setOrders(parsed as Order[]);
-        } else {
-            setOrders([]);
-        }
-      } else {
-        setOrders([]);
+      const savedProfile = localStorage.getItem(USER_PROFILE_KEY);
+      if (savedProfile) {
+        const { savedUser } = JSON.parse(savedProfile);
+        setUserEmail(savedUser?.email);
       }
     } catch (error) {
-      console.error("Failed to load orders from localStorage", error);
-      setOrders([]);
+      console.error("Failed to load user profile from localStorage", error);
     } finally {
-      setIsLoading(false);
+        // Even if profile fails, we might still want to try fetching orders
+        // if email was found previously, but for now let's stop loading.
+        // In a real app, you might handle this differently.
     }
   }, []);
+
+  useEffect(() => {
+    if (!userEmail) {
+        setIsLoading(false);
+        return;
+    };
+
+    const q = query(collection(firestore, "orders"), where("shippingInfo.email", "==", userEmail));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const userOrders: Order[] = [];
+        querySnapshot.forEach((doc) => {
+            userOrders.push({ id: doc.id, ...doc.data() } as Order);
+        });
+        // Sort by date, newest first
+        userOrders.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setOrders(userOrders);
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Failed to fetch orders from Firestore:", error);
+        setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [userEmail]);
 
   if (isLoading) {
       return (

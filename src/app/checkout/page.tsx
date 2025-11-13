@@ -156,9 +156,17 @@ export default function CheckoutPage() {
     };
 
     try {
+        // 1. Save to Firestore
         const orderRef = doc(firestore, 'orders', orderId);
         await setDoc(orderRef, order);
         
+        // 2. Save to localStorage (for "My Orders" page)
+        const existingOrdersJson = localStorage.getItem('bazaargoUserOrders');
+        const existingOrders = existingOrdersJson ? JSON.parse(existingOrdersJson) : [];
+        const updatedOrders = [...existingOrders, order];
+        localStorage.setItem('bazaargoUserOrders', JSON.stringify(updatedOrders));
+
+        // 3. Send confirmation email
         await sendOrderConfirmationEmail(order);
 
         toast({
@@ -173,6 +181,8 @@ export default function CheckoutPage() {
             title: 'Order Failed',
             description: error.message || 'There was a problem processing your order.',
         });
+        setIsProcessing(false); // Stop processing on failure
+        return;
     }
 
     clearCart();
