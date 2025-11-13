@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,7 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { QuickCheckoutSheet } from '@/components/quick-checkout-sheet';
+import { QuickCheckoutDialog } from '@/components/quick-checkout-sheet';
 
 
 const VIEWING_HISTORY_KEY = 'bazaargoProductViewHistory';
@@ -95,7 +94,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
-  const [isCheckoutSheetOpen, setIsCheckoutSheetOpen] = useState(false);
+  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
   const [checkoutItem, setCheckoutItem] = useState<CartItem | null>(null);
 
   const reviewForm = useForm<ReviewFormValues>({
@@ -184,7 +183,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       selectedColor: selectedColor?.name === 'N/A' ? undefined : colorData,
     };
     setCheckoutItem(itemForCheckout);
-    setIsCheckoutSheetOpen(true);
+    setIsCheckoutDialogOpen(true);
   };
 
   const handleMessageSeller = () => {
@@ -465,9 +464,9 @@ export function ProductDetailsClient({ product }: { product: Product }) {
         </div>
       </div>
       {checkoutItem && (
-        <QuickCheckoutSheet
-            isOpen={isCheckoutSheetOpen}
-            onOpenChange={setIsCheckoutSheetOpen}
+        <QuickCheckoutDialog
+            isOpen={isCheckoutDialogOpen}
+            onOpenChange={setIsCheckoutDialogOpen}
             item={checkoutItem}
         />
       )}

@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings, ShippingRate, CartItem } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
@@ -46,13 +46,13 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
-interface QuickCheckoutSheetProps {
+interface QuickCheckoutDialogProps {
     isOpen: boolean;
     onOpenChange: (isOpen: boolean) => void;
     item: CartItem;
 }
 
-export function QuickCheckoutSheet({ isOpen, onOpenChange, item }: QuickCheckoutSheetProps) {
+export function QuickCheckoutDialog({ isOpen, onOpenChange, item }: QuickCheckoutDialogProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -142,14 +142,14 @@ export function QuickCheckoutSheet({ isOpen, onOpenChange, item }: QuickCheckout
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full sm:max-w-lg p-0 flex flex-col">
-            <SheetHeader className="p-6 border-b">
-                <SheetTitle>দ্রুত চেকআউট</SheetTitle>
-            </SheetHeader>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[90vh] w-[95vw] max-w-4xl p-0 flex flex-col">
+            <DialogHeader className="p-6 pb-0">
+                <DialogTitle>দ্রুত চেকআউট</DialogTitle>
+            </DialogHeader>
             <ScrollArea className="flex-grow">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-6 pb-6">
                         {/* Order Summary */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-lg">অর্ডারের সারাংশ</h3>
@@ -206,7 +206,7 @@ export function QuickCheckoutSheet({ isOpen, onOpenChange, item }: QuickCheckout
                     </form>
                 </Form>
             </ScrollArea>
-            <SheetFooter className="p-6 border-t mt-auto">
+            <DialogFooter className="p-6 border-t mt-auto">
                 <Button type="submit" form="checkout-form" size="lg" className="w-full" disabled={isProcessing} onClick={form.handleSubmit(onSubmit)}>
                     {isProcessing ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> প্রসেসিং...</>
@@ -214,8 +214,8 @@ export function QuickCheckoutSheet({ isOpen, onOpenChange, item }: QuickCheckout
                         <>অর্ডার করুন (৳{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })})</>
                     )}
                 </Button>
-            </SheetFooter>
-        </SheetContent>
-    </Sheet>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
   );
 }
