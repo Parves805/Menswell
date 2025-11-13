@@ -30,12 +30,12 @@ import { firestore } from '@/lib/firebase';
 const PAYMENT_SETTINGS_KEY = 'paymentGatewaySettings';
 
 const checkoutSchema = z.object({
-  name: z.string().min(2, { message: 'সম্পূর্ণ নাম आवश्यक' }),
+  name: z.string().min(2, { message: 'সম্পূর্ণ নাম আবশ্যক' }),
   email: z.string().email({ message: 'সঠিক ইমেল ঠিকানা দিন' }),
   phone: z.string().min(10, { message: 'সঠিক ফোন নম্বর দিন' }),
-  street: z.string().min(3, { message: 'রাস্তার ঠিকানা आवश्यक' }),
-  city: z.string().min(2, { message: 'শহরের নাম आवश्यक' }),
-  zip: z.string().min(4, { message: 'পোস্ট কোড आवश्यक' }),
+  street: z.string().min(3, { message: 'রাস্তার ঠিকানা আবশ্যক' }),
+  city: z.string().min(2, { message: 'শহরের নাম আবশ্যক' }),
+  zip: z.string().min(4, { message: 'পোস্ট কোড আবশ্যক' }),
   paymentMethod: z.enum(['cash', 'bkash', 'nagad', 'rocket'], {
     required_error: "আপনাকে একটি পেমেন্ট পদ্ধতি বেছে নিতে হবে।",
   }),
