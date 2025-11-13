@@ -293,7 +293,7 @@ export default function CheckoutPage() {
                                                 {paymentSettings.bkashNumber && (
                                                     <Alert>
                                                         <AlertDescription>
-                                                            অনুগ্রহ করে এই বিকাশ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>.
+                                                            অনুগ্রহ করে এই বিকাশ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>. অর্ডার নিশ্চিত করার জন্য বিকাশ সেন্ড মানি করার পর, আপনি যে লেনদেন আইডি (Txn ID) পাবেন, সেটি এখানে লিখুন।
                                                         </AlertDescription>
                                                     </Alert>
                                                 )}
