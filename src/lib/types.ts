@@ -98,6 +98,12 @@ export interface AboutUsSettings {
     missionText2: string;
 }
 
+export interface LegalPagesSettings {
+    returns: string;
+    terms: string;
+    privacy: string;
+}
+
 export interface HomepageSection {
   id: string;
   title: string;

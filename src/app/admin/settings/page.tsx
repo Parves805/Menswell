@@ -11,7 +11,7 @@ import { Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, AboutUsSettings } from '@/lib/types';
+import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, AboutUsSettings, LegalPagesSettings } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
@@ -57,6 +57,12 @@ const defaultAboutUsSettings: AboutUsSettings = {
     missionText2: 'We aim to deliver premium-quality apparel that reflects the latest trends while staying affordable for students and youth communities.',
 };
 
+const defaultLegalSettings: LegalPagesSettings = {
+    returns: 'We want you to be completely satisfied with your purchase. If you\'re not happy for any reason, you can return most items for a full refund or exchange within 30 days of the delivery date.\n\n### Conditions for Return:\n* Items must be in new, unworn, and unwashed condition.\n* Original tags must still be attached.\n* Items must be returned in their original packaging.\n* Final sale items are not eligible for return or exchange.\n\n### How to Start a Return:\nTo initiate a return, please visit your "My Orders" page and select the order containing the item you wish to return. If you checked out as a guest, please contact our support team with your order number.\n\n### Refunds:\nOnce we receive and inspect your return, we will process your refund to the original payment method within 5-7 business days. You will receive an email notification once the refund has been issued.',
+    terms: 'Last Updated: November 2025\nWelcome to BazaarGo. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services...\n\n(Full default content for terms and conditions)',
+    privacy: 'BazaarGo ("us", "we", or "our") operates the BazaarGo website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.\n\n### Information Collection and Use\nWe collect several different types of information for various purposes to provide and improve our Service to you. This may include, but is not limited to, your name, email address, phone number, and shipping address.\n\n(Full default content for privacy policy)',
+};
+
 const defaultAiSettings: AiSettings = {
   recommendationsEnabled: true,
 };
@@ -83,6 +89,7 @@ export default function AdminSettingsPage() {
     const [slides, setSlides] = useState<Slide[]>([]);
     const [settings, setSettings] = useState<WebsiteSettings>(defaultWebsiteSettings);
     const [aboutUsSettings, setAboutUsSettings] = useState<AboutUsSettings>(defaultAboutUsSettings);
+    const [legalSettings, setLegalSettings] = useState<LegalPagesSettings>(defaultLegalSettings);
     const [aiSettings, setAiSettings] = useState<AiSettings>(defaultAiSettings);
     const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>(defaultPaymentSettings);
     const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
@@ -99,6 +106,7 @@ export default function AdminSettingsPage() {
                 setSlides(heroSlidesData.map((slide: any, index: number) => ({ ...slide, id: Date.now() + index })));
                 setSettings(data.websiteSettings || defaultWebsiteSettings);
                 setAboutUsSettings(data.aboutUsSettings || defaultAboutUsSettings);
+                setLegalSettings(data.legalPagesSettings || defaultLegalSettings);
                 setAiSettings(data.aiSettings || defaultAiSettings);
                 setPaymentSettings(data.paymentGatewaySettings || defaultPaymentSettings);
                 setThemeSettings(data.themeSettings || defaultThemeSettings);
@@ -125,6 +133,10 @@ export default function AdminSettingsPage() {
 
     const handleAboutUsChange = (field: keyof AboutUsSettings, value: string) => {
         setAboutUsSettings(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleLegalChange = (field: keyof LegalPagesSettings, value: string) => {
+        setLegalSettings(prev => ({ ...prev, [field]: value }));
     };
 
     const handleAiSettingChange = (field: keyof AiSettings, value: boolean) => {
@@ -157,6 +169,7 @@ export default function AdminSettingsPage() {
                 heroSliderImages: slidesToSave,
                 websiteSettings: settings,
                 aboutUsSettings: aboutUsSettings,
+                legalPagesSettings: legalSettings,
                 aiSettings: aiSettings,
                 paymentGatewaySettings: paymentSettings,
                 themeSettings: themeSettings,
@@ -289,6 +302,27 @@ export default function AdminSettingsPage() {
                     <div className="grid gap-2">
                         <Label htmlFor="about-mission-text2">Mission Text (Paragraph 2)</Label>
                         <Textarea id="about-mission-text2" value={aboutUsSettings.missionText2} onChange={(e) => handleAboutUsChange('missionText2', e.target.value)} rows={3} />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Legal & Policy Pages</CardTitle>
+                    <CardDescription>Manage the content for your legal pages. Supports Markdown.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="grid gap-2">
+                        <Label htmlFor="returns-policy">Return Policy</Label>
+                        <Textarea id="returns-policy" value={legalSettings.returns} onChange={(e) => handleLegalChange('returns', e.target.value)} rows={10} />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="terms-conditions">Terms & Conditions</Label>
+                        <Textarea id="terms-conditions" value={legalSettings.terms} onChange={(e) => handleLegalChange('terms', e.target.value)} rows={10} />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="privacy-policy">Privacy Policy</Label>
+                        <Textarea id="privacy-policy" value={legalSettings.privacy} onChange={(e) => handleLegalChange('privacy', e.target.value)} rows={10} />
                     </div>
                 </CardContent>
             </Card>
