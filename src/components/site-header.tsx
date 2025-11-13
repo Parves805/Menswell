@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Search, User, Heart, ShoppingBag, Menu, LogIn, UserPlus, UserCircle, Settings, LogOut, ListOrdered, ShoppingCart, ChevronDown, Bell } from 'lucide-react';
@@ -74,6 +75,15 @@ export function SiteHeader() {
         unsubNotifications();
     };
   }, [isAuthenticated]);
+
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const query = formData.get('query') as string;
+    if (query) {
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
@@ -218,10 +228,10 @@ export function SiteHeader() {
         {/* Center: Search Bar */}
         <div className="flex-1 flex justify-center px-4 lg:px-8">
             <div className="w-full max-w-lg">
-                <form>
+                <form onSubmit={handleSearch}>
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input type="search" placeholder="Search products..." className="pl-12 h-12 text-base" />
+                    <Input name="query" type="search" placeholder="Search products..." className="pl-12 h-12 text-base" />
                   </div>
                 </form>
             </div>
