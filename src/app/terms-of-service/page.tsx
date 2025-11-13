@@ -19,10 +19,10 @@ export default function TermsOfServicePage() {
                 <CardHeader className="text-center">
                     <FileText className="mx-auto h-12 w-12 text-primary mb-4" />
                     <CardTitle className="text-3xl md:text-4xl font-bold font-headline">Terms and Conditions</CardTitle>
-                    <CardDescription>Last Updated: July 2024</CardDescription>
+                    <CardDescription>Last Updated: November 2025</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 text-muted-foreground leading-relaxed">
-                    <p>Welcome to BazaarGo. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services.</p>
+                    <p>Welcome to Menswell. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services.</p>
                     
                     <div className="space-y-2">
                         <h3 className="font-semibold text-lg text-foreground">1. General</h3>
@@ -66,7 +66,7 @@ export default function TermsOfServicePage() {
                     
                     <div className="space-y-2">
                          <h3 className="font-semibold text-lg text-foreground">7. Intellectual Property</h3>
-                         <p>All content on this website—including images, designs, logos, and text—is the property of BazaarGo and protected by copyright laws. You may not reproduce, distribute, or use any content without written permission.</p>
+                         <p>All content on this website—including images, designs, logos, and text—is the property of Menswell and protected by copyright laws. You may not reproduce, distribute, or use any content without written permission.</p>
                     </div>
 
                     <div className="space-y-2">
@@ -87,7 +87,7 @@ export default function TermsOfServicePage() {
 
                     <div className="space-y-2">
                         <h3 className="font-semibold text-lg text-foreground">10. Limitation of Liability</h3>
-                        <p>BazaarGo is not liable for:</p>
+                        <p>Menswell is not liable for:</p>
                          <ul className="list-disc pl-6 space-y-1">
                             <li>Any indirect, incidental, or consequential damages resulting from the use or inability to use our Site or products.</li>
                             <li>Any delay or failure beyond our reasonable control (e.g., natural disasters, transport delays, or technical issues).</li>
