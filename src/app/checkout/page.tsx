@@ -35,7 +35,6 @@ const checkoutSchema = z.object({
   phone: z.string().min(10, { message: 'সঠিক ফোন নম্বর দিন' }),
   street: z.string().min(3, { message: 'রাস্তার ঠিকানা आवश्यक' }),
   city: z.string().min(2, { message: 'শহরের নাম आवश्यक' }),
-  state: z.string().min(2, { message: 'বিভাগের নাম आवश्यक' }),
   zip: z.string().min(4, { message: 'পোস্ট কোড आवश्यक' }),
   paymentMethod: z.enum(['cash', 'bkash', 'nagad', 'rocket'], {
     required_error: "আপনাকে একটি পেমেন্ট পদ্ধতি বেছে নিতে হবে।",
@@ -76,7 +75,6 @@ export default function CheckoutPage() {
       phone: '',
       street: '',
       city: '',
-      state: '',
       zip: '',
       paymentMethod: 'cash',
       transactionId: '',
@@ -102,7 +100,6 @@ export default function CheckoutPage() {
             phone: savedUser.phone || '',
             street: savedUser.address?.street || '',
             city: savedUser.address?.city || '',
-            state: savedUser.address?.state || '',
             zip: savedUser.address?.zip || '',
             paymentMethod: form.getValues('paymentMethod'),
             transactionId: '',
@@ -149,7 +146,7 @@ export default function CheckoutPage() {
         phone: data.phone,
         street: data.street,
         city: data.city,
-        state: data.state,
+        state: '', // Kept for type consistency, but empty
         zip: data.zip,
       },
       paymentDetails: {
@@ -283,7 +280,7 @@ export default function CheckoutPage() {
                         )}
                         />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2 grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name="city"
@@ -297,38 +294,19 @@ export default function CheckoutPage() {
                             </FormItem>
                         )}
                         />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                         <FormField
-                            control={form.control}
-                            name="state"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>বিভাগ</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                    </div>
-                    <div>
-                         <FormField
-                            control={form.control}
-                            name="zip"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>পোস্ট কোড</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                            />
-                    </div>
+                     <FormField
+                        control={form.control}
+                        name="zip"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>পোস্ট কোড</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                   </div>
                 </CardContent>
               </Card>
