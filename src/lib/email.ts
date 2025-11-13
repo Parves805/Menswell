@@ -1,3 +1,4 @@
+
 'use server';
 
 import { Resend } from 'resend';
@@ -7,8 +8,24 @@ import type { Order } from '@/lib/types';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOrderConfirmationEmail(order: Order) {
+  // Do not attempt to generate email if AI key is missing
+  if (!process.env.GOOGLE_API_KEY) {
+    console.warn('[BazaarGo] GOOGLE_API_KEY not set. Skipping AI email generation.');
+    return;
+  }
+
   if (!process.env.RESEND_API_KEY) {
-    throw new Error('Resend API key is not configured. Email not sent.');
+    console.warn('[BazaarGo] RESEND_API_KEY not set. Skipping sending email.');
+    // Log the generated HTML to the console for manual use if AI key is present
+    try {
+        const emailHtml = await generateOrderConfirmationEmail({ order });
+        console.log("---- ORDER CONFIRMATION EMAIL (HTML) ----");
+        console.log(emailHtml);
+        console.log("-----------------------------------------");
+    } catch(e) {
+        console.error("Failed to generate email HTML for logging.", e);
+    }
+    return;
   }
 
   try {
