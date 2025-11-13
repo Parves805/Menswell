@@ -6,7 +6,7 @@ import { FileText } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | BazaarGo',
+  title: 'Terms and Conditions | BazaarGo',
 };
 
 export default function TermsOfServicePage() {
@@ -66,7 +66,7 @@ export default function TermsOfServicePage() {
                     
                     <div className="space-y-2">
                          <h3 className="font-semibold text-lg text-foreground">7. Intellectual Property</h3>
-                         <p>All content on this website—including images, designs, logos, and text—is the property of Menswell and protected by copyright laws. You may not reproduce, distribute, or use any content without written permission.</p>
+                         <p>All content on this website—including images, designs, logos, and text—is the property of BazaarGo and protected by copyright laws. You may not reproduce, distribute, or use any content without written permission.</p>
                     </div>
 
                     <div className="space-y-2">
@@ -87,7 +87,7 @@ export default function TermsOfServicePage() {
 
                     <div className="space-y-2">
                         <h3 className="font-semibold text-lg text-foreground">10. Limitation of Liability</h3>
-                        <p>Menswell is not liable for:</p>
+                        <p>BazaarGo is not liable for:</p>
                          <ul className="list-disc pl-6 space-y-1">
                             <li>Any indirect, incidental, or consequential damages resulting from the use or inability to use our Site or products.</li>
                             <li>Any delay or failure beyond our reasonable control (e.g., natural disasters, transport delays, or technical issues).</li>
