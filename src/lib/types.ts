@@ -42,7 +42,7 @@ export interface Order {
     phone: string;
     street: string;
     city: string;
-    state: string;
+    state: string; // Used for shipping location name e.g., 'Inside Dhaka'
     zip: string;
   };
   paymentDetails?: {
@@ -70,12 +70,19 @@ export interface PopupCampaign {
   displayDuration: number; // in seconds
 }
 
+export interface ShippingRate {
+  id: string;
+  location: string;
+  cost: number;
+}
+
 export interface WebsiteSettings {
   storeName: string;
   logoUrl: string;
   contactEmail: string;
   contactPhone: string;
   address: string;
+  shippingRates: ShippingRate[];
 }
 
 export interface HomepageSection {

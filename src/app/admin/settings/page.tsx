@@ -11,7 +11,7 @@ import { Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings } from '@/lib/types';
+import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, ShippingRate } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
@@ -41,6 +41,7 @@ const defaultWebsiteSettings: WebsiteSettings = {
   contactEmail: 'support@bazaargo.com',
   contactPhone: '+1 (234) 567-890',
   address: '123 Bazaar Street, Dhaka, Bangladesh',
+  shippingRates: [],
 };
 
 const defaultAiSettings: AiSettings = {

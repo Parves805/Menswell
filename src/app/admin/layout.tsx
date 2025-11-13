@@ -32,6 +32,7 @@ import {
   Megaphone,
   View,
   SquareCheck,
+  Truck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -269,6 +270,11 @@ export default function AdminLayout({
                     <Link href="/admin/settings">General Settings</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive('/admin/shipping')}>
+                    <Link href="/admin/shipping">Shipping Rates</Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                  <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive('/admin/sections')}>
                     <Link href="/admin/sections">Homepage Sections</Link>
@@ -374,5 +380,3 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
-
-    

@@ -15,12 +15,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { CreditCard, Truck, Loader2 } from 'lucide-react';
-import type { Order, PaymentGatewaySettings } from '@/lib/types';
+import type { Order, PaymentGatewaySettings, ShippingRate } from '@/lib/types';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
@@ -33,6 +34,7 @@ const checkoutSchema = z.object({
   street: z.string().min(3, { message: 'রাস্তার ঠিকানা আবশ্যক' }),
   city: z.string().min(2, { message: 'শহরের নাম আবশ্যক' }),
   zip: z.string().min(4, { message: 'পোস্ট কোড আবশ্যক' }),
+  shippingZone: z.string().min(1, { message: 'ডেলিভারি এলাকা বেছে নিন।' }),
   paymentMethod: z.enum(['cash', 'bkash', 'nagad', 'rocket'], {
     required_error: "আপনাকে একটি পেমেন্ট পদ্ধতি বেছে নিতে হবে।",
   }),
@@ -49,13 +51,12 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
-const shippingCost = 5.00;
-
 export default function CheckoutPage() {
   const { cartItems, subtotal, clearCart, totalItems } = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>({
     cashOnDelivery: true,
     bkash: true,
@@ -75,15 +76,20 @@ export default function CheckoutPage() {
       street: '',
       city: '',
       zip: '',
+      shippingZone: '',
       paymentMethod: 'cash',
       transactionId: '',
     },
   });
 
   const selectedPaymentMethod = form.watch('paymentMethod');
+  const selectedShippingZoneId = form.watch('shippingZone');
+  
+  const shippingCost = shippingRates.find(rate => rate.id === selectedShippingZoneId)?.cost ?? 0;
+  const total = subtotal + shippingCost;
+
 
   useEffect(() => {
-    // Redirect to home if cart is empty
     if (totalItems === 0 && !isProcessing) {
       router.replace('/');
     }
@@ -95,14 +101,13 @@ export default function CheckoutPage() {
             if (userDoc.exists()) {
                 const userData = userDoc.data();
                 form.reset({
+                    ...form.getValues(),
                     name: userData.name || '',
                     email: userData.email || '',
                     phone: userData.phone || '',
                     street: userData.address?.street || '',
                     city: userData.address?.city || '',
                     zip: userData.address?.zip || '',
-                    paymentMethod: form.getValues('paymentMethod'),
-                    transactionId: '',
                 });
             }
         }
@@ -112,8 +117,14 @@ export default function CheckoutPage() {
 
     const settingsRef = doc(firestore, 'settings', 'store');
     const unsub = onSnapshot(settingsRef, (docSnap) => {
-        if (docSnap.exists() && docSnap.data().paymentGatewaySettings) {
-            setPaymentSettings(docSnap.data().paymentGatewaySettings);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            setPaymentSettings(data.paymentGatewaySettings || {});
+            const rates = data.shippingRates || [];
+            setShippingRates(rates);
+            if (rates.length > 0 && !form.getValues('shippingZone')) {
+                form.setValue('shippingZone', rates[0].id);
+            }
         }
     });
 
@@ -125,18 +136,19 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     const orderId = new Date().getTime().toString();
+    const shippingLocation = shippingRates.find(r => r.id === data.shippingZone)?.location || 'N/A';
     const order: Order = {
       id: orderId,
       date: new Date().toISOString(),
       items: cartItems,
-      total: subtotal + shippingCost,
+      total: total,
       shippingInfo: {
         name: data.name,
         email: data.email,
         phone: data.phone,
         street: data.street,
         city: data.city,
-        state: '', // Kept for type consistency, but empty
+        state: shippingLocation,
         zip: data.zip,
       },
       paymentDetails: {
@@ -147,11 +159,9 @@ export default function CheckoutPage() {
     };
 
     try {
-        // 1. Save to Firestore
         const orderRef = doc(firestore, 'orders', orderId);
         await setDoc(orderRef, order);
         
-        // 2. Send confirmation email
         await sendOrderConfirmationEmail(order);
 
         toast({
@@ -166,7 +176,7 @@ export default function CheckoutPage() {
             title: 'Order Failed',
             description: error.message || 'There was a problem processing your order.',
         });
-        setIsProcessing(false); // Stop processing on failure
+        setIsProcessing(false);
         return;
     }
 
@@ -199,7 +209,6 @@ export default function CheckoutPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Left Column: Shipping & Payment */}
             <div className="lg:col-span-2 space-y-8">
               <Card>
                 <CardHeader>
@@ -207,94 +216,44 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                     <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>পুরো নাম</FormLabel>
-                            <FormControl>
-                                <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+                     <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>পুরো নাম</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                   <div>
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>ইমেল</FormLabel>
-                            <FormControl>
-                                <Input type="email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+                    <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>ইমেল</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                   <div>
-                    <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>ফোন</FormLabel>
-                            <FormControl>
-                                <Input type="tel" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+                    <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>ফোন</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                   <div className="sm:col-span-2">
-                     <FormField
-                        control={form.control}
-                        name="street"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>রাস্তার ঠিকানা</FormLabel>
-                            <FormControl>
-                                <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+                     <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>রাস্তার ঠিকানা</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  </div>
+                  <div className="sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>শহর</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="zip" render={({ field }) => (<FormItem><FormLabel>পোস্ট কোড</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                   <div className="sm:col-span-2">
-                     <FormField
-                        control={form.control}
-                        name="city"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>শহর</FormLabel>
-                            <FormControl>
-                                <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                  </div>
-                  <div>
-                     <FormField
-                        control={form.control}
-                        name="zip"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>পোস্ট কোড</FormLabel>
-                            <FormControl>
-                                <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+                    <FormField
+                      control={form.control}
+                      name="shippingZone"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>ডেলিভারি এলাকা</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                  <FormControl>
+                                      <SelectTrigger>
+                                          <SelectValue placeholder="আপনার ডেলিভারি এলাকা বেছে নিন" />
+                                      </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                      {shippingRates.map(rate => (
+                                          <SelectItem key={rate.id} value={rate.id}>{rate.location}</SelectItem>
+                                      ))}
+                                  </SelectContent>
+                              </Select>
+                              <FormMessage />
+                          </FormItem>
+                      )}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -459,7 +418,6 @@ export default function CheckoutPage() {
               </Card>
             </div>
 
-            {/* Right Column: Order Summary */}
             <div className="lg:col-span-1">
               <Card className="sticky top-24">
                 <CardHeader>
@@ -475,7 +433,7 @@ export default function CheckoutPage() {
                         <div className="flex-grow overflow-hidden">
                           <p className="font-medium truncate">{item.name}</p>
                           <div className="text-sm text-muted-foreground">
-                            {[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}
+                             {[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}
                           </div>
                           <div className="text-sm text-muted-foreground">পরিমাণ: {item.quantity}</div>
                         </div>
@@ -498,7 +456,7 @@ export default function CheckoutPage() {
                       <Separator />
                       <div className="flex justify-between font-bold text-lg">
                           <span>সর্বমোট</span>
-                          <span>৳{(subtotal + shippingCost).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span>৳{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                   </div>
                 </CardContent>
@@ -511,7 +469,7 @@ export default function CheckoutPage() {
                           </>
                       ) : (
                           <>
-                              অর্ডার করুন (৳{(subtotal + shippingCost).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                              অর্ডার করুন (৳{total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
                           </>
                       )}
                   </Button>
