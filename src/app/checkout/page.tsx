@@ -21,10 +21,9 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings } from '@/lib/types';
-import { generateOrderConfirmationEmail } from '@/ai/flows/generate-order-email';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { sendOrderConfirmationEmail } from '@/lib/email';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
 
 const checkoutSchema = z.object({
@@ -39,12 +38,12 @@ const checkoutSchema = z.object({
   }),
   transactionId: z.string().optional(),
 }).refine(data => {
-    if (data.paymentMethod === 'bkash' && (!data.transactionId || data.transactionId.trim().length < 5)) {
+    if ((data.paymentMethod === 'bkash' || data.paymentMethod === 'nagad' || data.paymentMethod === 'rocket') && (!data.transactionId || data.transactionId.trim().length < 5)) {
         return false;
     }
     return true;
 }, {
-    message: "একটি সঠিক বিকাশ লেনদেন আইডি প্রয়োজন।",
+    message: "একটি সঠিক লেনদেন আইডি প্রয়োজন।",
     path: ["transactionId"],
 });
 
@@ -62,7 +61,9 @@ export default function CheckoutPage() {
     bkash: true,
     bkashNumber: '',
     nagad: true,
+    nagadNumber: '',
     rocket: true,
+    rocketNumber: '',
   });
 
   const form = useForm<CheckoutFormValues>({
@@ -112,14 +113,7 @@ export default function CheckoutPage() {
     const settingsRef = doc(firestore, 'settings', 'store');
     const unsub = onSnapshot(settingsRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().paymentGatewaySettings) {
-            const settings = docSnap.data().paymentGatewaySettings;
-            setPaymentSettings({
-              cashOnDelivery: settings.cashOnDelivery,
-              bkash: settings.bkash,
-              bkashNumber: settings.bkashNumber || '',
-              nagad: settings.nagad,
-              rocket: settings.rocket,
-            });
+            setPaymentSettings(docSnap.data().paymentGatewaySettings);
         }
     });
 
@@ -272,8 +266,8 @@ export default function CheckoutPage() {
                         )}
                         />
                   </div>
-                  <div className="sm:col-span-2 grid grid-cols-2 gap-4">
-                    <FormField
+                  <div className="sm:col-span-2">
+                     <FormField
                         control={form.control}
                         name="city"
                         render={({ field }) => (
@@ -286,6 +280,8 @@ export default function CheckoutPage() {
                             </FormItem>
                         )}
                         />
+                  </div>
+                  <div>
                      <FormField
                         control={form.control}
                         name="zip"
@@ -375,29 +371,81 @@ export default function CheckoutPage() {
                                 )}
                                 {paymentSettings.nagad && (
                                 <FormItem>
-                                    <Label className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                                        <FormControl>
-                                            <RadioGroupItem value="nagad" />
-                                        </FormControl>
-                                        <CreditCard className="h-6 w-6" />
-                                        <div>
-                                            <span className="font-semibold">নগদ</span>
-                                            <p className="text-sm text-muted-foreground">নগদ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p>
+                                    <Label className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                        <div className="flex items-start gap-4 w-full">
+                                            <FormControl>
+                                                <RadioGroupItem value="nagad" className="mt-1" />
+                                            </FormControl>
+                                            <CreditCard className="h-6 w-6" />
+                                            <div className="flex-grow">
+                                                <span className="font-semibold">নগদ</span>
+                                                <p className="text-sm text-muted-foreground">নগদ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p>
+                                            </div>
                                         </div>
+                                         {selectedPaymentMethod === 'nagad' && (
+                                            <div className="w-full pl-10 space-y-3">
+                                                {paymentSettings.nagadNumber && (
+                                                    <Alert>
+                                                        <AlertDescription>
+                                                            অনুগ্রহ করে এই নগদ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.nagadNumber}</strong>.
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                )}
+                                                <FormField
+                                                    control={form.control}
+                                                    name="transactionId"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>নগদ লেনদেন আইডি</FormLabel>
+                                                            <FormControl>
+                                                                <Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        )}
                                     </Label>
                                 </FormItem>
                                 )}
                                 {paymentSettings.rocket && (
-                                <FormItem>
-                                    <Label className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                                        <FormControl>
-                                            <RadioGroupItem value="rocket" />
-                                        </FormControl>
-                                        <CreditCard className="h-6 w-6" />
-                                        <div>
-                                            <span className="font-semibold">রকেট</span>
-                                            <p className="text-sm text-muted-foreground">রকেট মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p>
+                                 <FormItem>
+                                    <Label className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                        <div className="flex items-start gap-4 w-full">
+                                            <FormControl>
+                                                <RadioGroupItem value="rocket" className="mt-1" />
+                                            </FormControl>
+                                            <CreditCard className="h-6 w-6" />
+                                            <div className="flex-grow">
+                                                <span className="font-semibold">রকেট</span>
+                                                <p className="text-sm text-muted-foreground">রকেট মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p>
+                                            </div>
                                         </div>
+                                         {selectedPaymentMethod === 'rocket' && (
+                                            <div className="w-full pl-10 space-y-3">
+                                                {paymentSettings.rocketNumber && (
+                                                    <Alert>
+                                                        <AlertDescription>
+                                                            অনুগ্রহ করে এই রকেট পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.rocketNumber}</strong>.
+                                                        </AlertDescription>
+                                                    </Alert>
+                                                )}
+                                                <FormField
+                                                    control={form.control}
+                                                    name="transactionId"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>রকেট লেনদেন আইডি</FormLabel>
+                                                            <FormControl>
+                                                                <Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        )}
                                     </Label>
                                 </FormItem>
                                 )}
@@ -477,5 +525,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    

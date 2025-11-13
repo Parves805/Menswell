@@ -52,7 +52,9 @@ const defaultPaymentSettings: PaymentGatewaySettings = {
   bkash: true,
   bkashNumber: '',
   nagad: true,
+  nagadNumber: '',
   rocket: false,
+  rocketNumber: '',
 };
 
 const defaultThemeSettings: ThemeSettings = {
@@ -372,27 +374,53 @@ export default function AdminSettingsPage() {
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <div>
-                            <Label htmlFor="pg-nagad" className="font-medium">Nagad</Label>
-                            <p className="text-sm text-muted-foreground">Allow customers to pay via Nagad.</p>
+                     <div className="rounded-lg border p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <Label htmlFor="pg-nagad" className="font-medium">Nagad</Label>
+                                <p className="text-sm text-muted-foreground">Allow customers to pay via Nagad.</p>
+                            </div>
+                            <Switch 
+                                id="pg-nagad" 
+                                checked={paymentSettings.nagad} 
+                                onCheckedChange={(checked) => handlePaymentSettingChange('nagad', checked)} 
+                            />
                         </div>
-                        <Switch 
-                            id="pg-nagad" 
-                            checked={paymentSettings.nagad} 
-                            onCheckedChange={(checked) => handlePaymentSettingChange('nagad', checked)} 
-                        />
+                         {paymentSettings.nagad && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="nagadNumber">Nagad Personal Number</Label>
+                                <Input
+                                    id="nagadNumber"
+                                    value={paymentSettings.nagadNumber}
+                                    onChange={(e) => handlePaymentSettingChange('nagadNumber', e.target.value)}
+                                    placeholder="e.g., 01xxxxxxxxx"
+                                />
+                            </div>
+                        )}
                     </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                        <div>
-                            <Label htmlFor="pg-rocket" className="font-medium">Rocket</Label>
-                            <p className="text-sm text-muted-foreground">Allow customers to pay via Rocket.</p>
+                     <div className="rounded-lg border p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <Label htmlFor="pg-rocket" className="font-medium">Rocket</Label>
+                                <p className="text-sm text-muted-foreground">Allow customers to pay via Rocket.</p>
+                            </div>
+                            <Switch 
+                                id="pg-rocket" 
+                                checked={paymentSettings.rocket} 
+                                onCheckedChange={(checked) => handlePaymentSettingChange('rocket', checked)} 
+                            />
                         </div>
-                        <Switch 
-                            id="pg-rocket" 
-                            checked={paymentSettings.rocket} 
-                            onCheckedChange={(checked) => handlePaymentSettingChange('rocket', checked)} 
-                        />
+                         {paymentSettings.rocket && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="rocketNumber">Rocket Personal Number</Label>
+                                <Input
+                                    id="rocketNumber"
+                                    value={paymentSettings.rocketNumber}
+                                    onChange={(e) => handlePaymentSettingChange('rocketNumber', e.target.value)}
+                                    placeholder="e.g., 01xxxxxxxxx"
+                                />
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -406,5 +434,3 @@ export default function AdminSettingsPage() {
         </div>
     );
 }
-
-    

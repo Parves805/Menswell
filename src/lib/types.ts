@@ -102,7 +102,9 @@ export interface PaymentGatewaySettings {
   bkash: boolean;
   bkashNumber: string;
   nagad: boolean;
+  nagadNumber: string;
   rocket: boolean;
+  rocketNumber: string;
 }
 
 export interface ThemeSettings {
@@ -110,5 +112,3 @@ export interface ThemeSettings {
     background: string;
     accent: string;
 }
-
-    
