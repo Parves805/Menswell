@@ -172,12 +172,8 @@ export default function CheckoutPage() {
     }
 
     clearCart();
-    toast({
-      title: 'অর্ডার সফল হয়েছে!',
-      description: 'আপনার কেনাকাটার জন্য ধন্যবাদ। আপনার অর্ডারটি পাঠানো হলে আপনাকে জানানো হবে।',
-    });
 
-    router.push('/orders');
+    router.push(`/thank-you?orderId=${orderId}`);
   };
   
   if (totalItems === 0 && !isProcessing) {
