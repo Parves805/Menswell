@@ -209,7 +209,7 @@ export default function CheckoutPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-grow container pt-8 pb-24 md:pt-12 md:pb-12">
-        <h1 className="text-3xl md:text-4xl font-bold font-headline mb-8 text-center">চেকআউট</h1>
+        <h1 className="text-3xl md:text-4xl font-bold font-headline mb-8 text-center">Checkout</h1>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
