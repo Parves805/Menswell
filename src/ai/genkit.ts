@@ -15,9 +15,9 @@ if (apiKey) {
   console.warn("[BazaarGo] AI features like product recommendations will be disabled.");
   console.warn("[BazaarGo] Get a key from https://aistudio.google.com/app/apikey and add it to your .env file.\n");
   
-  // Initialize with no plugins if key is not present to avoid crashing the app
+  // Initialize with a model but no key to prevent crashing, but AI calls will fail.
   ai = genkit({
-    plugins: [],
+    plugins: [googleAI({ apiKey: '', model: 'gemini-1.5-flash-latest' })],
   });
 }
 
