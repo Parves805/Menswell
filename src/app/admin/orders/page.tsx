@@ -32,6 +32,7 @@ import { firestore } from '@/lib/firebase';
 import { collection, doc, onSnapshot, query, setDoc, orderBy } from 'firebase/firestore';
 import { generateStatusUpdateEmail } from '@/ai/flows/generate-status-update-email';
 import { OrderInvoice } from '@/components/admin/order-invoice';
+import { useReactToPrint } from 'react-to-print';
 
 
 const statusColors: { [key: string]: string } = {
@@ -51,9 +52,11 @@ export default function AdminOrdersPage() {
     
     const invoiceRef = useRef<HTMLDivElement>(null);
     
-    const handlePrint = () => {
-      window.print();
-    };
+    const handlePrint = useReactToPrint({
+        content: () => invoiceRef.current,
+        documentTitle: `Invoice-Order-${selectedOrder?.id.slice(-6) ?? ''}`,
+        bodyClass: 'bg-white'
+    });
 
 
     useEffect(() => {
@@ -118,21 +121,11 @@ export default function AdminOrdersPage() {
 
     return (
       <>
-        <style jsx global>{`
-          @media print {
-            body > *:not(.printable-invoice) {
-              display: none !important;
-            }
-            .printable-invoice {
-              display: block !important;
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-            }
-          }
-        `}</style>
-        <Card className="non-printable">
+        <div style={{ display: "none" }}>
+            {selectedOrder && <OrderInvoice ref={invoiceRef} order={selectedOrder} />}
+        </div>
+
+        <Card>
             <CardHeader>
                 <CardTitle className="text-2xl md:text-3xl">Orders</CardTitle>
                 <CardDescription>Manage customer orders here.</CardDescription>
@@ -206,7 +199,7 @@ export default function AdminOrdersPage() {
 
                 {selectedOrder && (
                     <Dialog open={!!selectedOrder} onOpenChange={(isOpen) => !isOpen && setSelectedOrder(null)}>
-                        <DialogContent className="sm:max-w-3xl non-printable">
+                        <DialogContent className="sm:max-w-3xl">
                             <DialogHeader>
                                 <DialogTitle>Order Details</DialogTitle>
                                 <DialogDescription>
@@ -295,9 +288,6 @@ export default function AdminOrdersPage() {
                         </DialogContent>
                     </Dialog>
                 )}
-                 <div className="hidden printable-invoice">
-                    {selectedOrder && <OrderInvoice ref={invoiceRef} order={selectedOrder} />}
-                </div>
             </CardContent>
         </Card>
       </>

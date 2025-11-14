@@ -1,8 +1,11 @@
 'use client';
 
-import React from 'react';
-import type { Order } from '@/lib/types';
+import React, { useState, useEffect } from 'react';
+import type { Order, WebsiteSettings } from '@/lib/types';
 import { format } from 'date-fns';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import Image from 'next/image';
 
 interface OrderInvoiceProps {
     order: Order;
@@ -11,6 +14,16 @@ interface OrderInvoiceProps {
 export const OrderInvoice = React.forwardRef<HTMLDivElement, OrderInvoiceProps>(({ order }, ref) => {
     const subtotal = order.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const shipping = order.total - subtotal;
+    const [settings, setSettings] = useState<Partial<WebsiteSettings>>({});
+
+    useEffect(() => {
+        const unsubSettings = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+            if (doc.exists()) {
+                setSettings(doc.data().websiteSettings || {});
+            }
+        });
+        return () => unsubSettings();
+    }, []);
 
     return (
         <div ref={ref} className="p-8 font-sans bg-white text-black">
@@ -20,9 +33,13 @@ export const OrderInvoice = React.forwardRef<HTMLDivElement, OrderInvoiceProps>(
                     <p className="text-gray-600">Order #{order.id.slice(-6)}</p>
                 </div>
                 <div className="text-right">
-                    {/* You can add a logo here */}
-                    <h2 className="text-2xl font-bold">BazaarGo</h2>
-                    <p className="text-gray-500 text-sm">Your one-stop online marketplace.</p>
+                     {settings.logoUrl && (
+                        <div className="relative h-16 w-40 mb-2">
+                            <Image src={settings.logoUrl} alt={settings.storeName || 'Logo'} fill className="object-contain" />
+                        </div>
+                    )}
+                    <h2 className="text-xl font-bold">{settings.storeName}</h2>
+                    <p className="text-gray-500 text-sm">{settings.address}</p>
                 </div>
             </header>
             
@@ -94,7 +111,7 @@ export const OrderInvoice = React.forwardRef<HTMLDivElement, OrderInvoiceProps>(
             
             <footer className="mt-16 pt-4 border-t-2 text-center text-gray-500 text-sm">
                 <p>Thank you for your business!</p>
-                <p>BazaarGo | support@bazaargo.com</p>
+                <p>{settings.storeName} | {settings.contactEmail}</p>
             </footer>
         </div>
     );
