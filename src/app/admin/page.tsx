@@ -99,26 +99,26 @@ export default function AdminDashboardPage() {
     }, []);
 
     const renderStatCard = (title: string, value: string, change?: number, changeText?: string, icon?: React.ReactNode) => (
-        <Card>
+        <Card className="bg-primary text-primary-foreground">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 {icon}
             </CardHeader>
             <CardContent>
-                {isLoading ? <Skeleton className="h-8 w-3/4" /> : <div className="text-2xl font-bold">{value}</div>}
-                {isLoading ? <Skeleton className="h-4 w-1/2 mt-1" /> : (
+                {isLoading ? <Skeleton className="h-8 w-3/4 bg-primary-foreground/20" /> : <div className="text-2xl font-bold">{value}</div>}
+                {isLoading ? <Skeleton className="h-4 w-1/2 mt-1 bg-primary-foreground/20" /> : (
                    change !== undefined && changeText && (
-                     <p className="text-xs text-muted-foreground flex items-center">
+                     <p className="text-xs text-primary-foreground/80 flex items-center">
                         {change >= 0 ? 
-                            <ArrowUp className="h-3 w-3 mr-1 text-green-500" /> :
-                            <ArrowDown className="h-3 w-3 mr-1 text-red-500" /> 
+                            <ArrowUp className="h-3 w-3 mr-1" /> :
+                            <ArrowDown className="h-3 w-3 mr-1" /> 
                         }
                         {change.toFixed(1)}% {changeText}
                     </p>
                    )
                 )}
                  {change === undefined && changeText && (
-                    <p className="text-xs text-muted-foreground">{changeText}</p>
+                    <p className="text-xs text-primary-foreground/80">{changeText}</p>
                  )}
             </CardContent>
         </Card>
@@ -135,28 +135,28 @@ export default function AdminDashboardPage() {
             `৳${stats.totalRevenue.toLocaleString('en-IN')}`,
             stats.revenueChange,
             "from last month",
-            <span className="text-muted-foreground">৳</span>
+            <span className="text-primary-foreground/80">৳</span>
         )}
         {renderStatCard(
             "Total Sales", 
             `+${stats.totalSales.toLocaleString('en-IN')}`,
             stats.salesChange,
             "from last month",
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            <ShoppingCart className="h-4 w-4 text-primary-foreground/80" />
         )}
         {renderStatCard(
             "Total Products",
             totalProducts.toLocaleString('en-IN'),
             undefined,
             "in stock",
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <Package className="h-4 w-4 text-primary-foreground/80" />
         )}
         {renderStatCard(
             "Total Customers",
             stats.totalCustomers.toLocaleString('en-IN'),
             undefined,
             "unique customers",
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-primary-foreground/80" />
         )}
       </div>
 
