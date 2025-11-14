@@ -237,7 +237,7 @@ export function AuthForm({ type }: AuthFormProps) {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isLoading || isGoogleLoading}/>
+                    <Input placeholder="Your Name" {...field} disabled={isLoading || isGoogleLoading}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
