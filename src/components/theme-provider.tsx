@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import type { ThemeSettings } from '@/lib/types';
@@ -68,6 +68,8 @@ function applyTheme(settings: ThemeSettings) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
+
   useEffect(() => {
     const settingsRef = doc(firestore, 'settings', 'store');
     
@@ -77,13 +79,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         } else {
             applyTheme(defaultThemeSettings);
         }
+        setIsThemeLoaded(true);
     }, (error) => {
         console.error("Failed to load theme settings from Firestore, using defaults.", error);
         applyTheme(defaultThemeSettings);
+        setIsThemeLoaded(true);
     });
 
     return () => unsub();
   }, []);
+
+  if (!isThemeLoaded) {
+      return null;
+  }
 
   return <>{children}</>;
 }

@@ -57,12 +57,14 @@ export default function RootLayout({
         {/* End Meta Pixel Code */}
 
       </head>
-      <body className="font-body antialiased min-h-screen flex flex-col" suppressHydrationWarning>
+      <body className="font-body antialiased min-h-screen" suppressHydrationWarning>
         <ThemeProvider>
             <WishlistProvider>
               <CartProvider>
                 <ChatProvider>
-                  {children}
+                  <div className="flex flex-col min-h-screen">
+                    {children}
+                  </div>
                   <Toaster />
                   <BottomNav />
                   <ChatWidget />
