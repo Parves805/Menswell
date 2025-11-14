@@ -348,29 +348,15 @@ export function SiteHeader() {
         </div>
       </div>
       {/* Desktop Navigation */}
-      <div className="hidden md:flex h-12 items-center justify-center border-t">
+      <div className="hidden md:flex h-12 items-center justify-center">
           <nav className="flex items-center space-x-6 text-sm font-medium">
               <Link href="/" className="text-foreground transition-colors hover:text-primary">Home</Link>
-              
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="group flex items-center text-sm font-medium text-foreground transition-colors hover:text-primary focus:outline-none">
-                    Categories
-                    <ChevronDown className="relative top-[1px] ml-1 h-4 w-4 transition duration-200 group-data-[state=open]:rotate-180" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center">
-                  {categories.map((category) => (
-                    <DropdownMenuItem key={category.id} asChild>
-                      <Link href={`/category/${category.id}`}>
-                        {category.name}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
               <Link href="/shop" className="text-foreground transition-colors hover:text-primary">Shop</Link>
+              {categories.map((category) => (
+                <Link key={category.id} href={`/category/${category.id}`} className="text-foreground transition-colors hover:text-primary">
+                  {category.name}
+                </Link>
+              ))}
               <Link href="/about" className="text-foreground transition-colors hover:text-primary">About Us</Link>
           </nav>
       </div>
