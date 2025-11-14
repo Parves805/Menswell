@@ -1,4 +1,6 @@
 
+'use client';
+
 import { AuthForm } from '@/components/auth-form';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
