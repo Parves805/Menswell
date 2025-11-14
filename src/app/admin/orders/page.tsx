@@ -287,9 +287,7 @@ export default function AdminOrdersPage() {
                     </Dialog>
                 )}
                  <div className="hidden">
-                    <div ref={invoiceRef}>
-                        {selectedOrder && <OrderInvoice order={selectedOrder} />}
-                    </div>
+                    {selectedOrder && <OrderInvoice ref={invoiceRef} order={selectedOrder} />}
                 </div>
             </CardContent>
         </Card>
