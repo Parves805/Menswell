@@ -88,7 +88,8 @@ export default function AdminOrdersPage() {
             }
             toast({ title: 'Status Updated', description: `Order status changed to ${newStatus}.` });
             
-            // Send email notification
+            // Send email notification - Temporarily disabled
+            /*
             try {
                 await generateStatusUpdateEmail({ order: { ...orderToUpdate, status: newStatus }, newStatus });
                  toast({
@@ -103,6 +104,7 @@ export default function AdminOrdersPage() {
                     description: 'Could not send status update email.',
                 });
             }
+            */
 
 
         } catch (error) {
