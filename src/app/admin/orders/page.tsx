@@ -18,6 +18,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import {
   Dialog,
@@ -165,22 +166,17 @@ export default function AdminOrdersPage() {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                 <DropdownMenuItem onSelect={() => setSelectedOrder(order)}>View Details</DropdownMenuItem>
-                                                <DropdownMenuSub>
-                                                    <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
-                                                    <DropdownMenuPortal>
-                                                        <DropdownMenuSubContent>
-                                                            {ORDER_STATUSES.map(status => (
-                                                                <DropdownMenuItem 
-                                                                    key={status} 
-                                                                    onClick={() => handleStatusChange(order.id, status)}
-                                                                    disabled={order.status === status}
-                                                                >
-                                                                    {status}
-                                                                </DropdownMenuItem>
-                                                            ))}
-                                                        </DropdownMenuSubContent>
-                                                    </DropdownMenuPortal>
-                                                </DropdownMenuSub>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+                                                {ORDER_STATUSES.map(status => (
+                                                    <DropdownMenuItem 
+                                                        key={status} 
+                                                        onClick={() => handleStatusChange(order.id, status)}
+                                                        disabled={order.status === status}
+                                                    >
+                                                        {status}
+                                                    </DropdownMenuItem>
+                                                ))}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
