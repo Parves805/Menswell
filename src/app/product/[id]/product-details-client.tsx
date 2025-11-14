@@ -23,7 +23,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { QuickCheckoutDialog } from '@/components/quick-checkout-sheet';
 
 
 const VIEWING_HISTORY_KEY = 'bazaargoProductViewHistory';
@@ -93,9 +92,6 @@ export function ProductDetailsClient({ product }: { product: Product }) {
   const [userCanReview, setUserCanReview] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-
-  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
-  const [checkoutItem, setCheckoutItem] = useState<CartItem | null>(null);
 
   const reviewForm = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
@@ -176,14 +172,8 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       return;
     }
     const { image, ...colorData } = selectedColor || {};
-    const itemForCheckout: CartItem = {
-      ...product,
-      quantity: quantity,
-      selectedSize: selectedSize === 'N/A' ? undefined : selectedSize,
-      selectedColor: selectedColor?.name === 'N/A' ? undefined : colorData,
-    };
-    setCheckoutItem(itemForCheckout);
-    setIsCheckoutDialogOpen(true);
+    addItem(product, quantity, selectedSize === 'N/A' ? undefined : selectedSize, selectedColor?.name === 'N/A' ? undefined : colorData);
+    router.push('/checkout');
   };
 
   const handleMessageSeller = () => {
@@ -463,13 +453,6 @@ export function ProductDetailsClient({ product }: { product: Product }) {
             )}
         </div>
       </div>
-      {checkoutItem && (
-        <QuickCheckoutDialog
-            isOpen={isCheckoutDialogOpen}
-            onOpenChange={setIsCheckoutDialogOpen}
-            item={checkoutItem}
-        />
-      )}
     </>
   );
 }
