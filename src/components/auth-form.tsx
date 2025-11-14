@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -238,7 +237,7 @@ export function AuthForm({ type }: AuthFormProps) {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} disabled={isLoading || isGoogleLoading}/>
+                    <Input placeholder="You Name" {...field} disabled={isLoading || isGoogleLoading}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
