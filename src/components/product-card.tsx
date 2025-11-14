@@ -23,8 +23,8 @@ function Rating({ rating, reviewCount }: { rating: number, reviewCount: number }
   return (
     <div className="flex items-center gap-1 text-sm text-muted-foreground">
       <div className="flex items-center">
-        {[...Array(fullStars)].map((_, i) => <Star key={`full_${i}`} className="w-4 h-4 fill-primary text-primary" />)}
-        {halfStar && <StarHalf className="w-4 h-4 fill-primary text-primary" />}
+        {[...Array(fullStars)].map((_, i) => <Star key={`full_${i}`} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
+        {halfStar && <StarHalf className="w-4 h-4 fill-yellow-500 text-yellow-500" />}
         {[...Array(emptyStars)].map((_, i) => <Star key={`empty_${i}`} className="w-4 h-4 text-muted-foreground/50" />)}
       </div>
       <span>({reviewCount})</span>
@@ -44,7 +44,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col bg-card border-primary/20">
-      <CardHeader className="p-0 border-b">
+      <CardHeader className="p-0 border-b border-primary/20">
         <div className="relative aspect-square w-full">
           <Link href={`/product/${product.id}`}>
             <Image

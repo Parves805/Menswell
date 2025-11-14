@@ -47,8 +47,8 @@ function OverallRating({ rating, reviewCount }: { rating: number, reviewCount: n
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center">
-        {[...Array(fullStars)].map((_, i) => <Star key={`full_${i}`} className="w-5 h-5 fill-primary text-primary" />)}
-        {halfStar && <StarHalf className="w-5 h-5 fill-primary text-primary" />}
+        {[...Array(fullStars)].map((_, i) => <Star key={`full_${i}`} className="w-5 h-5 fill-yellow-500 text-yellow-500" />)}
+        {halfStar && <StarHalf className="w-5 h-5 fill-yellow-500 text-yellow-500" />}
         {[...Array(emptyStars)].map((_, i) => <Star key={`empty_${i}`} className="w-5 h-5 text-muted-foreground/50" />)}
       </div>
       <span className="text-muted-foreground text-sm">({reviewCount} reviews)</span>
@@ -66,7 +66,7 @@ const StarRatingInput = ({ value, onChange, disabled = false }: { value: number;
           className={cn(
             "h-8 w-8",
             !disabled && "cursor-pointer",
-            (hoverValue || value) >= star ? "text-primary fill-primary" : "text-muted-foreground/30"
+            (hoverValue || value) >= star ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/30"
           )}
           onClick={() => !disabled && onChange(star)}
           onMouseEnter={() => !disabled && setHoverValue(star)}
@@ -172,7 +172,6 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       toast({ title: 'Please select a color', variant: 'destructive' });
       return;
     }
-    // Clear the cart, add the current item, then redirect
     clearCart();
     const { image, ...colorData } = selectedColor || {};
     addItem(product, quantity, selectedSize === 'N/A' ? undefined : selectedSize, selectedColor?.name === 'N/A' ? undefined : colorData);
@@ -398,7 +397,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
                             <span className="text-xs text-muted-foreground">{new Date(review.timestamp).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center my-1">
-                            {[...Array(5)].map((_, i) => <Star key={i} className={cn("w-4 h-4", i < review.rating ? "text-primary fill-primary" : "text-muted-foreground/30")} />)}
+                            {[...Array(5)].map((_, i) => <Star key={i} className={cn("w-4 h-4", i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/30")} />)}
                         </div>
                         <p className="text-muted-foreground text-sm">{review.comment}</p>
                     </div>
