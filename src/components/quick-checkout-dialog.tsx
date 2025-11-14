@@ -152,20 +152,18 @@ export function QuickCheckoutDialog({ isOpen, onOpenChange, item }: QuickCheckou
                         <CardHeader>
                             <DialogTitle className="text-2xl">ডেলিভারির তথ্য</DialogTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-0 sm:p-6">
                            <Form {...form}>
                                 <form onSubmit={form.handleSubmit(onSubmit)} id="quick-checkout-form" className="space-y-4">
-                                    <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>পুরো নাম</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="name" render={({ field }) => (<FormItem className="sm:col-span-2"><FormLabel>পুরো নাম</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                                         <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>ইমেল</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>)} />
                                         <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>ফোন</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    </div>
-                                    <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>রাস্তার ঠিকানা</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="street" render={({ field }) => (<FormItem className="sm:col-span-2"><FormLabel>রাস্তার ঠিকানা</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                                         <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>শহর</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                                         <FormField control={form.control} name="zip" render={({ field }) => (<FormItem><FormLabel>পোস্ট কোড</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                         <FormField control={form.control} name="shippingZone" render={({ field }) => (<FormItem className="sm:col-span-2"><FormLabel>ডেলিভারি এলাকা</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="আপনার ডেলিভারি এলাকা বেছে নিন" /></SelectTrigger></FormControl><SelectContent>{shippingRates.map(rate => (<SelectItem key={rate.id} value={rate.id}>{rate.location}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
                                     </div>
-                                    <FormField control={form.control} name="shippingZone" render={({ field }) => (<FormItem><FormLabel>ডেলিভারি এলাকা</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="আপনার ডেলিভারি এলাকা বেছে নিন" /></SelectTrigger></FormControl><SelectContent>{shippingRates.map(rate => (<SelectItem key={rate.id} value={rate.id}>{rate.location}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
                                     
                                     <div className="space-y-4 pt-4">
                                         <h3 className="font-semibold text-lg">পেমেন্ট পদ্ধতি</h3>
