@@ -281,7 +281,7 @@ export default function AdminOrdersPage() {
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setSelectedOrder(null)}>Close</Button>
                                 <Button onClick={handlePrint}>
-                                    <Printer className="mr-2 h-4 w-4" />
+                                    <span className="mr-2"><Printer className="h-4 w-4" /></span>
                                     Print Invoice
                                 </Button>
                             </DialogFooter>
