@@ -52,12 +52,12 @@ export default function AdminOrdersPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const { toast } = useToast();
-    const invoiceRef = useRef(null);
+    const invoiceRef = useRef<OrderInvoice>(null);
 
     const handlePrint = useReactToPrint({
-        content: () => invoiceRef.current,
-        documentTitle: `Invoice-Order-${selectedOrder?.id.slice(-6)}`,
+      content: () => invoiceRef.current,
     });
+
 
     useEffect(() => {
         const q = query(collection(firestore, "orders"), orderBy("date", "desc"));
@@ -286,7 +286,7 @@ export default function AdminOrdersPage() {
                         </DialogContent>
                     </Dialog>
                 )}
-                 <div className="hidden">
+                 <div style={{ display: "none" }}>
                     {selectedOrder && <OrderInvoice ref={invoiceRef} order={selectedOrder} />}
                 </div>
             </CardContent>
