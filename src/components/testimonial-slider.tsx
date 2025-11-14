@@ -12,11 +12,29 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import type { Testimonial } from '@/lib/types';
-import { Quote } from 'lucide-react';
+import { Quote, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TestimonialSliderProps {
   testimonials: Testimonial[];
 }
+
+function Rating({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-1">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          className={cn(
+            "h-5 w-5",
+            i < rating ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground/30"
+          )}
+        />
+      ))}
+    </div>
+  );
+}
+
 
 export function TestimonialSlider({ testimonials }: TestimonialSliderProps) {
   const plugin = React.useRef(
@@ -40,10 +58,11 @@ export function TestimonialSlider({ testimonials }: TestimonialSliderProps) {
               <Card className="h-full border">
                 <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
                   <Quote className="h-8 w-8 text-primary mb-4" />
-                  <p className="text-muted-foreground italic mb-6 flex-grow">
+                  <p className="text-muted-foreground italic mb-4 flex-grow">
                     "{testimonial.text}"
                   </p>
-                  <div className="flex items-center gap-4">
+                  <Rating rating={testimonial.rating} />
+                  <div className="flex items-center gap-4 mt-4">
                     <Image
                       src={testimonial.avatarUrl}
                       alt={testimonial.author}

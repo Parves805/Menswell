@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, PlusCircle, Loader2 } from 'lucide-react';
+import { Trash2, PlusCircle, Loader2, Star } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, Testimonial } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 
 const defaultHeroSlides = [
@@ -66,10 +67,31 @@ const defaultThemeSettings: ThemeSettings = {
 };
 
 const defaultTestimonials: Testimonial[] = [
-    { id: '1', author: 'Anik Khan', role: 'Student, Dhaka', text: 'Awesome collection and fast delivery! The quality of the t-shirt is amazing. Highly recommended.', avatarUrl: 'https://placehold.co/100x100.png' },
-    { id: '2', author: 'Riyad Hasan', role: 'Graphic Designer', text: 'I love the unique designs. The fabric is so comfortable, and the fit is perfect. Will shop again!', avatarUrl: 'https://placehold.co/100x100.png' },
-    { id: '3', author: 'Sumon Ahmed', role: 'Freelancer', text: 'Great customer service and the products are top-notch. The checkout process was smooth and easy.', avatarUrl: 'https://placehold.co/100x100.png' },
+    { id: '1', author: 'Anik Khan', role: 'Student, Dhaka', text: 'Awesome collection and fast delivery! The quality of the t-shirt is amazing. Highly recommended.', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
+    { id: '2', author: 'Riyad Hasan', role: 'Graphic Designer', text: 'I love the unique designs. The fabric is so comfortable, and the fit is perfect. Will shop again!', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
+    { id: '3', author: 'Sumon Ahmed', role: 'Freelancer', text: 'Great customer service and the products are top-notch. The checkout process was smooth and easy.', avatarUrl: 'https://placehold.co/100x100.png', rating: 4 },
 ];
+
+const StarRatingInput = ({ value, onChange, disabled = false }: { value: number; onChange: (value: number) => void; disabled?: boolean }) => {
+  const [hoverValue, setHoverValue] = useState(0);
+  return (
+    <div className={cn("flex items-center gap-1", disabled && "cursor-not-allowed opacity-50")}>
+      {[1, 2, 3, 4, 5].map(star => (
+        <Star
+          key={star}
+          className={cn(
+            "h-6 w-6",
+            !disabled && "cursor-pointer",
+            (hoverValue || value) >= star ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/30"
+          )}
+          onClick={() => !disabled && onChange(star)}
+          onMouseEnter={() => !disabled && setHoverValue(star)}
+          onMouseLeave={() => !disabled && setHoverValue(0)}
+        />
+      ))}
+    </div>
+  );
+};
 
 
 export default function AdminSettingsPage() {
@@ -138,7 +160,7 @@ export default function AdminSettingsPage() {
         setSlides(prevSlides => prevSlides.filter(slide => slide.id !== id));
     };
 
-    const handleTestimonialChange = (id: string, field: keyof Omit<Testimonial, 'id'>, value: string) => {
+    const handleTestimonialChange = (id: string, field: keyof Omit<Testimonial, 'id'>, value: string | number) => {
         setTestimonials(prev =>
             prev.map(t => (t.id === id ? { ...t, [field]: value } : t))
         );
@@ -148,7 +170,7 @@ export default function AdminSettingsPage() {
         const newId = `testimonial_${Date.now()}`;
         setTestimonials(prev => [
             ...prev,
-            { id: newId, author: '', role: '', text: '', avatarUrl: 'https://placehold.co/100x100.png' },
+            { id: newId, author: '', role: '', text: '', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
         ]);
     };
 
@@ -380,8 +402,8 @@ export default function AdminSettingsPage() {
                                 height={60}
                                 className="rounded-full border"
                             />
-                            <div className="flex-grow space-y-2 w-full">
-                                <div className="grid grid-cols-2 gap-4">
+                            <div className="flex-grow space-y-4 w-full">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor={`testimonial-author-${testimonial.id}`}>Author Name</Label>
                                         <Input id={`testimonial-author-${testimonial.id}`} value={testimonial.author} onChange={(e) => handleTestimonialChange(testimonial.id, 'author', e.target.value)} />
@@ -395,9 +417,18 @@ export default function AdminSettingsPage() {
                                     <Label htmlFor={`testimonial-text-${testimonial.id}`}>Testimonial Text</Label>
                                     <Textarea id={`testimonial-text-${testimonial.id}`} value={testimonial.text} onChange={(e) => handleTestimonialChange(testimonial.id, 'text', e.target.value)} />
                                 </div>
-                                 <div>
-                                    <Label htmlFor={`testimonial-avatar-${testimonial.id}`}>Avatar URL</Label>
-                                    <Input id={`testimonial-avatar-${testimonial.id}`} value={testimonial.avatarUrl} onChange={(e) => handleTestimonialChange(testimonial.id, 'avatarUrl', e.target.value)} />
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+                                    <div>
+                                        <Label htmlFor={`testimonial-avatar-${testimonial.id}`}>Avatar URL</Label>
+                                        <Input id={`testimonial-avatar-${testimonial.id}`} value={testimonial.avatarUrl} onChange={(e) => handleTestimonialChange(testimonial.id, 'avatarUrl', e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <Label>Rating</Label>
+                                        <StarRatingInput
+                                            value={testimonial.rating}
+                                            onChange={(value) => handleTestimonialChange(testimonial.id, 'rating', value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => removeTestimonial(testimonial.id)} className="text-destructive flex-shrink-0 mt-2 sm:mt-0">

@@ -146,4 +146,5 @@ export interface Testimonial {
   role: string;
   text: string;
   avatarUrl: string;
+  rating: number;
 }
