@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ShoppingBag } from 'lucide-react';
