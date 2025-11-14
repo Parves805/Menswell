@@ -125,7 +125,7 @@ export default function ThankYouPage() {
     return (
         <div className="flex flex-col min-h-screen">
             <SiteHeader />
-            <main className="flex-grow flex items-center justify-center container py-12 px-4 pb-24 md:pb-12 bg-secondary/30">
+            <main className="flex-grow flex items-center justify-center container py-12 px-4 pb-24 md:pb-12">
                 <Suspense fallback={<Skeleton className="h-96 w-full max-w-2xl" />}>
                     <ThankYouContent />
                 </Suspense>

@@ -337,7 +337,7 @@ export default function AdminLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-secondary/30">
+      <div className="flex min-h-screen">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">

@@ -168,7 +168,7 @@ export default function Home() {
                   <CarouselItem key={category.id} className="basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
                     <div className="p-1">
                       <Link href={`/category/${category.id}`} className="group text-center block">
-                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary border">
+                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary">
                           <CardContent className="p-0">
                             <div className="relative aspect-square">
                               <Image
@@ -195,7 +195,7 @@ export default function Home() {
         
         {/* Recent Products Section */}
         {recentProducts.length > 0 && (
-          <section className="bg-secondary/50 py-12 md:py-20">
+          <section className="py-12 md:py-20">
             <div className="container">
               <h2 className="text-3xl font-bold text-center font-headline mb-8">Recent Products</h2>
               <Carousel opts={{ align: "start", loop: recentProducts.length > 4 }} className="w-full">
@@ -256,7 +256,7 @@ export default function Home() {
 
         {/* On Sale Now Section */}
         {saleProducts.length > 0 && (
-          <section className="bg-secondary/50 py-12 md:py-20">
+          <section className="py-12 md:py-20">
             <div className="container">
               <h2 className="text-3xl font-bold text-center font-headline mb-8">On Sale Now</h2>
               <Carousel opts={{ align: "start", loop: saleProducts.length > 4 }} className="w-full">
@@ -282,7 +282,7 @@ export default function Home() {
 
         {/* Just For You Section */}
         {aiSettings.recommendationsEnabled && viewingHistory.length > 0 && (
-          <section className="bg-secondary/50 py-12 md:py-20">
+          <section className="py-12 md:py-20">
             <div className="container">
               <h2 className="text-3xl font-bold text-center font-headline mb-8">Just For You</h2>
               <ProductRecommendations viewingHistory={viewingHistory} />

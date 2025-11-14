@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 
 export default function TrackOrderPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-secondary/30">
+    <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-grow flex items-center justify-center py-12 px-4 pb-24 md:pb-12">
-        <Card className="w-full max-w-md border-primary/20">
+        <Card className="w-full max-w-md">
             <CardHeader className="text-center">
                 <div className="mx-auto mb-4">
                     <Truck className="h-10 w-10 text-primary" />
