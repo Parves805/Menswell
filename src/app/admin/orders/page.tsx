@@ -52,7 +52,19 @@ export default function AdminOrdersPage() {
     const invoiceRef = useRef<HTMLDivElement>(null);
     
     const handlePrint = () => {
-        window.print();
+      if (!selectedOrder) return;
+
+      const originalTitle = document.title;
+      document.title = `Invoice_${selectedOrder.id}`;
+      
+      const handleAfterPrint = () => {
+        document.title = originalTitle;
+        window.removeEventListener('afterprint', handleAfterPrint);
+      };
+
+      window.addEventListener('afterprint', handleAfterPrint);
+
+      window.print();
     };
 
 
