@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -34,6 +35,7 @@ import {
   Truck,
   FileText,
   UserCog,
+  ImageIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -219,6 +221,15 @@ export default function AdminLayout({
           <Link href="/admin/notifications">
             <Bell />
             <span>Notifications</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <Link href="https://menswell.stapler.studio" target="_blank">
+            <ImageIcon />
+            <span>Image URL Generator</span>
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
