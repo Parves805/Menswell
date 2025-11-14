@@ -4,13 +4,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ShoppingBag, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { AdminUser } from '@/lib/types';
+
+const ADMIN_USERS_KEY = 'bazaargoAdminUsers';
 
 const adminLoginSchema = z.object({
   email: z.string().email({ message: 'আপনার ইমেল ঠিকানাটি সঠিক নয়। অনুগ্রহ করে একটি সঠিক ইমেল ব্যবহার করুন।' }),
@@ -19,10 +22,32 @@ const adminLoginSchema = z.object({
 
 type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 
+const defaultAdmin: AdminUser = {
+    id: 'default-admin',
+    name: 'Mafuz',
+    email: 'mafuz@gmail.com',
+    password: 'Mafuz@123',
+};
+
+
 export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([defaultAdmin]);
+
+  useEffect(() => {
+    try {
+        const storedUsers = localStorage.getItem(ADMIN_USERS_KEY);
+        if (storedUsers) {
+            setAdminUsers([defaultAdmin, ...JSON.parse(storedUsers)]);
+        }
+    } catch (e) {
+        console.error("Failed to parse admin users from localStorage", e);
+        setAdminUsers([defaultAdmin]);
+    }
+  }, []);
+
 
   const form = useForm<AdminLoginFormValues>({
     resolver: zodResolver(adminLoginSchema),
@@ -35,9 +60,12 @@ export default function AdminLoginPage() {
   const onSubmit = (data: AdminLoginFormValues) => {
     setIsLoading(true);
 
-    // Simulate API call
     setTimeout(() => {
-      if (data.email === 'mafuz@gmail.com' && data.password === 'Mafuz@123') {
+      const user = adminUsers.find(
+        (u) => u.email === data.email && u.password === data.password
+      );
+
+      if (user) {
         localStorage.setItem('isAdminAuthenticated', 'true');
         toast({
           title: 'Login Successful',
@@ -50,7 +78,6 @@ export default function AdminLoginPage() {
             title: 'Login Failed',
             description: 'Invalid email or password.',
         });
-        // Setting a general form error
         form.setError("root", { type: "manual", message: "Invalid email or password." });
       }
       setIsLoading(false);

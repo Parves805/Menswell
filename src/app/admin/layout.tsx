@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -34,6 +33,7 @@ import {
   SquareCheck,
   Truck,
   FileText,
+  UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -67,7 +67,8 @@ export default function AdminLayout({
     '/admin/analytics',
     '/admin/seo',
     '/admin/shipping',
-  ].some(p => pathname === p);
+    '/admin/users',
+  ].some(p => pathname.startsWith(p));
 
   const areMarketingActive = [
     '/admin/marketing/email',
@@ -313,6 +314,11 @@ export default function AdminLayout({
                     <Link href="/admin/settings">General Settings</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
+                    <Link href="/admin/users">Admin Users</Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive('/admin/shipping')}>
                     <Link href="/admin/shipping">Shipping Rates</Link>
@@ -418,5 +424,3 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
-
-    
