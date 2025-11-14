@@ -21,6 +21,7 @@ export interface Category {
   name: string;
   image: string;
   bannerImage: string;
+  order?: number;
 }
 
 export interface CartItem extends Product {
