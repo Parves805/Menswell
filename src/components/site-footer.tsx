@@ -38,7 +38,7 @@ export function SiteFooter() {
   const logoToDisplay = settings.footerLogoUrl || settings.logoUrl;
 
   return (
-    <footer className="mt-auto border-t bg-primary text-primary-foreground">
+    <footer className="mt-auto border-t bg-accent text-accent-foreground">
       <div className="container py-12">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
           <div className="col-span-2 sm:col-span-3 md:col-span-1">
@@ -89,7 +89,7 @@ export function SiteFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 border-t border-primary-foreground/20 pt-6 text-center text-sm text-primary-foreground/80">
+        <div className="mt-8 border-t border-accent-foreground/20 pt-6 text-center text-sm text-accent-foreground/80">
           <p>&copy; {new Date().getFullYear()} {settings.storeName}. All rights reserved.</p>
         </div>
       </div>
