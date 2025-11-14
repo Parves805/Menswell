@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -52,9 +51,9 @@ export default function AdminOrdersPage() {
     
     const invoiceRef = useRef<HTMLDivElement>(null);
     
-    const handlePrint = useReactToPrint({
-        content: () => invoiceRef.current,
-    });
+    const handlePrint = () => {
+      window.print();
+    };
 
 
     useEffect(() => {
@@ -118,7 +117,22 @@ export default function AdminOrdersPage() {
     const shipping = selectedOrder ? selectedOrder.total - subtotal : 0;
 
     return (
-        <Card>
+      <>
+        <style jsx global>{`
+          @media print {
+            body > *:not(.printable-invoice) {
+              display: none !important;
+            }
+            .printable-invoice {
+              display: block !important;
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+            }
+          }
+        `}</style>
+        <Card className="non-printable">
             <CardHeader>
                 <CardTitle className="text-2xl md:text-3xl">Orders</CardTitle>
                 <CardDescription>Manage customer orders here.</CardDescription>
@@ -192,7 +206,7 @@ export default function AdminOrdersPage() {
 
                 {selectedOrder && (
                     <Dialog open={!!selectedOrder} onOpenChange={(isOpen) => !isOpen && setSelectedOrder(null)}>
-                        <DialogContent className="sm:max-w-3xl">
+                        <DialogContent className="sm:max-w-3xl non-printable">
                             <DialogHeader>
                                 <DialogTitle>Order Details</DialogTitle>
                                 <DialogDescription>
@@ -281,10 +295,11 @@ export default function AdminOrdersPage() {
                         </DialogContent>
                     </Dialog>
                 )}
-                 <div className="hidden">
+                 <div className="hidden printable-invoice">
                     {selectedOrder && <OrderInvoice ref={invoiceRef} order={selectedOrder} />}
                 </div>
             </CardContent>
         </Card>
+      </>
     )
 }
