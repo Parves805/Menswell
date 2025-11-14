@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -8,7 +7,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Card, CardContent } from '@/components/ui/card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import type { Product, Category, PopupCampaign, WebsiteSettings, HomepageSection as HomepageSectionType, PromoSection } from '@/lib/types';
+import type { Product, Category, PopupCampaign, WebsiteSettings, HomepageSection as HomepageSectionType, PromoSection, Testimonial } from '@/lib/types';
 import { ProductCard } from '@/components/product-card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +15,7 @@ import { ProductRecommendations } from '@/components/product-recommendations';
 import { PopupModal } from '@/components/popup-modal';
 import { HomepageSection } from '@/components/homepage-section';
 import { PromoGrid } from '@/components/promo-grid';
+import { TestimonialSlider } from '@/components/testimonial-slider';
 import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 
@@ -37,6 +37,7 @@ export default function Home() {
   const [showPopup, setShowPopup] = React.useState(false);
   const [homepageSections, setHomepageSections] = React.useState<HomepageSectionType[]>([]);
   const [promoSections, setPromoSections] = React.useState<PromoSection[]>([]);
+  const [testimonials, setTestimonials] = React.useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -56,6 +57,7 @@ export default function Home() {
             setAiSettings(settings.aiSettings || { recommendationsEnabled: true });
             setHomepageSections(settings.homepageSections || []);
             setPromoSections(settings.promoCardSections || []);
+            setTestimonials(settings.testimonials || []);
             
             const campaign = settings.popupCampaign;
             if (campaign) {
@@ -166,7 +168,7 @@ export default function Home() {
                   <CarouselItem key={category.id} className="basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
                     <div className="p-1">
                       <Link href={`/category/${category.id}`} className="group text-center block">
-                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20-primary border-primary/20">
+                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary border">
                           <CardContent className="p-0">
                             <div className="relative aspect-square">
                               <Image
@@ -292,6 +294,17 @@ export default function Home() {
         {promoSections.map((section) => (
             <PromoGrid key={section.id} promoCards={section.cards} isLoading={isLoading} />
         ))}
+
+        {/* Testimonials Section */}
+        {testimonials.length > 0 && (
+            <section className="py-12 md:py-20">
+                <div className="container">
+                    <h2 className="text-3xl font-bold text-center font-headline mb-8">What Our Customers Say</h2>
+                    <TestimonialSlider testimonials={testimonials} />
+                </div>
+            </section>
+        )}
+
       </main>
       <SiteFooter />
     </div>

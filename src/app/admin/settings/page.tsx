@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,7 +10,7 @@ import { Trash2, PlusCircle, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings } from '@/lib/types';
+import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, Testimonial } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
@@ -66,6 +65,12 @@ const defaultThemeSettings: ThemeSettings = {
     accent: "#F2223A",
 };
 
+const defaultTestimonials: Testimonial[] = [
+    { id: '1', author: 'Anik Khan', role: 'Student, Dhaka', text: 'Awesome collection and fast delivery! The quality of the t-shirt is amazing. Highly recommended.', avatarUrl: 'https://placehold.co/100x100.png' },
+    { id: '2', author: 'Riyad Hasan', role: 'Graphic Designer', text: 'I love the unique designs. The fabric is so comfortable, and the fit is perfect. Will shop again!', avatarUrl: 'https://placehold.co/100x100.png' },
+    { id: '3', author: 'Sumon Ahmed', role: 'Freelancer', text: 'Great customer service and the products are top-notch. The checkout process was smooth and easy.', avatarUrl: 'https://placehold.co/100x100.png' },
+];
+
 
 export default function AdminSettingsPage() {
     const { toast } = useToast();
@@ -74,6 +79,7 @@ export default function AdminSettingsPage() {
     const [aiSettings, setAiSettings] = useState<AiSettings>(defaultAiSettings);
     const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>(defaultPaymentSettings);
     const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
+    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -89,8 +95,10 @@ export default function AdminSettingsPage() {
                 setAiSettings(data.aiSettings || defaultAiSettings);
                 setPaymentSettings(data.paymentGatewaySettings || defaultPaymentSettings);
                 setThemeSettings(data.themeSettings || defaultThemeSettings);
+                setTestimonials(data.testimonials || defaultTestimonials);
             } else {
                  setSlides(defaultHeroSlides.map((img, i) => ({ ...img, id: Date.now() + i })));
+                 setTestimonials(defaultTestimonials);
             }
             setIsMounted(true);
         });
@@ -130,6 +138,25 @@ export default function AdminSettingsPage() {
         setSlides(prevSlides => prevSlides.filter(slide => slide.id !== id));
     };
 
+    const handleTestimonialChange = (id: string, field: keyof Omit<Testimonial, 'id'>, value: string) => {
+        setTestimonials(prev =>
+            prev.map(t => (t.id === id ? { ...t, [field]: value } : t))
+        );
+    };
+
+    const addTestimonial = () => {
+        const newId = `testimonial_${Date.now()}`;
+        setTestimonials(prev => [
+            ...prev,
+            { id: newId, author: '', role: '', text: '', avatarUrl: 'https://placehold.co/100x100.png' },
+        ]);
+    };
+
+    const removeTestimonial = (id: string) => {
+        setTestimonials(prev => prev.filter(t => t.id !== id));
+    };
+
+
     const saveChanges = async () => {
         setIsLoading(true);
         try {
@@ -142,6 +169,7 @@ export default function AdminSettingsPage() {
                 aiSettings: aiSettings,
                 paymentGatewaySettings: paymentSettings,
                 themeSettings: themeSettings,
+                testimonials: testimonials,
             }, { merge: true });
 
             toast({
@@ -166,7 +194,7 @@ export default function AdminSettingsPage() {
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
-            <Card className="border-primary/20">
+            <Card>
                 <CardHeader>
                     <CardTitle>Website Settings</CardTitle>
                     <CardDescription>Manage general settings for your website.</CardDescription>
@@ -247,7 +275,7 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
 
-            <Card className="border-primary/20">
+            <Card>
                 <CardHeader>
                     <CardTitle>Theme Customization</CardTitle>
                     <CardDescription>Customize the main colors of your website. Use HEX color codes.</CardDescription>
@@ -286,20 +314,20 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
 
-            <Card className="border-primary/20">
+            <Card>
                 <CardHeader>
                     <CardTitle>Hero Slider Management</CardTitle>
                     <CardDescription>Add, remove, or change images in the homepage hero slider.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {slides.map((slide) => (
-                        <div key={slide.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border-primary/20 rounded-lg">
+                        <div key={slide.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg">
                             <Image
                                 src={slide.url || 'https://placehold.co/150x150.png'}
                                 alt={'Slide preview'}
                                 width={100}
                                 height={100}
-                                className="aspect-square rounded-md object-cover border-primary/20"
+                                className="aspect-square rounded-md object-cover border"
                                 data-ai-hint={slide.dataAiHint}
                             />
                             <div className="flex-grow space-y-2 w-full">
@@ -337,13 +365,63 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
 
-             <Card className="border-primary/20">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Testimonial Management</CardTitle>
+                    <CardDescription>Manage customer testimonials displayed on the homepage.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {testimonials.map((testimonial) => (
+                        <div key={testimonial.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg">
+                             <Image
+                                src={testimonial.avatarUrl || 'https://placehold.co/100x100.png'}
+                                alt={testimonial.author}
+                                width={60}
+                                height={60}
+                                className="rounded-full border"
+                            />
+                            <div className="flex-grow space-y-2 w-full">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor={`testimonial-author-${testimonial.id}`}>Author Name</Label>
+                                        <Input id={`testimonial-author-${testimonial.id}`} value={testimonial.author} onChange={(e) => handleTestimonialChange(testimonial.id, 'author', e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor={`testimonial-role-${testimonial.id}`}>Role / Location</Label>
+                                        <Input id={`testimonial-role-${testimonial.id}`} value={testimonial.role} onChange={(e) => handleTestimonialChange(testimonial.id, 'role', e.target.value)} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label htmlFor={`testimonial-text-${testimonial.id}`}>Testimonial Text</Label>
+                                    <Textarea id={`testimonial-text-${testimonial.id}`} value={testimonial.text} onChange={(e) => handleTestimonialChange(testimonial.id, 'text', e.target.value)} />
+                                </div>
+                                 <div>
+                                    <Label htmlFor={`testimonial-avatar-${testimonial.id}`}>Avatar URL</Label>
+                                    <Input id={`testimonial-avatar-${testimonial.id}`} value={testimonial.avatarUrl} onChange={(e) => handleTestimonialChange(testimonial.id, 'avatarUrl', e.target.value)} />
+                                </div>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => removeTestimonial(testimonial.id)} className="text-destructive flex-shrink-0 mt-2 sm:mt-0">
+                                <Trash2 className="h-5 w-5" />
+                                <span className="sr-only">Remove Testimonial</span>
+                            </Button>
+                        </div>
+                    ))}
+                    <div className="flex justify-start pt-4">
+                        <Button variant="outline" onClick={addTestimonial}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Testimonial
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+             <Card>
                 <CardHeader>
                     <CardTitle>AI Settings</CardTitle>
                     <CardDescription>Manage AI-powered features for your store.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-between rounded-lg border-primary/20 p-4">
+                    <div className="flex items-center justify-between rounded-lg border p-4">
                         <div>
                             <Label htmlFor="ai-recommendations" className="font-medium">Product Recommendations</Label>
                             <p className="text-sm text-muted-foreground">Enable or disable AI-powered product recommendations on the homepage.</p>
@@ -357,13 +435,13 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
             
-            <Card className="border-primary/20">
+            <Card>
                 <CardHeader>
                     <CardTitle>Payment Gateway Settings</CardTitle>
                     <CardDescription>Enable or disable payment methods for checkout.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between rounded-lg border-primary/20 p-4">
+                    <div className="flex items-center justify-between rounded-lg border p-4">
                         <div>
                             <Label htmlFor="pg-cash" className="font-medium">Cash on Delivery</Label>
                             <p className="text-sm text-muted-foreground">Allow customers to pay with cash upon delivery.</p>
@@ -374,7 +452,7 @@ export default function AdminSettingsPage() {
                             onCheckedChange={(checked) => handlePaymentSettingChange('cashOnDelivery', checked)} 
                         />
                     </div>
-                    <div className="rounded-lg border-primary/20 p-4 space-y-4">
+                    <div className="rounded-lg border p-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <Label htmlFor="pg-bkash" className="font-medium">bKash</Label>
@@ -398,7 +476,7 @@ export default function AdminSettingsPage() {
                             </div>
                         )}
                     </div>
-                     <div className="rounded-lg border-primary/20 p-4 space-y-4">
+                     <div className="rounded-lg border p-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <Label htmlFor="pg-nagad" className="font-medium">Nagad</Label>
@@ -422,7 +500,7 @@ export default function AdminSettingsPage() {
                             </div>
                         )}
                     </div>
-                     <div className="rounded-lg border-primary/20 p-4 space-y-4">
+                     <div className="rounded-lg border p-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <Label htmlFor="pg-rocket" className="font-medium">Rocket</Label>

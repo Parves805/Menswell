@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -139,4 +138,12 @@ export interface ThemeSettings {
     primary: string; // Now expecting HEX string e.g., "#RRGGBB"
     background: string; // Now expecting HEX string e.g., "#RRGGBB"
     accent: string; // Now expecting HEX string e.g., "#RRGGBB"
+}
+
+export interface Testimonial {
+  id: string;
+  author: string;
+  role: string;
+  text: string;
+  avatarUrl: string;
 }
