@@ -51,8 +51,9 @@ export default function AdminOrdersPage() {
     const { toast } = useToast();
     
     const invoiceRef = useRef<HTMLDivElement>(null);
+    
     const handlePrint = useReactToPrint({
-      content: () => invoiceRef.current,
+        content: () => invoiceRef.current,
     });
 
 
