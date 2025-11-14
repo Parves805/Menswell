@@ -43,7 +43,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col bg-card">
+    <Card className="w-full h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col bg-card border-primary/20">
       <CardHeader className="p-0 border-b">
         <div className="relative aspect-square w-full">
           <Link href={`/product/${product.id}`}>
