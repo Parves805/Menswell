@@ -348,13 +348,11 @@ export function SiteHeader() {
         </div>
       </div>
       {/* Desktop Navigation */}
-      <div className="hidden md:flex h-12 items-center justify-between container">
+      <div className="hidden md:flex h-12 items-center justify-start container">
           <nav className="flex items-center space-x-6 text-sm font-medium">
               <Link href="/" className="text-foreground transition-colors hover:text-primary">Home</Link>
               <Link href="/shop" className="text-foreground transition-colors hover:text-primary">Shop</Link>
               <Link href="/about" className="text-foreground transition-colors hover:text-primary">About Us</Link>
-          </nav>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
               {categories.map((category) => (
                 <Link key={category.id} href={`/category/${category.id}`} className="text-foreground transition-colors hover:text-primary">
                   {category.name}
