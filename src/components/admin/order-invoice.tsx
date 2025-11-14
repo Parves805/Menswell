@@ -111,7 +111,7 @@ export const OrderInvoice = React.forwardRef<HTMLDivElement, OrderInvoiceProps>(
             
             <footer className="mt-16 pt-4 border-t-2 text-center text-gray-500 text-sm">
                 <p>Thank you for your business!</p>
-                <p>{settings.storeName} | {settings.contactEmail}</p>
+                <p>{settings.contactEmail}</p>
             </footer>
         </div>
     );
