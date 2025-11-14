@@ -52,6 +52,12 @@ const nextConfig: NextConfig = {
         hostname: 'scontent.fcgp7-1.fna.fbcdn.net',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn0.gstatic.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
