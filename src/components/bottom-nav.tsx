@@ -90,7 +90,7 @@ export function BottomNav() {
   }
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t border-primary/20">
+    <div className="md:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t">
       <div className="grid h-full grid-cols-5 mx-auto">
         <NavLink href="/" pathname={pathname}>
           <Home className="h-6 w-6" />
@@ -108,7 +108,7 @@ export function BottomNav() {
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[75vh] flex flex-col rounded-t-lg">
-            <SheetHeader className="p-4 border-b border-primary/20">
+            <SheetHeader className="p-4 border-b">
               <SheetTitle>All Categories</SheetTitle>
             </SheetHeader>
             <nav className="flex-grow overflow-y-auto">
@@ -117,7 +117,7 @@ export function BottomNav() {
                   <SheetClose asChild key={category.id}>
                     <Link
                       href={`/category/${category.id}`}
-                      className="group flex flex-col items-center text-center gap-2 p-4 rounded-lg border-primary/20 hover:border-primary/20-primary hover:bg-secondary/50 transition-colors"
+                      className="group flex flex-col items-center text-center gap-2 p-4 rounded-lg border hover:border-primary hover:bg-secondary/50 transition-colors"
                     >
                       <div className="relative h-16 w-16 mb-2">
                          <Image src={category.image} alt={category.name} fill className="object-contain" />
@@ -159,7 +159,7 @@ export function BottomNav() {
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-auto flex flex-col rounded-t-lg">
-             <SheetHeader className="p-4 border-b border-primary/20 text-left">
+             <SheetHeader className="p-4 border-b text-left">
               <SheetTitle>{isAuthenticated ? 'My Account' : 'Welcome'}</SheetTitle>
             </SheetHeader>
              <nav className="flex flex-col p-2">
