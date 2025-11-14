@@ -17,7 +17,7 @@ export default function LoginPage() {
                     <ShoppingBag className="h-10 w-10 text-primary" />
                 </div>
                 <CardTitle className="text-3xl font-bold font-headline">Welcome Back</CardTitle>
-                <CardDescription>Sign in to your BazaarGo account to continue.</CardDescription>
+                <CardDescription>Sign in to your Menswell account to continue.</CardDescription>
             </CardHeader>
             <CardContent>
                 <AuthForm type="login" />

@@ -17,7 +17,7 @@ export default function SignupPage() {
                     <ShoppingBag className="h-10 w-10 text-primary" />
                 </div>
                 <CardTitle className="text-3xl font-bold font-headline">Create an Account</CardTitle>
-                <CardDescription>Create an account to get started with BazaarGo.</CardDescription>
+                <CardDescription>Create an account to get started with Menswell.</CardDescription>
             </CardHeader>
             <CardContent>
                 <AuthForm type="signup" />
