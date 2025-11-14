@@ -82,6 +82,12 @@ const nextConfig: NextConfig = {
         hostname: 'filemanager.flexfashion.top',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'menswell.stapler.studio',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
