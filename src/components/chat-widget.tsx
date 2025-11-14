@@ -142,7 +142,7 @@ export function ChatWidget() {
     return (
         <div className="fixed bottom-20 right-4 z-50 md:bottom-4">
             {isChatOpen && (
-                 <Card className="w-80 h-[28rem] flex flex-col shadow-2xl mb-2 border">
+                 <Card className="w-80 h-[28rem] flex flex-col shadow-2xl mb-2">
                     <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
                         <CardTitle className="text-lg">Chat with us</CardTitle>
                         <Button variant="ghost" size="icon" onClick={toggleChat}>

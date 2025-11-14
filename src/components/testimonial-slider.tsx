@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -55,7 +56,7 @@ export function TestimonialSlider({ testimonials }: TestimonialSliderProps) {
         {testimonials.map((testimonial) => (
           <CarouselItem key={testimonial.id} className="md:basis-1/2 lg:basis-1/3">
             <div className="p-4">
-              <Card className="h-full border">
+              <Card className="h-full">
                 <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full">
                   <Quote className="h-8 w-8 text-primary mb-4" />
                   <p className="text-muted-foreground italic mb-4 flex-grow">
@@ -68,7 +69,7 @@ export function TestimonialSlider({ testimonials }: TestimonialSliderProps) {
                       alt={testimonial.author}
                       width={56}
                       height={56}
-                      className="rounded-full border-2 border-primary"
+                      className="rounded-full"
                     />
                     <div>
                       <p className="font-semibold">{testimonial.author}</p>

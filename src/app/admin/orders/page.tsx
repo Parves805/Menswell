@@ -93,7 +93,7 @@ export default function AdminOrdersPage() {
     const shipping = selectedOrder ? selectedOrder.total - subtotal : 0;
 
     return (
-        <Card className="border-primary/20">
+        <Card>
             <CardHeader>
                 <CardTitle className="text-2xl md:text-3xl">Orders</CardTitle>
                 <CardDescription>Manage customer orders here.</CardDescription>
@@ -205,7 +205,7 @@ export default function AdminOrdersPage() {
                                                 <span className="text-muted-foreground">Shipping</span>
                                                 <span>৳{shipping.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
-                                            <div className="flex justify-between font-bold text-base border-t border-primary/20 pt-2 mt-2">
+                                            <div className="flex justify-between font-bold text-base pt-2 mt-2">
                                                 <span>Total</span>
                                                 <span>৳{selectedOrder.total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
@@ -235,7 +235,7 @@ export default function AdminOrdersPage() {
                                     <div className="space-y-4">
                                         {selectedOrder.items.map(item => (
                                             <div key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor?.name || ''}`} className="flex items-center gap-4">
-                                                <Image src={item.images[0]} alt={item.name} width={64} height={64} className="rounded-md border border-primary/20 aspect-square object-cover" />
+                                                <Image src={item.images[0]} alt={item.name} width={64} height={64} className="rounded-md aspect-square object-cover" />
                                                 <div className="flex-grow">
                                                     <p className="font-medium">{item.name}</p>
                                                     {(item.selectedSize || item.selectedColor) && (

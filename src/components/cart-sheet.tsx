@@ -65,7 +65,7 @@ export function CartSheet() {
               <div className="flex flex-col gap-6">
                 {cartItems.map((item) => (
                   <div key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor?.name || ''}`} className="flex items-start gap-4">
-                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border">
+                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
                         src={item.images[0]}
                         alt={item.name}
@@ -81,7 +81,7 @@ export function CartSheet() {
                             <span>{[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}</span>
                             {item.selectedColor && (
                                 <div
-                                    className="h-3 w-3 rounded-full border"
+                                    className="h-3 w-3 rounded-full"
                                     style={{ backgroundColor: item.selectedColor.hex }}
                                 />
                             )}

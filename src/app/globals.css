@@ -96,7 +96,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-transparent;
   }
   body {
     @apply bg-background text-foreground;

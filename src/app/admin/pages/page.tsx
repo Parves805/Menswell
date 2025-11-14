@@ -138,7 +138,7 @@ export default function PageSettings() {
         <div className="max-w-3xl mx-auto space-y-6">
             <h1 className="text-2xl md:text-3xl font-bold font-headline">About & Legal Pages</h1>
             
-            <Card className="border-primary/20">
+            <Card>
                 <CardHeader>
                     <CardTitle>About Us Page Settings</CardTitle>
                     <CardDescription>Manage the content for the "About Us" page.</CardDescription>
@@ -187,7 +187,7 @@ export default function PageSettings() {
                 </CardContent>
             </Card>
 
-            <Card className="border-primary/20">
+            <Card>
                 <CardHeader>
                     <CardTitle>Legal & Policy Pages</CardTitle>
                     <CardDescription>Manage the content for your legal pages. Supports Markdown.</CardDescription>
