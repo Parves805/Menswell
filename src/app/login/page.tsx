@@ -4,17 +4,36 @@ import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingBag } from 'lucide-react';
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import type { WebsiteSettings } from '@/lib/types';
+
 
 export default function LoginPage() {
+  const [logoUrl, setLogoUrl] = useState('');
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+        if (doc.exists()) {
+            const settings = doc.data().websiteSettings as WebsiteSettings;
+            if (settings && settings.logoUrl) {
+                setLogoUrl(settings.logoUrl);
+            }
+        }
+    });
+    return () => unsub();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-grow flex items-center justify-center py-12 px-4 pb-24 md:pb-12">
         <Card className="w-full max-w-md">
             <CardHeader className="text-center">
-                <div className="mx-auto mb-4">
-                    <ShoppingBag className="h-10 w-10 text-primary" />
+                <div className="mx-auto mb-4 h-10 w-24 relative">
+                    {logoUrl && <Image src={logoUrl} alt="Logo" layout="fill" objectFit="contain" />}
                 </div>
                 <CardTitle className="text-3xl font-bold font-headline">Welcome Back</CardTitle>
                 <CardDescription>Sign in to your Menswell account to continue.</CardDescription>

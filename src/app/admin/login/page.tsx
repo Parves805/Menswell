@@ -9,9 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { ShoppingBag, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { AdminUser } from '@/lib/types';
+import type { AdminUser, WebsiteSettings } from '@/lib/types';
+import Image from 'next/image';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
 
 const ADMIN_USERS_KEY = 'bazaargoAdminUsers';
 
@@ -35,6 +38,7 @@ export default function AdminLoginPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([defaultAdmin]);
+  const [logoUrl, setLogoUrl] = useState('');
 
   useEffect(() => {
     try {
@@ -46,6 +50,18 @@ export default function AdminLoginPage() {
         console.error("Failed to parse admin users from localStorage", e);
         setAdminUsers([defaultAdmin]);
     }
+  }, []);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+        if (doc.exists()) {
+            const settings = doc.data().websiteSettings as WebsiteSettings;
+            if (settings && settings.logoUrl) {
+                setLogoUrl(settings.logoUrl);
+            }
+        }
+    });
+    return () => unsub();
   }, []);
 
 
@@ -88,8 +104,8 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4">
-            <ShoppingBag className="h-10 w-10 text-primary" />
+          <div className="mx-auto mb-4 h-10 w-24 relative">
+             {logoUrl && <Image src={logoUrl} alt="Logo" layout="fill" objectFit="contain" />}
           </div>
           <CardTitle className="text-2xl md:text-3xl font-bold font-headline">Admin Login</CardTitle>
           <CardDescription>Enter your credentials to access the admin panel.</CardDescription>
