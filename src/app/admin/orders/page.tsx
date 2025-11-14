@@ -1,13 +1,13 @@
-
 'use client'; 
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useReactToPrint } from 'react-to-print';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
+import { MoreHorizontal, Printer } from "lucide-react"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -34,6 +34,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { firestore } from '@/lib/firebase';
 import { collection, doc, onSnapshot, query, setDoc, orderBy } from 'firebase/firestore';
+import { generateStatusUpdateEmail } from '@/ai/flows/generate-status-update-email';
+import { OrderInvoice } from '@/components/admin/order-invoice';
 
 
 const statusColors: { [key: string]: string } = {
@@ -50,6 +52,12 @@ export default function AdminOrdersPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const { toast } = useToast();
+    const invoiceRef = useRef(null);
+
+    const handlePrint = useReactToPrint({
+        content: () => invoiceRef.current,
+        documentTitle: `Invoice-Order-${selectedOrder?.id.slice(-6)}`,
+    });
 
     useEffect(() => {
         const q = query(collection(firestore, "orders"), orderBy("date", "desc"));
@@ -81,6 +89,23 @@ export default function AdminOrdersPage() {
                 setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
             }
             toast({ title: 'Status Updated', description: `Order status changed to ${newStatus}.` });
+            
+            // Send email notification
+            try {
+                await generateStatusUpdateEmail({ order: { ...orderToUpdate, status: newStatus }, newStatus });
+                 toast({
+                    title: 'Email Sent',
+                    description: `Status update email sent to ${orderToUpdate.shippingInfo.email}.`,
+                });
+            } catch (emailError) {
+                console.error("Failed to send status update email:", emailError);
+                toast({
+                    variant: 'destructive',
+                    title: 'Email Failed',
+                    description: 'Could not send status update email.',
+                });
+            }
+
 
         } catch (error) {
             console.error("Failed to update order status", error);
@@ -253,10 +278,17 @@ export default function AdminOrdersPage() {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setSelectedOrder(null)}>Close</Button>
+                                <Button onClick={handlePrint}>
+                                    <Printer className="mr-2 h-4 w-4" />
+                                    Print Invoice
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
                 )}
+                 <div className="hidden">
+                    {selectedOrder && <OrderInvoice ref={invoiceRef} order={selectedOrder} />}
+                </div>
             </CardContent>
         </Card>
     )
