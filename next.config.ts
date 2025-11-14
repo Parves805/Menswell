@@ -70,6 +70,12 @@ const nextConfig: NextConfig = {
         hostname: 'static-01.daraz.com.bd',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'static.vecteezy.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
