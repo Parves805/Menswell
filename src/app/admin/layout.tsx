@@ -46,7 +46,7 @@ import {
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTitle, SheetHeader } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetHeader, SheetTrigger } from '@/components/ui/sheet';
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
@@ -418,3 +418,5 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
+
+    
