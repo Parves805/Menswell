@@ -13,7 +13,7 @@ export const OrderInvoice = React.forwardRef<HTMLDivElement, OrderInvoiceProps>(
     const shipping = order.total - subtotal;
 
     return (
-        <div ref={ref} className="p-8 font-sans">
+        <div ref={ref} className="p-8 font-sans bg-white text-black">
             <header className="flex justify-between items-center pb-4 border-b-2 border-gray-800">
                 <div>
                     <h1 className="text-4xl font-bold text-gray-800">INVOICE</h1>
