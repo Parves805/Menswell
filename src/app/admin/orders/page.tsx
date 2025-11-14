@@ -32,7 +32,6 @@ import { firestore } from '@/lib/firebase';
 import { collection, doc, onSnapshot, query, setDoc, orderBy } from 'firebase/firestore';
 import { generateStatusUpdateEmail } from '@/ai/flows/generate-status-update-email';
 import { OrderInvoice } from '@/components/admin/order-invoice';
-import { useReactToPrint } from 'react-to-print';
 
 
 const statusColors: { [key: string]: string } = {
@@ -52,11 +51,9 @@ export default function AdminOrdersPage() {
     
     const invoiceRef = useRef<HTMLDivElement>(null);
     
-    const handlePrint = useReactToPrint({
-        content: () => invoiceRef.current,
-        documentTitle: `Invoice-Order-${selectedOrder?.id.slice(-6) ?? ''}`,
-        bodyClass: 'bg-white'
-    });
+    const handlePrint = () => {
+        window.print();
+    };
 
 
     useEffect(() => {
@@ -121,11 +118,26 @@ export default function AdminOrdersPage() {
 
     return (
       <>
-        <div style={{ display: "none" }}>
+        <div className="printable-invoice">
             {selectedOrder && <OrderInvoice ref={invoiceRef} order={selectedOrder} />}
         </div>
-
-        <Card>
+        <style jsx global>{`
+            @media print {
+              body * {
+                visibility: hidden;
+              }
+              .printable-invoice, .printable-invoice * {
+                visibility: visible;
+              }
+              .printable-invoice {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+              }
+            }
+        `}</style>
+        <Card className="non-printable">
             <CardHeader>
                 <CardTitle className="text-2xl md:text-3xl">Orders</CardTitle>
                 <CardDescription>Manage customer orders here.</CardDescription>
@@ -199,7 +211,7 @@ export default function AdminOrdersPage() {
 
                 {selectedOrder && (
                     <Dialog open={!!selectedOrder} onOpenChange={(isOpen) => !isOpen && setSelectedOrder(null)}>
-                        <DialogContent className="sm:max-w-3xl">
+                        <DialogContent className="sm:max-w-3xl non-printable">
                             <DialogHeader>
                                 <DialogTitle>Order Details</DialogTitle>
                                 <DialogDescription>
