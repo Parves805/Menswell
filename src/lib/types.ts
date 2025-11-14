@@ -80,6 +80,7 @@ export interface WebsiteSettings {
   storeName: string;
   logoUrl: string;
   footerLogoUrl?: string;
+  tagline?: string;
   contactEmail: string;
   contactPhone: string;
   address: string;

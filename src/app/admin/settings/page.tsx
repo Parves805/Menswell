@@ -39,6 +39,7 @@ const defaultWebsiteSettings: WebsiteSettings = {
   storeName: 'BazaarGo',
   logoUrl: '',
   footerLogoUrl: '',
+  tagline: 'Your one-stop online marketplace.',
   contactEmail: 'support@bazaargo.com',
   contactPhone: '+1 (234) 567-890',
   address: '123 Bazaar Street, Dhaka, Bangladesh',
@@ -178,6 +179,15 @@ export default function AdminSettingsPage() {
                             value={settings.storeName}
                             onChange={(e) => handleSettingChange('storeName', e.target.value)}
                             placeholder="Your Store Name"
+                        />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="tagline">Tagline</Label>
+                        <Input
+                            id="tagline"
+                            value={settings.tagline || ''}
+                            onChange={(e) => handleSettingChange('tagline', e.target.value)}
+                            placeholder="Your one-stop online marketplace."
                         />
                     </div>
                      <div className="grid gap-2">

@@ -11,7 +11,10 @@ import { collection, doc, onSnapshot } from 'firebase/firestore';
 
 
 export function SiteFooter() {
-  const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ storeName: 'BazaarGo' });
+  const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ 
+    storeName: 'BazaarGo',
+    tagline: 'Your one-stop online marketplace.' 
+  });
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -51,7 +54,7 @@ export function SiteFooter() {
                     </>
                 )}
             </Link>
-            <p className="text-sm opacity-80">Your one-stop online marketplace.</p>
+            <p className="text-sm opacity-80">{settings.tagline || 'Your one-stop online marketplace.'}</p>
           </div>
           <div>
             <h4 className="font-semibold mb-3 font-headline">Shop</h4>
