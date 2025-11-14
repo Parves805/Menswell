@@ -99,14 +99,14 @@ export default function ShippingRatesPage() {
             
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                     <Card className="border-primary/20">
+                     <Card>
                         <CardHeader>
                             <CardTitle>Manage Shipping Zones</CardTitle>
                             <CardDescription>Set flat shipping rates for different delivery locations.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {fields.map((field, index) => (
-                                <div key={field.id} className="p-4 border-primary/20 rounded-md flex flex-col md:flex-row items-start md:items-end gap-4">
+                                <div key={field.id} className="p-4 border rounded-md flex flex-col md:flex-row items-start md:items-end gap-4">
                                     <FormField
                                         control={form.control}
                                         name={`shippingRates.${index}.location`}

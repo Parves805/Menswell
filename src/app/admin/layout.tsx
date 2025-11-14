@@ -46,7 +46,7 @@ import {
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger, SheetHeader } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
@@ -410,7 +410,7 @@ export default function AdminLayout({
                 </Sheet>
                 <h1 className="text-lg font-semibold flex-1 text-center">Admin Menu</h1>
               </header>
-              <main className={cn(mainContentClass)}>
+              <main className={cn(mainContentClass, "bg-background")}>
                 {children}
               </main>
           </div>

@@ -92,7 +92,7 @@ export default function PopupCampaignPage() {
             <h1 className="text-2xl md:text-3xl font-bold font-headline flex items-center gap-2"><Megaphone /> Popup Campaign</h1>
             <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Card className="border-primary/20">
+            <Card>
                 <CardHeader>
                     <CardTitle>Promotional Popup Settings</CardTitle>
                     <CardDescription>Configure the popup that appears for first-time visitors.</CardDescription>
@@ -102,7 +102,7 @@ export default function PopupCampaignPage() {
                         control={form.control}
                         name="enabled"
                         render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border-primary/20 p-4">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
                                     <FormLabel className="text-base">Enable Popup</FormLabel>
                                     <p className="text-sm text-muted-foreground">

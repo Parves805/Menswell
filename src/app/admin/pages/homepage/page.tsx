@@ -117,7 +117,7 @@ export default function HomepageSectionsPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 
                 {fields.map((field, index) => (
-                    <Card key={field.id} className="border-primary/20">
+                    <Card key={field.id}>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div className="space-y-1.5">
                                 <CardTitle>Section {index + 1}</CardTitle>

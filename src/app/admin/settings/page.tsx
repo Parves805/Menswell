@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -423,7 +424,7 @@ export default function AdminSettingsPage() {
                     {testimonialsSettings.testimonials.map((testimonial) => (
                         <div key={testimonial.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg">
                              <Image
-                                src={testimonial.avatarUrl || 'https://placehold.co/100x100.png'}
+                                src={testimonial.avatarUrl}
                                 alt={testimonial.author}
                                 width={60}
                                 height={60}
