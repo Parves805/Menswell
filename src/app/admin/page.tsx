@@ -98,23 +98,28 @@ export default function AdminDashboardPage() {
         };
     }, []);
 
-    const renderStatCard = (title: string, value: string, change: number, icon: React.ReactNode, changeText: string) => (
-        <Card className="border-primary/20">
+    const renderStatCard = (title: string, value: string, change?: number, changeText?: string, icon?: React.ReactNode) => (
+        <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 {icon}
             </CardHeader>
             <CardContent>
-                {isLoading ? <Skeleton className="h-8 w-3/4" /> : <div className="text-xl md:text-2xl font-bold">{value}</div>}
+                {isLoading ? <Skeleton className="h-8 w-3/4" /> : <div className="text-2xl font-bold">{value}</div>}
                 {isLoading ? <Skeleton className="h-4 w-1/2 mt-1" /> : (
-                    <p className="text-xs text-muted-foreground flex items-center">
+                   change !== undefined && changeText && (
+                     <p className="text-xs text-muted-foreground flex items-center">
                         {change >= 0 ? 
                             <ArrowUp className="h-3 w-3 mr-1 text-green-500" /> :
                             <ArrowDown className="h-3 w-3 mr-1 text-red-500" /> 
                         }
                         {change.toFixed(1)}% {changeText}
                     </p>
+                   )
                 )}
+                 {change === undefined && changeText && (
+                    <p className="text-xs text-muted-foreground">{changeText}</p>
+                 )}
             </CardContent>
         </Card>
     );
@@ -125,32 +130,38 @@ export default function AdminDashboardPage() {
       
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {renderStatCard("Total Revenue", `৳${stats.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, stats.revenueChange, <span className="text-muted-foreground">৳</span>, "from last month")}
-        {renderStatCard("Total Sales", `+${stats.totalSales}`, stats.salesChange, <ShoppingCart className="h-4 w-4 text-muted-foreground" />, "from last month")}
-        <Card className="border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+        {renderStatCard(
+            "Total Revenue", 
+            `৳${stats.totalRevenue.toLocaleString('en-IN')}`,
+            stats.revenueChange,
+            "from last month",
+            <span className="text-muted-foreground">৳</span>
+        )}
+        {renderStatCard(
+            "Total Sales", 
+            `+${stats.totalSales.toLocaleString('en-IN')}`,
+            stats.salesChange,
+            "from last month",
+            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+        )}
+        {renderStatCard(
+            "Total Products",
+            totalProducts.toLocaleString('en-IN'),
+            undefined,
+            "in stock",
             <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-xl md:text-2xl font-bold">{totalProducts}</div>}
-            <p className="text-xs text-muted-foreground">in stock</p>
-          </CardContent>
-        </Card>
-        <Card className="border-primary/20">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+        )}
+        {renderStatCard(
+            "Total Customers",
+            stats.totalCustomers.toLocaleString('en-IN'),
+            undefined,
+            "unique customers",
             <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-1/4" /> : <div className="text-xl md:text-2xl font-bold">{stats.totalCustomers}</div>}
-            <p className="text-xs text-muted-foreground">unique customers</p>
-          </CardContent>
-        </Card>
+        )}
       </div>
 
        {/* Recent Orders Table */}
-      <Card className="border-primary/20">
+      <Card>
         <CardHeader>
           <CardTitle>Recent Orders</CardTitle>
           <CardDescription>A list of the most recent orders.</CardDescription>
