@@ -79,6 +79,7 @@ export interface ShippingRate {
 export interface WebsiteSettings {
   storeName: string;
   logoUrl: string;
+  footerLogoUrl?: string;
   contactEmail: string;
   contactPhone: string;
   address: string;

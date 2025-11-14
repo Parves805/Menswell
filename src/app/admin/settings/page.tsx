@@ -38,6 +38,7 @@ interface AiSettings {
 const defaultWebsiteSettings: WebsiteSettings = {
   storeName: 'BazaarGo',
   logoUrl: '',
+  footerLogoUrl: '',
   contactEmail: 'support@bazaargo.com',
   contactPhone: '+1 (234) 567-890',
   address: '123 Bazaar Street, Dhaka, Bangladesh',
@@ -189,6 +190,18 @@ export default function AdminSettingsPage() {
                         />
                         <p className="text-sm text-muted-foreground">
                             Enter a URL for your store logo. Leave blank to use the default icon.
+                        </p>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="footerLogoUrl">Footer Logo URL (Optional)</Label>
+                        <Input
+                            id="footerLogoUrl"
+                            value={settings.footerLogoUrl || ''}
+                            onChange={(e) => handleSettingChange('footerLogoUrl', e.target.value)}
+                            placeholder="https://example.com/footer-logo.png"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                           If you want a different logo in the footer, enter its URL here.
                         </p>
                     </div>
                     <div className="grid gap-2">

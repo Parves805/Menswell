@@ -32,15 +32,17 @@ export function SiteFooter() {
     };
   }, []);
 
+  const logoToDisplay = settings.footerLogoUrl || settings.logoUrl;
+
   return (
     <footer className="mt-auto border-t bg-primary text-primary-foreground">
       <div className="container py-12">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
           <div className="col-span-2 sm:col-span-3 md:col-span-1">
              <Link href="/" className="mb-4 flex items-center space-x-2">
-                {settings.logoUrl ? (
+                {logoToDisplay ? (
                     <div className="relative" style={{width: '120px', height: '32px'}}>
-                       <Image src={settings.logoUrl} alt={settings.storeName || 'BazaarGo'} fill style={{objectFit: 'contain'}} />
+                       <Image src={logoToDisplay} alt={settings.storeName || 'BazaarGo'} fill style={{objectFit: 'contain'}} />
                     </div>
                 ) : (
                     <>
