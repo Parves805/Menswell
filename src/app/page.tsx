@@ -7,7 +7,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Card, CardContent } from '@/components/ui/card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import type { Product, Category, PopupCampaign, WebsiteSettings, HomepageSection as HomepageSectionType, PromoSection, Testimonial } from '@/lib/types';
+import type { Product, Category, PopupCampaign, WebsiteSettings, HomepageSection as HomepageSectionType, PromoSection, TestimonialsSettings } from '@/lib/types';
 import { ProductCard } from '@/components/product-card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,7 +37,7 @@ export default function Home() {
   const [showPopup, setShowPopup] = React.useState(false);
   const [homepageSections, setHomepageSections] = React.useState<HomepageSectionType[]>([]);
   const [promoSections, setPromoSections] = React.useState<PromoSection[]>([]);
-  const [testimonials, setTestimonials] = React.useState<Testimonial[]>([]);
+  const [testimonialsSettings, setTestimonialsSettings] = React.useState<TestimonialsSettings>({ enabled: true, testimonials: [] });
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -57,7 +57,7 @@ export default function Home() {
             setAiSettings(settings.aiSettings || { recommendationsEnabled: true });
             setHomepageSections(settings.homepageSections || []);
             setPromoSections(settings.promoCardSections || []);
-            setTestimonials(settings.testimonials || []);
+            setTestimonialsSettings(settings.testimonialsSettings || { enabled: true, testimonials: [] });
             
             const campaign = settings.popupCampaign;
             if (campaign) {
@@ -296,11 +296,11 @@ export default function Home() {
         ))}
 
         {/* Testimonials Section */}
-        {testimonials.length > 0 && (
+        {testimonialsSettings.enabled && testimonialsSettings.testimonials.length > 0 && (
             <section className="py-12 md:py-20">
                 <div className="container">
                     <h2 className="text-3xl font-bold text-center font-headline mb-8">What Our Customers Say</h2>
-                    <TestimonialSlider testimonials={testimonials} />
+                    <TestimonialSlider testimonials={testimonialsSettings.testimonials} />
                 </div>
             </section>
         )}

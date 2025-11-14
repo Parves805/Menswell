@@ -148,3 +148,8 @@ export interface Testimonial {
   avatarUrl: string;
   rating: number;
 }
+
+export interface TestimonialsSettings {
+    enabled: boolean;
+    testimonials: Testimonial[];
+}

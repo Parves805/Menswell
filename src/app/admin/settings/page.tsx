@@ -10,7 +10,7 @@ import { Trash2, PlusCircle, Loader2, Star } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, Testimonial } from '@/lib/types';
+import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, Testimonial, TestimonialsSettings } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
@@ -66,11 +66,15 @@ const defaultThemeSettings: ThemeSettings = {
     accent: "#F2223A",
 };
 
-const defaultTestimonials: Testimonial[] = [
-    { id: '1', author: 'Anik Khan', role: 'Student, Dhaka', text: 'Awesome collection and fast delivery! The quality of the t-shirt is amazing. Highly recommended.', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
-    { id: '2', author: 'Riyad Hasan', role: 'Graphic Designer', text: 'I love the unique designs. The fabric is so comfortable, and the fit is perfect. Will shop again!', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
-    { id: '3', author: 'Sumon Ahmed', role: 'Freelancer', text: 'Great customer service and the products are top-notch. The checkout process was smooth and easy.', avatarUrl: 'https://placehold.co/100x100.png', rating: 4 },
-];
+const defaultTestimonialsSettings: TestimonialsSettings = {
+    enabled: true,
+    testimonials: [
+        { id: '1', author: 'Anik Khan', role: 'Student, Dhaka', text: 'Awesome collection and fast delivery! The quality of the t-shirt is amazing. Highly recommended.', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
+        { id: '2', author: 'Riyad Hasan', role: 'Graphic Designer', text: 'I love the unique designs. The fabric is so comfortable, and the fit is perfect. Will shop again!', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
+        { id: '3', author: 'Sumon Ahmed', role: 'Freelancer', text: 'Great customer service and the products are top-notch. The checkout process was smooth and easy.', avatarUrl: 'https://placehold.co/100x100.png', rating: 4 },
+    ]
+};
+
 
 const StarRatingInput = ({ value, onChange, disabled = false }: { value: number; onChange: (value: number) => void; disabled?: boolean }) => {
   const [hoverValue, setHoverValue] = useState(0);
@@ -101,7 +105,7 @@ export default function AdminSettingsPage() {
     const [aiSettings, setAiSettings] = useState<AiSettings>(defaultAiSettings);
     const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>(defaultPaymentSettings);
     const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
-    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+    const [testimonialsSettings, setTestimonialsSettings] = useState<TestimonialsSettings>(defaultTestimonialsSettings);
     const [isLoading, setIsLoading] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -117,10 +121,10 @@ export default function AdminSettingsPage() {
                 setAiSettings(data.aiSettings || defaultAiSettings);
                 setPaymentSettings(data.paymentGatewaySettings || defaultPaymentSettings);
                 setThemeSettings(data.themeSettings || defaultThemeSettings);
-                setTestimonials(data.testimonials || defaultTestimonials);
+                setTestimonialsSettings(data.testimonialsSettings || defaultTestimonialsSettings);
             } else {
                  setSlides(defaultHeroSlides.map((img, i) => ({ ...img, id: Date.now() + i })));
-                 setTestimonials(defaultTestimonials);
+                 setTestimonialsSettings(defaultTestimonialsSettings);
             }
             setIsMounted(true);
         });
@@ -161,21 +165,32 @@ export default function AdminSettingsPage() {
     };
 
     const handleTestimonialChange = (id: string, field: keyof Omit<Testimonial, 'id'>, value: string | number) => {
-        setTestimonials(prev =>
-            prev.map(t => (t.id === id ? { ...t, [field]: value } : t))
-        );
+        setTestimonialsSettings(prev => ({
+            ...prev,
+            testimonials: prev.testimonials.map(t => (t.id === id ? { ...t, [field]: value } : t)),
+        }));
     };
 
     const addTestimonial = () => {
         const newId = `testimonial_${Date.now()}`;
-        setTestimonials(prev => [
+        setTestimonialsSettings(prev => ({
             ...prev,
-            { id: newId, author: '', role: '', text: '', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
-        ]);
+            testimonials: [
+                ...prev.testimonials,
+                { id: newId, author: '', role: '', text: '', avatarUrl: 'https://placehold.co/100x100.png', rating: 5 },
+            ],
+        }));
     };
 
     const removeTestimonial = (id: string) => {
-        setTestimonials(prev => prev.filter(t => t.id !== id));
+        setTestimonialsSettings(prev => ({
+            ...prev,
+            testimonials: prev.testimonials.filter(t => t.id !== id),
+        }));
+    };
+    
+    const handleTestimonialEnableChange = (enabled: boolean) => {
+        setTestimonialsSettings(prev => ({ ...prev, enabled }));
     };
 
 
@@ -191,7 +206,7 @@ export default function AdminSettingsPage() {
                 aiSettings: aiSettings,
                 paymentGatewaySettings: paymentSettings,
                 themeSettings: themeSettings,
-                testimonials: testimonials,
+                testimonialsSettings: testimonialsSettings,
             }, { merge: true });
 
             toast({
@@ -389,11 +404,23 @@ export default function AdminSettingsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Testimonial Management</CardTitle>
-                    <CardDescription>Manage customer testimonials displayed on the homepage.</CardDescription>
+                    <div className='flex items-center justify-between'>
+                        <div>
+                            <CardTitle>Testimonial Management</CardTitle>
+                            <CardDescription>Manage customer testimonials displayed on the homepage.</CardDescription>
+                        </div>
+                         <div className="flex items-center space-x-2">
+                            <Label htmlFor="testimonials-enabled" className="text-sm font-medium">Enable Section</Label>
+                            <Switch
+                                id="testimonials-enabled"
+                                checked={testimonialsSettings.enabled}
+                                onCheckedChange={handleTestimonialEnableChange}
+                            />
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {testimonials.map((testimonial) => (
+                    {testimonialsSettings.testimonials.map((testimonial) => (
                         <div key={testimonial.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg">
                              <Image
                                 src={testimonial.avatarUrl || 'https://placehold.co/100x100.png'}
