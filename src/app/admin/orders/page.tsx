@@ -52,8 +52,8 @@ export default function AdminOrdersPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const { toast } = useToast();
-    const invoiceRef = useRef<OrderInvoice>(null);
-
+    
+    const invoiceRef = useRef<HTMLDivElement>(null);
     const handlePrint = useReactToPrint({
       content: () => invoiceRef.current,
     });
