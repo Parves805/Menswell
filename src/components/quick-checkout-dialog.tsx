@@ -147,40 +147,42 @@ export function QuickCheckoutDialog({ isOpen, onOpenChange, item }: QuickCheckou
             
             {/* Form Section */}
             <div className="md:col-span-1 flex flex-col">
-                <DialogHeader className="p-6 pb-0">
-                    <DialogTitle className="text-2xl">ডেলিভারির তথ্য</DialogTitle>
-                </DialogHeader>
-                <ScrollArea className="flex-grow">
-                    <div className="p-6">
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} id="quick-checkout-form" className="space-y-4">
-                                <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>পুরো নাম</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>ইমেল</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>ফোন</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                </div>
-                                <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>রাস্তার ঠিকানা</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>শহর</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name="zip" render={({ field }) => (<FormItem><FormLabel>পোস্ট কোড</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                </div>
-                                <FormField control={form.control} name="shippingZone" render={({ field }) => (<FormItem><FormLabel>ডেলিভারি এলাকা</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="আপনার ডেলিভারি এলাকা বেছে নিন" /></SelectTrigger></FormControl><SelectContent>{shippingRates.map(rate => (<SelectItem key={rate.id} value={rate.id}>{rate.location}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
-                                
-                                <div className="space-y-4 pt-4">
-                                    <h3 className="font-semibold text-lg">পেমেন্ট পদ্ধতি</h3>
-                                    <FormField control={form.control} name="paymentMethod" render={({ field }) => (
-                                        <FormItem className="space-y-3"><FormControl>
-                                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-4">
-                                            {paymentSettings.cashOnDelivery && (<FormItem><FormLabel className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><FormControl><RadioGroupItem value="cash" /></FormControl><Truck className="h-6 w-6" /><div><span className="font-semibold">ক্যাশ অন ডেলিভারি</span><p className="text-sm text-muted-foreground">আপনার অর্ডার হাতে পেয়ে নগদ অর্থে পরিশোধ করুন।</p></div></FormLabel></FormItem>)}
-                                            {paymentSettings.bkash && (<FormItem><FormLabel className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><div className="flex items-start gap-4 w-full"><FormControl><RadioGroupItem value="bkash" className="mt-1" /></FormControl><CreditCard className="h-6 w-6" /><div className="flex-grow"><span className="font-semibold">বিকাশ</span><p className="text-sm text-muted-foreground">বিকাশ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p></div></div>{selectedPaymentMethod === 'bkash' && (<div className="w-full pl-10 space-y-3">{paymentSettings.bkashNumber && (<Alert><AlertDescription>অনুগ্রহ করে এই বিকাশ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>. অর্ডার নিশ্চিত করার জন্য বিকাশ সেন্ড মানি করার পর, আপনি যে লেনদেন আইডি (Txn ID) পাবেন, সেটি এখানে লিখুন।</AlertDescription></Alert>)}<FormField control={form.control} name="transactionId" render={({ field }) => (<FormItem><FormLabel>বিকাশ লেনদেন আইডি</FormLabel><FormControl><Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" /></FormControl><FormMessage /></FormItem>)} /></div>)}</FormLabel></FormItem>)}
-                                            {paymentSettings.nagad && (<FormItem><FormLabel className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><div className="flex items-start gap-4 w-full"><FormControl><RadioGroupItem value="nagad" className="mt-1" /></FormControl><CreditCard className="h-6 w-6" /><div className="flex-grow"><span className="font-semibold">নগদ</span><p className="text-sm text-muted-foreground">নগদ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p></div></div>{selectedPaymentMethod === 'nagad' && (<div className="w-full pl-10 space-y-3">{paymentSettings.nagadNumber && (<Alert><AlertDescription>অনুগ্রহ করে এই নগদ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.nagadNumber}</strong>.</AlertDescription></Alert>)}<FormField control={form.control} name="transactionId" render={({ field }) => (<FormItem><FormLabel>নগদ লেনদেন আইডি</FormLabel><FormControl><Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" /></FormControl><FormMessage /></FormItem>)} /></div>)}</FormLabel></FormItem>)}
-                                            {paymentSettings.rocket && (<FormItem><FormLabel className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><div className="flex items-start gap-4 w-full"><FormControl><RadioGroupItem value="rocket" className="mt-1" /></FormControl><CreditCard className="h-6 w-6" /><div className="flex-grow"><span className="font-semibold">রকেট</span><p className="text-sm text-muted-foreground">রকেট মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p></div></div>{selectedPaymentMethod === 'rocket' && (<div className="w-full pl-10 space-y-3">{paymentSettings.rocketNumber && (<Alert><AlertDescription>অনুগ্রহ করে এই রকেট পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.rocketNumber}</strong>.</AlertDescription></Alert>)}<FormField control={form.control} name="transactionId" render={({ field }) => (<FormItem><FormLabel>রকেট লেনদেন আইডি</FormLabel><FormControl><Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" /></FormControl><FormMessage /></FormItem>)} /></div>)}</FormLabel></FormItem>)}
-                                        </RadioGroup></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                </div>
-                            </form>
-                        </Form>
-                    </div>
+                 <ScrollArea className="flex-grow">
+                    <Card className="border-0 shadow-none">
+                        <CardHeader>
+                            <DialogTitle className="text-2xl">ডেলিভারির তথ্য</DialogTitle>
+                        </CardHeader>
+                        <CardContent>
+                           <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} id="quick-checkout-form" className="space-y-4">
+                                    <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>পুরো নাম</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabel>ইমেল</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="phone" render={({ field }) => (<FormItem><FormLabel>ফোন</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    </div>
+                                    <FormField control={form.control} name="street" render={({ field }) => (<FormItem><FormLabel>রাস্তার ঠিকানা</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>শহর</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                        <FormField control={form.control} name="zip" render={({ field }) => (<FormItem><FormLabel>পোস্ট কোড</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    </div>
+                                    <FormField control={form.control} name="shippingZone" render={({ field }) => (<FormItem><FormLabel>ডেলিভারি এলাকা</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="আপনার ডেলিভারি এলাকা বেছে নিন" /></SelectTrigger></FormControl><SelectContent>{shippingRates.map(rate => (<SelectItem key={rate.id} value={rate.id}>{rate.location}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+                                    
+                                    <div className="space-y-4 pt-4">
+                                        <h3 className="font-semibold text-lg">পেমেন্ট পদ্ধতি</h3>
+                                        <FormField control={form.control} name="paymentMethod" render={({ field }) => (
+                                            <FormItem className="space-y-3"><FormControl>
+                                            <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-4">
+                                                {paymentSettings.cashOnDelivery && (<FormItem><FormLabel className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><FormControl><RadioGroupItem value="cash" /></FormControl><Truck className="h-6 w-6" /><div><span className="font-semibold">ক্যাশ অন ডেলিভারি</span><p className="text-sm text-muted-foreground">আপনার অর্ডার হাতে পেয়ে নগদ অর্থে পরিশোধ করুন।</p></div></FormLabel></FormItem>)}
+                                                {paymentSettings.bkash && (<FormItem><FormLabel className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><div className="flex items-start gap-4 w-full"><FormControl><RadioGroupItem value="bkash" className="mt-1" /></FormControl><CreditCard className="h-6 w-6" /><div className="flex-grow"><span className="font-semibold">বিকাশ</span><p className="text-sm text-muted-foreground">বিকাশ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p></div></div>{selectedPaymentMethod === 'bkash' && (<div className="w-full pl-10 space-y-3">{paymentSettings.bkashNumber && (<Alert><AlertDescription>অনুগ্রহ করে এই বিকাশ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.bkashNumber}</strong>. অর্ডার নিশ্চিত করার জন্য বিকাশ সেন্ড মানি করার পর, আপনি যে লেনদেন আইডি (Txn ID) পাবেন, সেটি এখানে লিখুন।</AlertDescription></Alert>)}<FormField control={form.control} name="transactionId" render={({ field }) => (<FormItem><FormLabel>বিকাশ লেনদেন আইডি</FormLabel><FormControl><Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" /></FormControl><FormMessage /></FormItem>)} /></div>)}</FormLabel></FormItem>)}
+                                                {paymentSettings.nagad && (<FormItem><FormLabel className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><div className="flex items-start gap-4 w-full"><FormControl><RadioGroupItem value="nagad" className="mt-1" /></FormControl><CreditCard className="h-6 w-6" /><div className="flex-grow"><span className="font-semibold">নগদ</span><p className="text-sm text-muted-foreground">নগদ মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p></div></div>{selectedPaymentMethod === 'nagad' && (<div className="w-full pl-10 space-y-3">{paymentSettings.nagadNumber && (<Alert><AlertDescription>অনুগ্রহ করে এই নগদ পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.nagadNumber}</strong>.</AlertDescription></Alert>)}<FormField control={form.control} name="transactionId" render={({ field }) => (<FormItem><FormLabel>নগদ লেনদেন আইডি</FormLabel><FormControl><Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" /></FormControl><FormMessage /></FormItem>)} /></div>)}</FormLabel></FormItem>)}
+                                                {paymentSettings.rocket && (<FormItem><FormLabel className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary"><div className="flex items-start gap-4 w-full"><FormControl><RadioGroupItem value="rocket" className="mt-1" /></FormControl><CreditCard className="h-6 w-6" /><div className="flex-grow"><span className="font-semibold">রকেট</span><p className="text-sm text-muted-foreground">রকেট মোবাইল ব্যাংকিং এর মাধ্যমে পেমেন্ট করুন।</p></div></div>{selectedPaymentMethod === 'rocket' && (<div className="w-full pl-10 space-y-3">{paymentSettings.rocketNumber && (<Alert><AlertDescription>অনুগ্রহ করে এই রকেট পার্সোনাল নাম্বারে টাকা পাঠান: <strong className="text-primary">{paymentSettings.rocketNumber}</strong>.</AlertDescription></Alert>)}<FormField control={form.control} name="transactionId" render={({ field }) => (<FormItem><FormLabel>রকেট লেনদেন আইডি</FormLabel><FormControl><Input {...field} placeholder="যেমন, 9X7Y6Z5A4B" /></FormControl><FormMessage /></FormItem>)} /></div>)}</FormLabel></FormItem>)}
+                                            </RadioGroup></FormControl><FormMessage /></FormItem>
+                                        )}/>
+                                    </div>
+                                </form>
+                            </Form>
+                        </CardContent>
+                    </Card>
                 </ScrollArea>
                 <DialogFooter className="p-6 pt-0">
                     <Button type="submit" form="quick-checkout-form" size="lg" className="w-full" disabled={isProcessing}>
@@ -190,44 +192,41 @@ export function QuickCheckoutDialog({ isOpen, onOpenChange, item }: QuickCheckou
             </div>
 
             {/* Order Summary Section */}
-            <div className="hidden md:block md:col-span-1 p-6 bg-muted/50">
-                <div className="flex flex-col h-full">
-                    <div className="flex-grow space-y-6">
-                        <h3 className="font-semibold text-2xl">অর্ডারের সারাংশ</h3>
-                        <div className="flex items-start gap-4 p-4 border rounded-lg bg-background">
-                            <div className="relative h-20 w-20 flex-shrink-0 rounded-md overflow-hidden border">
-                                <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
-                            </div>
-                            <div className="flex-grow overflow-hidden">
-                                <p className="font-semibold truncate">{item.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}
-                                </p>
-                                <p className="text-sm text-muted-foreground">পরিমাণ: {item.quantity}</p>
-                            </div>
-                            <p className="font-semibold text-right pl-2">
-                                ৳{(item.price * item.quantity).toLocaleString('en-IN')}
+            <div className="hidden md:flex flex-col md:col-span-1 p-6 bg-muted/50">
+                <div className="flex-grow space-y-6">
+                    <h3 className="font-semibold text-2xl">অর্ডারের সারাংশ</h3>
+                    <div className="flex items-start gap-4 p-4 border rounded-lg bg-background">
+                        <div className="relative h-20 w-20 flex-shrink-0 rounded-md overflow-hidden border">
+                            <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
+                        </div>
+                        <div className="flex-grow overflow-hidden">
+                            <p className="font-semibold truncate">{item.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                                {[item.selectedSize, item.selectedColor?.name].filter(Boolean).join(' / ')}
                             </p>
+                            <p className="text-sm text-muted-foreground">পরিমাণ: {item.quantity}</p>
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex justify-between"><span className="text-muted-foreground">মোট মূল্য</span><span>৳{subtotal.toLocaleString('en-IN')}</span></div>
-                            <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি চার্জ</span><span>৳{shippingCost.toLocaleString('en-IN')}</span></div>
-                            <Separator />
-                            <div className="flex justify-between font-bold text-xl"><span>সর্বমোট</span><span>৳{total.toLocaleString('en-IN')}</span></div>
-                        </div>
+                        <p className="font-semibold text-right pl-2">
+                            ৳{(item.price * item.quantity).toLocaleString('en-IN')}
+                        </p>
                     </div>
-                    <div className="mt-6">
-                        <Button type="submit" form="quick-checkout-form" size="lg" className="w-full" disabled={isProcessing}>
-                            {isProcessing ? (
-                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> প্রসেসিং...</>
-                            ) : (
-                                <>অর্ডার করুন (৳{total.toLocaleString('en-IN')})</>
-                            )}
-                        </Button>
+                    <div className="space-y-2">
+                        <div className="flex justify-between"><span className="text-muted-foreground">মোট মূল্য</span><span>৳{subtotal.toLocaleString('en-IN')}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">ডেলিভারি চার্জ</span><span>৳{shippingCost.toLocaleString('en-IN')}</span></div>
+                        <Separator />
+                        <div className="flex justify-between font-bold text-xl"><span>সর্বমোট</span><span>৳{total.toLocaleString('en-IN')}</span></div>
                     </div>
                 </div>
+                <div className="mt-6">
+                     <Button type="submit" form="quick-checkout-form" size="lg" className="w-full" disabled={isProcessing}>
+                        {isProcessing ? (
+                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> প্রসেসিং...</>
+                        ) : (
+                            <>অর্ডার করুন (৳{total.toLocaleString('en-IN')})</>
+                        )}
+                    </Button>
+                </div>
             </div>
-
         </DialogContent>
     </Dialog>
   );
