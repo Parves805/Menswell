@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ShoppingBag } from 'lucide-react';
@@ -42,9 +43,11 @@ export function SiteFooter() {
                        <Image src={settings.logoUrl} alt={settings.storeName || 'BazaarGo'} fill style={{objectFit: 'contain'}} />
                     </div>
                 ) : (
-                    <ShoppingBag className="h-6 w-6 text-primary" />
+                    <>
+                        <ShoppingBag className="h-6 w-6 text-primary" />
+                        <span className="font-bold font-headline">{settings.storeName}</span>
+                    </>
                 )}
-                <span className="font-bold font-headline">{settings.storeName}</span>
             </Link>
             <p className="text-muted-foreground text-sm">Your one-stop online marketplace.</p>
           </div>
