@@ -64,6 +64,12 @@ const nextConfig: NextConfig = {
         hostname: 'bn.smartdeal.com.bd',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'static-01.daraz.com.bd',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
