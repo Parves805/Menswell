@@ -110,8 +110,7 @@ export const OrderInvoice = React.forwardRef<HTMLDivElement, OrderInvoiceProps>(
             </section>
             
             <footer className="mt-16 pt-4 border-t-2 text-center text-gray-500 text-sm">
-                <p>Thank you for your business!</p>
-                <p>support@Menswell.com</p>
+                <p>Thank you for your purchase.</p>
             </footer>
         </div>
     );
