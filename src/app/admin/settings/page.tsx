@@ -59,9 +59,9 @@ const defaultPaymentSettings: PaymentGatewaySettings = {
 };
 
 const defaultThemeSettings: ThemeSettings = {
-    primary: "19 89% 54%",
-    background: "24 69% 93%",
-    accent: "354 89% 54%",
+    primary: "#F26522",
+    background: "#F9EBE1",
+    accent: "#F2223A",
 };
 
 
@@ -227,7 +227,7 @@ export default function AdminSettingsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Theme Customization</CardTitle>
-                    <CardDescription>Customize the main colors of your website. Use HSL values without the `hsl()` wrapper.</CardDescription>
+                    <CardDescription>Customize the main colors of your website. Use HEX color codes.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid gap-2">
@@ -236,7 +236,7 @@ export default function AdminSettingsPage() {
                             id="primaryColor"
                             value={themeSettings.primary}
                             onChange={(e) => handleThemeSettingChange('primary', e.target.value)}
-                            placeholder="e.g., 19 89% 54%"
+                            placeholder="e.g., #F26522"
                         />
                         <p className="text-sm text-muted-foreground">Used for buttons, links, and important elements.</p>
                     </div>
@@ -246,7 +246,7 @@ export default function AdminSettingsPage() {
                             id="backgroundColor"
                             value={themeSettings.background}
                             onChange={(e) => handleThemeSettingChange('background', e.target.value)}
-                            placeholder="e.g., 24 69% 93%"
+                            placeholder="e.g., #F9EBE1"
                         />
                          <p className="text-sm text-muted-foreground">The main background color of the site.</p>
                     </div>
@@ -256,7 +256,7 @@ export default function AdminSettingsPage() {
                             id="accentColor"
                             value={themeSettings.accent}
                             onChange={(e) => handleThemeSettingChange('accent', e.target.value)}
-                            placeholder="e.g., 354 89% 54%"
+                            placeholder="e.g., #F2223A"
                         />
                          <p className="text-sm text-muted-foreground">Used for highlights and secondary actions.</p>
                     </div>
@@ -273,7 +273,7 @@ export default function AdminSettingsPage() {
                         <div key={slide.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg">
                             <Image
                                 src={slide.url || 'https://placehold.co/150x150.png'}
-                                alt={`Slide preview`}
+                                alt={'Slide preview'}
                                 width={100}
                                 height={100}
                                 className="aspect-square rounded-md object-cover border"

@@ -134,7 +134,7 @@ export interface PaymentGatewaySettings {
 }
 
 export interface ThemeSettings {
-    primary: string;
-    background: string;
-    accent: string;
+    primary: string; // Now expecting HEX string e.g., "#RRGGBB"
+    background: string; // Now expecting HEX string e.g., "#RRGGBB"
+    accent: string; // Now expecting HEX string e.g., "#RRGGBB"
 }
