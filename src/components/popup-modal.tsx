@@ -58,7 +58,7 @@ export function PopupModal({ campaign, onClose }: PopupModalProps) {
     >
       <div
         className={cn(
-          'relative w-full max-w-md m-4 transform rounded-xl bg-card text-card-foreground shadow-2xl transition-all duration-300',
+          'relative w-full max-w-md m-4 transform rounded-xl bg-card text-card-foreground shadow-2xl transition-all duration-300 border-primary/20',
            isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         )}
         onClick={e => e.stopPropagation()}

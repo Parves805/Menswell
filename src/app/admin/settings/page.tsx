@@ -166,7 +166,7 @@ export default function AdminSettingsPage() {
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle>Website Settings</CardTitle>
                     <CardDescription>Manage general settings for your website.</CardDescription>
@@ -247,7 +247,7 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle>Theme Customization</CardTitle>
                     <CardDescription>Customize the main colors of your website. Use HEX color codes.</CardDescription>
@@ -286,20 +286,20 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle>Hero Slider Management</CardTitle>
                     <CardDescription>Add, remove, or change images in the homepage hero slider.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {slides.map((slide) => (
-                        <div key={slide.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border rounded-lg">
+                        <div key={slide.id} className="flex flex-col sm:flex-row items-start gap-4 p-4 border-primary/20 rounded-lg">
                             <Image
                                 src={slide.url || 'https://placehold.co/150x150.png'}
                                 alt={'Slide preview'}
                                 width={100}
                                 height={100}
-                                className="aspect-square rounded-md object-cover border"
+                                className="aspect-square rounded-md object-cover border-primary/20"
                                 data-ai-hint={slide.dataAiHint}
                             />
                             <div className="flex-grow space-y-2 w-full">
@@ -337,13 +337,13 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
 
-             <Card>
+             <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle>AI Settings</CardTitle>
                     <CardDescription>Manage AI-powered features for your store.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex items-center justify-between rounded-lg border-primary/20 p-4">
                         <div>
                             <Label htmlFor="ai-recommendations" className="font-medium">Product Recommendations</Label>
                             <p className="text-sm text-muted-foreground">Enable or disable AI-powered product recommendations on the homepage.</p>
@@ -357,13 +357,13 @@ export default function AdminSettingsPage() {
                 </CardContent>
             </Card>
             
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle>Payment Gateway Settings</CardTitle>
                     <CardDescription>Enable or disable payment methods for checkout.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex items-center justify-between rounded-lg border-primary/20 p-4">
                         <div>
                             <Label htmlFor="pg-cash" className="font-medium">Cash on Delivery</Label>
                             <p className="text-sm text-muted-foreground">Allow customers to pay with cash upon delivery.</p>
@@ -374,7 +374,7 @@ export default function AdminSettingsPage() {
                             onCheckedChange={(checked) => handlePaymentSettingChange('cashOnDelivery', checked)} 
                         />
                     </div>
-                    <div className="rounded-lg border p-4 space-y-4">
+                    <div className="rounded-lg border-primary/20 p-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <Label htmlFor="pg-bkash" className="font-medium">bKash</Label>
@@ -398,7 +398,7 @@ export default function AdminSettingsPage() {
                             </div>
                         )}
                     </div>
-                     <div className="rounded-lg border p-4 space-y-4">
+                     <div className="rounded-lg border-primary/20 p-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <Label htmlFor="pg-nagad" className="font-medium">Nagad</Label>
@@ -422,7 +422,7 @@ export default function AdminSettingsPage() {
                             </div>
                         )}
                     </div>
-                     <div className="rounded-lg border p-4 space-y-4">
+                     <div className="rounded-lg border-primary/20 p-4 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <Label htmlFor="pg-rocket" className="font-medium">Rocket</Label>

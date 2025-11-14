@@ -99,7 +99,7 @@ export default function AdminDashboardPage() {
     }, []);
 
     const renderStatCard = (title: string, value: string, change: number, icon: React.ReactNode, changeText: string) => (
-        <Card>
+        <Card className="border-primary/20">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
                 {icon}
@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {renderStatCard("Total Revenue", `৳${stats.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, stats.revenueChange, <span className="text-muted-foreground">৳</span>, "from last month")}
         {renderStatCard("Total Sales", `+${stats.totalSales}`, stats.salesChange, <ShoppingCart className="h-4 w-4 text-muted-foreground" />, "from last month")}
-        <Card>
+        <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">in stock</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-primary/20">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
       </div>
 
        {/* Recent Orders Table */}
-      <Card>
+      <Card className="border-primary/20">
         <CardHeader>
           <CardTitle>Recent Orders</CardTitle>
           <CardDescription>A list of the most recent orders.</CardDescription>
@@ -194,6 +194,3 @@ export default function AdminDashboardPage() {
     </div>
   )
 }
-    
-
-    

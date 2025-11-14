@@ -79,7 +79,7 @@ function SearchResults() {
             ))}
           </div>
         ) : (
-            <div className="text-center py-20 border-2 border-dashed rounded-lg">
+            <div className="text-center py-20 border-2 border-dashed border-primary/20 rounded-lg">
                 <Search className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
                 <h2 className="text-2xl font-semibold">No products found for "{query}"</h2>
                 <p className="text-muted-foreground mt-2">Try a different search term or browse our categories.</p>

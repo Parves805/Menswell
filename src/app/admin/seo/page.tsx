@@ -74,7 +74,7 @@ export default function SeoManagementPage() {
     return (
         <div className="space-y-4 md:space-y-6">
             <h1 className="text-2xl md:text-3xl font-bold font-headline flex items-center gap-2"><Globe /> SEO Management</h1>
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle>Search Engine Optimization</CardTitle>
                     <CardDescription>Manage meta tags and keywords to improve your site's ranking on search engines.</CardDescription>
@@ -125,5 +125,3 @@ export default function SeoManagementPage() {
         </div>
     );
 }
-
-    

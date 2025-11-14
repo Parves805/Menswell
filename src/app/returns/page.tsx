@@ -86,7 +86,7 @@ export default function ReturnsPage() {
       <SiteHeader />
       <main className="flex-grow container pt-8 pb-24 md:pt-12 md:pb-12">
         <div className="max-w-3xl mx-auto">
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader className="text-center">
                     <Undo2 className="mx-auto h-12 w-12 text-primary mb-4" />
                     <CardTitle className="text-3xl md:text-4xl font-bold font-headline">রিটার্ন ও এক্সচেঞ্জ নীতি</CardTitle>

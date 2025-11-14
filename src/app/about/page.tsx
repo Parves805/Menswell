@@ -64,7 +64,7 @@ export default function AboutPage() {
                     <Skeleton className="h-10 w-3/4 mx-auto" />
                     <Skeleton className="h-4 w-1/2 mx-auto mt-4" />
                 </div>
-                <Card>
+                <Card className="border-primary/20">
                     <div className="grid md:grid-cols-2">
                         <div className="p-8 space-y-4">
                             <Skeleton className="h-8 w-1/3" />
@@ -91,7 +91,7 @@ export default function AboutPage() {
         </div>
         
         <div className="max-w-4xl mx-auto space-y-12">
-            <Card>
+            <Card className="border-primary/20">
                 <div className="grid md:grid-cols-2">
                     <div className="p-8 flex flex-col justify-center">
                         <h2 className="text-3xl font-bold font-headline mb-4">{aboutUs.storyTitle}</h2>
@@ -119,7 +119,7 @@ export default function AboutPage() {
                 </p>
             </div>
 
-            <Card className="p-6 text-center">
+            <Card className="p-6 text-center border-primary/20">
                 <Rocket className="mx-auto h-12 w-12 text-primary mb-4" />
                 <CardTitle className="text-2xl font-headline">{aboutUs.missionTitle}</CardTitle>
                 <CardContent className="pt-4 max-w-3xl mx-auto">

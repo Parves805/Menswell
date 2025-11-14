@@ -72,7 +72,7 @@ export default function EmailMarketingPage() {
     return (
         <div className="space-y-4 md:space-y-6">
             <h1 className="text-2xl md:text-3xl font-bold font-headline flex items-center gap-2"><Mail /> Email Marketing</h1>
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle>Compose Promotional Email</CardTitle>
                     <CardDescription>Send an email to your customers to promote new products or sales.</CardDescription>

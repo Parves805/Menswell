@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -165,7 +166,7 @@ export default function Home() {
                   <CarouselItem key={category.id} className="basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
                     <div className="p-1">
                       <Link href={`/category/${category.id}`} className="group text-center block">
-                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary">
+                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20-primary border-primary/20">
                           <CardContent className="p-0">
                             <div className="relative aspect-square">
                               <Image

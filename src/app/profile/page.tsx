@@ -157,7 +157,7 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-grow container pt-8 pb-24 md:pt-12 md:pb-12">
-        <Card className="max-w-4xl mx-auto">
+        <Card className="max-w-4xl mx-auto border-primary/20">
           <CardHeader>
             <CardTitle className="text-3xl font-bold font-headline">My Profile</CardTitle>
             <CardDescription>Manage your account details and preferences.</CardDescription>
@@ -226,7 +226,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="border-t pt-6">
+            <CardFooter className="border-t border-primary/20 pt-6">
               <Button type="submit" disabled={isSaving}>
                 {isSaving ? (
                   <>
@@ -245,5 +245,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

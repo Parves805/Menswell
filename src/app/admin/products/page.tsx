@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from "react";
@@ -63,7 +64,7 @@ export default function AdminProductsPage() {
 
     return (
         <div>
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                         <CardTitle>Products</CardTitle>

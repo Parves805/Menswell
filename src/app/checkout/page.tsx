@@ -197,7 +197,7 @@ export default function CheckoutPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div className="lg:col-span-2 space-y-8">
-              <Card>
+              <Card className="border-primary/20">
                 <CardHeader>
                   <CardTitle>ডেলিভারির তথ্য</CardTitle>
                 </CardHeader>
@@ -245,7 +245,7 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-primary/20">
                 <CardHeader>
                   <CardTitle>পেমেন্ট পদ্ধতি</CardTitle>
                 </CardHeader>
@@ -263,7 +263,7 @@ export default function CheckoutPage() {
                             >
                                 {paymentSettings.cashOnDelivery && (
                                 <FormItem>
-                                    <Label className="flex items-center gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                    <Label className="flex items-center gap-4 rounded-lg border-primary/20 p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary/20-primary">
                                         <FormControl>
                                             <RadioGroupItem value="cash" />
                                         </FormControl>
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
                                 )}
                                 {paymentSettings.bkash && (
                                 <FormItem>
-                                    <Label className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                    <Label className="flex flex-col items-start gap-4 rounded-lg border-primary/20 p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary/20-primary">
                                         <div className="flex items-start gap-4 w-full">
                                             <FormControl>
                                                 <RadioGroupItem value="bkash" className="mt-1" />
@@ -317,7 +317,7 @@ export default function CheckoutPage() {
                                 )}
                                 {paymentSettings.nagad && (
                                 <FormItem>
-                                    <Label className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                    <Label className="flex flex-col items-start gap-4 rounded-lg border-primary/20 p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary/20-primary">
                                         <div className="flex items-start gap-4 w-full">
                                             <FormControl>
                                                 <RadioGroupItem value="nagad" className="mt-1" />
@@ -357,7 +357,7 @@ export default function CheckoutPage() {
                                 )}
                                 {paymentSettings.rocket && (
                                  <FormItem>
-                                    <Label className="flex flex-col items-start gap-4 rounded-lg border p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                                    <Label className="flex flex-col items-start gap-4 rounded-lg border-primary/20 p-4 cursor-pointer has-[:checked]:bg-primary/10 has-[:checked]:border-primary/20-primary">
                                         <div className="flex items-start gap-4 w-full">
                                             <FormControl>
                                                 <RadioGroupItem value="rocket" className="mt-1" />
@@ -406,7 +406,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 border-primary/20">
                 <CardHeader>
                   <CardTitle>অর্ডারের সারাংশ</CardTitle>
                 </CardHeader>
@@ -414,7 +414,7 @@ export default function CheckoutPage() {
                   <div className="max-h-64 overflow-y-auto pr-2 space-y-4">
                     {cartItems.map(item => (
                       <div key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor?.name || ''}`} className="flex items-start gap-4">
-                        <div className="relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border">
+                        <div className="relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border-primary/20">
                           <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
                         </div>
                         <div className="flex-grow overflow-hidden">

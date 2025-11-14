@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -141,8 +142,8 @@ export function ChatWidget() {
     return (
         <div className="fixed bottom-20 right-4 z-50 md:bottom-4">
             {isChatOpen && (
-                 <Card className="w-80 h-[28rem] flex flex-col shadow-2xl mb-2">
-                    <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
+                 <Card className="w-80 h-[28rem] flex flex-col shadow-2xl mb-2 border-primary/20">
+                    <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-primary/20">
                         <CardTitle className="text-lg">Chat with us</CardTitle>
                         <Button variant="ghost" size="icon" onClick={toggleChat}>
                             <X className="h-5 w-5"/>
@@ -175,7 +176,7 @@ export function ChatWidget() {
                             </div>
                         </ScrollArea>
                     </CardContent>
-                    <div className="p-4 border-t">
+                    <div className="p-4 border-t border-primary/20">
                          <div className="flex gap-2">
                             <Textarea 
                                 placeholder="Type a message..."

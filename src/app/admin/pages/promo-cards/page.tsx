@@ -122,7 +122,7 @@ export default function PromoCardsPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     {sectionFields.map((sectionField, sectionIndex) => (
-                        <Card key={sectionField.id}>
+                        <Card key={sectionField.id} className="border-primary/20">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle>Section {sectionIndex + 1}</CardTitle>
@@ -173,7 +173,7 @@ function PromoSectionFields({ control, sectionIndex }: PromoSectionFieldsProps) 
   return (
     <div className="space-y-6">
       {fields.map((cardField, cardIndex) => (
-        <div key={cardField.id} className="p-4 border rounded-md space-y-4 relative">
+        <div key={cardField.id} className="p-4 border-primary/20 rounded-md space-y-4 relative">
              <Button variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive" onClick={() => remove(cardIndex)}>
                 <Trash2 className="h-4 w-4"/>
                 <span className="sr-only">Remove Card</span>
@@ -207,5 +207,3 @@ function PromoSectionFields({ control, sectionIndex }: PromoSectionFieldsProps) 
     </div>
   );
 }
-
-    

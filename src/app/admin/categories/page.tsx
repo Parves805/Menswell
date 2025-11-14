@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -110,7 +111,7 @@ export default function AdminCategoriesPage() {
 
     return (
         <div className="space-y-4 md:space-y-6">
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                         <CardTitle className="text-2xl md:text-3xl">Categories</CardTitle>
@@ -186,7 +187,7 @@ export default function AdminCategoriesPage() {
                     {isLoading ? (
                         <div className="space-y-4">
                             {[...Array(3)].map((_, i) => (
-                                <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
+                                <div key={i} className="flex items-center space-x-4 p-4 border-primary/20 rounded-lg">
                                     <Skeleton className="h-16 w-16" />
                                     <div className="flex-grow space-y-2">
                                         <Skeleton className="h-4 w-1/3" />

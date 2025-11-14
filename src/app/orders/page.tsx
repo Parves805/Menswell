@@ -87,7 +87,7 @@ export default function OrdersPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-grow container pt-8 pb-24 md:pt-12 md:pb-12">
-        <Card className="max-w-4xl mx-auto">
+        <Card className="max-w-4xl mx-auto border-primary/20">
             <CardHeader>
                 <div className="flex items-center gap-4">
                     <ListOrdered className="h-8 w-8 text-primary" />
@@ -101,7 +101,7 @@ export default function OrdersPage() {
                 {orders.length > 0 ? (
                     <Accordion type="single" collapsible className="w-full space-y-4">
                         {orders.map((order) => (
-                            <AccordionItem value={order.id} key={order.id} className="border rounded-lg">
+                            <AccordionItem value={order.id} key={order.id} className="border-primary/20 rounded-lg">
                                 <AccordionTrigger className="p-4 hover:no-underline">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full text-left gap-4">
                                         <div className="mb-2 sm:mb-0">
@@ -121,12 +121,12 @@ export default function OrdersPage() {
                                         </div>
                                     </div>
                                 </AccordionTrigger>
-                                <AccordionContent className="p-4 border-t">
+                                <AccordionContent className="p-4 border-t border-primary/20">
                                     <h4 className="font-semibold mb-2">Items</h4>
                                     <div className="space-y-4 mb-4">
                                         {order.items.map((item) => (
                                             <div key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor?.name || ''}`} className="flex items-center gap-4">
-                                                <div className="relative h-16 w-16 rounded-md overflow-hidden border">
+                                                <div className="relative h-16 w-16 rounded-md overflow-hidden border-primary/20">
                                                     <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
                                                 </div>
                                                 <div className="flex-grow">
@@ -144,7 +144,7 @@ export default function OrdersPage() {
                                             </div>
                                         ))}
                                     </div>
-                                    <Separator className="my-4" />
+                                    <Separator />
                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <h4 className="font-semibold mb-2">Shipping To</h4>
@@ -172,7 +172,7 @@ export default function OrdersPage() {
                         ))}
                     </Accordion>
                 ) : (
-                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                    <div className="text-center py-16 border-2 border-dashed border-primary/20 rounded-lg">
                         <p className="text-muted-foreground">You have not placed any orders yet.</p>
                     </div>
                 )}

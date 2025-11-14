@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -77,7 +78,7 @@ const StarRatingInput = ({ value, onChange, disabled = false }: { value: number;
 };
 
 export function ProductDetailsClient({ product }: { product: Product }) {
-  const { addItem } = useCart();
+  const { addItem, clearCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { setChatOpen } = useChat();
   const { toast } = useToast();
@@ -171,6 +172,8 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       toast({ title: 'Please select a color', variant: 'destructive' });
       return;
     }
+    // Clear the cart, add the current item, then redirect
+    clearCart();
     const { image, ...colorData } = selectedColor || {};
     addItem(product, quantity, selectedSize === 'N/A' ? undefined : selectedSize, selectedColor?.name === 'N/A' ? undefined : colorData);
     router.push('/checkout');
@@ -224,7 +227,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         {/* Image Gallery */}
         <div className="grid gap-4">
-          <div className="relative aspect-square rounded-lg overflow-hidden border">
+          <div className="relative aspect-square rounded-lg overflow-hidden border-primary/20">
             <Image
               src={activeImage}
               alt={product.name}
@@ -285,8 +288,8 @@ export function ProductDetailsClient({ product }: { product: Product }) {
                               <Label
                               htmlFor={`size-${size}`}
                               className={cn(
-                                  "flex h-10 w-12 cursor-pointer items-center justify-center rounded-md border border-input bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                                  selectedSize === size && "border-primary ring-2 ring-primary"
+                                  "flex h-10 w-12 cursor-pointer items-center justify-center rounded-md border-primary/20 bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                                  selectedSize === size && "border-primary/20-primary ring-2 ring-primary"
                               )}
                               >
                               {size}
@@ -308,7 +311,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
                               type="button"
                               className={cn(
                               "h-8 w-8 rounded-full border-2 transition",
-                              selectedColor?.name === color.name ? "border-primary ring-2 ring-primary" : "border-muted-foreground/50"
+                              selectedColor?.name === color.name ? "border-primary/20-primary ring-2 ring-primary" : "border-muted-foreground/50"
                               )}
                               style={{ backgroundColor: color.hex }}
                               onClick={() => handleSelectColor(color)}
@@ -332,7 +335,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
           <div className="mt-4 flex flex-col gap-4">
               <div className="flex items-center gap-4">
                   {/* Quantity Selector */}
-                  <div className="flex items-center border rounded-md">
+                  <div className="flex items-center border-primary/20 rounded-md">
                       <Button variant="ghost" size="icon" className="h-12" onClick={() => setQuantity(q => Math.max(1, q - 1))}>
                           <Minus className="h-4 w-4" />
                       </Button>
@@ -366,7 +369,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       </div>
       
       {/* Details & Reviews Section */}
-      <div className="mt-16 pt-12 border-t">
+      <div className="mt-16 pt-12 border-t border-primary/20">
         <h2 className="text-2xl md:text-3xl font-bold font-headline mb-6">Product Details</h2>
         {product.longDescription ? (
            <div 
@@ -378,7 +381,7 @@ export function ProductDetailsClient({ product }: { product: Product }) {
         )}
       </div>
 
-      <div className="mt-16 pt-12 border-t">
+      <div className="mt-16 pt-12 border-t border-primary/20">
         <div className="flex flex-col md:flex-row justify-between md:items-center mb-6">
             <h2 className="text-2xl md:text-3xl font-bold font-headline">Customer Reviews ({totalReviews})</h2>
             <div className="mt-2 md:mt-0">

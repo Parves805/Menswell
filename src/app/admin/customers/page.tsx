@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -115,7 +116,7 @@ export default function AdminCustomersPage() {
 
     return (
         <div className="space-y-4 md:space-y-6">
-            <Card>
+            <Card className="border-primary/20">
                 <CardHeader>
                     <CardTitle className="text-2xl md:text-3xl">Customers</CardTitle>
                     <CardDescription>A list of your customers and their purchase history.</CardDescription>
@@ -193,13 +194,13 @@ export default function AdminCustomersPage() {
                                 </DialogHeader>
                                 <div className="grid gap-6 pt-4 max-h-[70vh] pr-2">
                                      <div className="grid grid-cols-2 gap-4">
-                                        <Card>
+                                        <Card className="border-primary/20">
                                             <CardHeader className="pb-2">
                                                 <CardDescription>TOTAL ORDERS</CardDescription>
                                                 <CardTitle className="text-3xl">{selectedCustomer.orderCount}</CardTitle>
                                             </CardHeader>
                                         </Card>
-                                        <Card>
+                                        <Card className="border-primary/20">
                                             <CardHeader className="pb-2">
                                                 <CardDescription>TOTAL SPENT</CardDescription>
                                                 <CardTitle className="text-3xl">৳{selectedCustomer.totalSpent.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</CardTitle>
@@ -207,7 +208,7 @@ export default function AdminCustomersPage() {
                                         </Card>
                                     </div>
                                     
-                                    <Card>
+                                    <Card className="border-primary/20">
                                         <CardHeader>
                                             <CardTitle>Order History</CardTitle>
                                         </CardHeader>

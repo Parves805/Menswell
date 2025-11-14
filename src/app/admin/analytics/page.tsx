@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -20,7 +21,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     }
 
     return (
-      <div className="bg-background border rounded-lg p-2 shadow-sm text-sm">
+      <div className="bg-background border-primary/20 rounded-lg p-2 shadow-sm text-sm">
         <p className="font-bold mb-1">{label}</p>
         <p className="text-primary">{`${key.charAt(0).toUpperCase() + key.slice(1)}: ${displayValue}`}</p>
       </div>
@@ -92,7 +93,7 @@ export default function AnalyticsPage() {
             <h1 className="text-2xl md:text-3xl font-bold font-headline">Analytics</h1>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+                <Card className="border-primary/20">
                     <CardHeader>
                         <CardTitle>Sales Overview</CardTitle>
                         <CardDescription>Monthly sales performance for the last 6 months.</CardDescription>
@@ -111,7 +112,7 @@ export default function AnalyticsPage() {
                         )}
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-primary/20">
                     <CardHeader>
                         <CardTitle>Daily Orders</CardTitle>
                         <CardDescription>Order volume for the last 7 days.</CardDescription>

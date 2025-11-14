@@ -25,15 +25,15 @@ export default function CartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2">
-              <Card>
+              <Card className="border-primary/20">
                 <CardHeader>
                   <CardTitle>Cart Items ({totalItems})</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="divide-y">
+                  <div className="divide-y divide-primary/20">
                     {cartItems.map(item => (
                       <div key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor?.name || ''}`} className="flex flex-col sm:flex-row items-center gap-4 p-4">
-                        <div className="relative h-24 w-24 flex-shrink-0 rounded-md overflow-hidden border">
+                        <div className="relative h-24 w-24 flex-shrink-0 rounded-md overflow-hidden border-primary/20">
                           <Image src={item.images[0]} alt={item.name} fill className="object-cover" />
                         </div>
                         <div className="flex-grow w-full grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
@@ -48,7 +48,7 @@ export default function CartPage() {
                                 ৳{item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} each
                             </p>
                           </div>
-                          <div className="flex items-center border rounded-md w-fit justify-self-start md:justify-self-center">
+                          <div className="flex items-center border-primary/20 rounded-md w-fit justify-self-start md:justify-self-center">
                             <Button variant="ghost" size="icon" onClick={() => updateQuantity(item.id, item.selectedSize, item.selectedColor?.name, item.quantity - 1)}>
                                 <Minus className="h-4 w-4" />
                             </Button>
@@ -76,7 +76,7 @@ export default function CartPage() {
             
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 border-primary/20">
                 <CardHeader>
                   <CardTitle>Order Summary</CardTitle>
                 </CardHeader>
@@ -109,7 +109,7 @@ export default function CartPage() {
 
           </div>
         ) : (
-          <div className="text-center py-20 border-2 border-dashed rounded-lg">
+          <div className="text-center py-20 border-2 border-dashed border-primary/20 rounded-lg">
             <ShoppingCartIcon className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
             <h2 className="text-2xl font-semibold">Your cart is empty.</h2>
             <p className="text-muted-foreground mt-2">Looks like you haven't added any items to your cart yet.</p>

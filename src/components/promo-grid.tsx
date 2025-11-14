@@ -35,7 +35,7 @@ export function PromoGrid({ promoCards, isLoading }: PromoGridProps) {
             <div className="container">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {promoCards.map((card) => (
-                        <Link key={card.id} href={card.link} className="group relative block overflow-hidden rounded-lg shadow-lg">
+                        <Link key={card.id} href={card.link} className="group relative block overflow-hidden rounded-lg shadow-lg border-primary/20">
                             <div className="relative h-[28rem] w-full">
                                 <Image
                                     src={card.imageUrl}

@@ -1,3 +1,4 @@
+
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -16,7 +17,7 @@ export default function TrackOrderPage() {
     <div className="flex flex-col min-h-screen bg-secondary/30">
       <SiteHeader />
       <main className="flex-grow flex items-center justify-center py-12 px-4 pb-24 md:pb-12">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md border-primary/20">
             <CardHeader className="text-center">
                 <div className="mx-auto mb-4">
                     <Truck className="h-10 w-10 text-primary" />

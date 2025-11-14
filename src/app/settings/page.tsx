@@ -64,7 +64,7 @@ export default function SettingsPage() {
     <div className="flex flex-col min-h-screen">
       <SiteHeader />
       <main className="flex-grow container pt-8 pb-24 md:pt-12 md:pb-12">
-        <Card className="max-w-3xl mx-auto">
+        <Card className="max-w-3xl mx-auto border-primary/20">
             <CardHeader>
                 <div className="flex items-center gap-4">
                     <Settings className="h-8 w-8 text-primary" />
@@ -82,21 +82,21 @@ export default function SettingsPage() {
                         <h3 className="text-xl font-semibold font-headline">Notifications</h3>
                     </div>
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center justify-between rounded-lg border-primary/20 p-4">
                             <div>
                                 <Label htmlFor="order-updates" className="font-medium">Order Updates</Label>
                                 <p className="text-sm text-muted-foreground">Receive updates on your order status.</p>
                             </div>
                             <Switch id="order-updates" checked={notifications.orderUpdates} onCheckedChange={() => handleNotificationChange('orderUpdates')} />
                         </div>
-                         <div className="flex items-center justify-between rounded-lg border p-4">
+                         <div className="flex items-center justify-between rounded-lg border-primary/20 p-4">
                              <div>
                                 <Label htmlFor="promotions" className="font-medium">Promotions</Label>
                                 <p className="text-sm text-muted-foreground">Get notified about sales and special offers.</p>
                             </div>
                             <Switch id="promotions" checked={notifications.promotions} onCheckedChange={() => handleNotificationChange('promotions')} />
                         </div>
-                         <div className="flex items-center justify-between rounded-lg border p-4">
+                         <div className="flex items-center justify-between rounded-lg border-primary/20 p-4">
                             <div>
                                 <Label htmlFor="newsletter" className="font-medium">Newsletter</Label>
                                 <p className="text-sm text-muted-foreground">Subscribe to our weekly newsletter.</p>
@@ -156,7 +156,7 @@ export default function SettingsPage() {
                 </section>
 
             </CardContent>
-            <CardFooter className="border-t pt-6">
+            <CardFooter className="border-t border-primary/20 pt-6">
                  <Button onClick={handleSaveChanges} disabled={isSaving}>
                     {isSaving ? (
                     <>

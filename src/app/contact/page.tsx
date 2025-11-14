@@ -85,7 +85,7 @@ export default function ContactPage() {
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-12">
-                    <Card>
+                    <Card className="border-primary/20">
                         <CardHeader>
                             <CardTitle>Send us a Message</CardTitle>
                             <CardDescription>Fill out the form and we'll get back to you.</CardDescription>

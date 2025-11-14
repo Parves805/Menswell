@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -145,8 +146,8 @@ export default function CommunicationsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 flex-grow min-h-0">
                 
                 {/* Thread List */}
-                <Card className={cn("md:col-span-1 lg:col-span-1 flex flex-col", selectedThread && "hidden md:flex")}>
-                    <CardHeader className="border-b">
+                <Card className={cn("md:col-span-1 lg:col-span-1 flex flex-col border-primary/20", selectedThread && "hidden md:flex")}>
+                    <CardHeader className="border-b border-primary/20">
                         <CardTitle>Inbox</CardTitle>
                         <CardDescription>{threads.length} active conversation(s)</CardDescription>
                     </CardHeader>
@@ -183,10 +184,10 @@ export default function CommunicationsPage() {
                 </Card>
 
                 {/* Message View */}
-                <Card className={cn("md:col-span-2 lg:col-span-3 flex flex-col", !selectedThread && "hidden md:flex")}>
+                <Card className={cn("md:col-span-2 lg:col-span-3 flex flex-col border-primary/20", !selectedThread && "hidden md:flex")}>
                     {selectedThread ? (
                         <>
-                            <CardHeader className="flex flex-row items-center gap-3 border-b">
+                            <CardHeader className="flex flex-row items-center gap-3 border-b border-primary/20">
                                 <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedThread(null)}>
                                     <ArrowLeft />
                                 </Button>
@@ -214,7 +215,7 @@ export default function CommunicationsPage() {
                                     </div>
                                 </ScrollArea>
                             </CardContent>
-                            <div className="p-4 border-t">
+                            <div className="p-4 border-t border-primary/20">
                                 <div className="flex gap-2">
                                     <Textarea 
                                         placeholder="Type your reply..."
@@ -241,5 +242,3 @@ export default function CommunicationsPage() {
         </div>
     );
 }
-
-    
