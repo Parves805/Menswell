@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ShoppingBag } from 'lucide-react';
@@ -90,7 +89,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-8 border-t border-accent-foreground/20 pt-6 text-center text-sm text-accent-foreground/80">
-          <p>&copy; {new Date().getFullYear()} {settings.storeName}. All rights reserved.</p>
+          <p>&copy; Copyright {new Date().getFullYear()} | {settings.storeName} | All rights reserved.</p>
         </div>
       </div>
     </footer>
