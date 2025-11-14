@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AuthForm } from '@/components/auth-form';
@@ -33,9 +34,6 @@ export default function LoginPage() {
       <main className="flex-grow flex items-center justify-center py-12 px-4 pb-24 md:pb-12">
         <Card className="w-full max-w-md">
             <CardHeader className="text-center">
-                <div className="mx-auto mb-4 h-10 w-24 relative">
-                    {logoUrl && <Image src={logoUrl} alt="Logo" layout="fill" objectFit="contain" />}
-                </div>
                 <CardTitle className="text-3xl font-bold font-headline">Welcome Back</CardTitle>
                 <CardDescription>Sign in to your Menswell account to continue.</CardDescription>
             </CardHeader>
