@@ -50,6 +50,8 @@ const checkoutSchema = z.object({
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
+const USER_PROFILE_KEY = 'userProfile';
+
 export default function CheckoutPage() {
   const { cartItems, subtotal, clearCart, totalItems } = useCart();
   const { toast } = useToast();
@@ -109,6 +111,25 @@ export default function CheckoutPage() {
                     zip: userData.address?.zip || '',
                 });
             }
+        } else {
+             // Load from localStorage for guests
+            try {
+                const savedProfile = localStorage.getItem(USER_PROFILE_KEY);
+                if (savedProfile) {
+                    const { savedUser } = JSON.parse(savedProfile);
+                    form.reset({
+                        ...form.getValues(),
+                        name: savedUser.name || '',
+                        email: savedUser.email || '',
+                        phone: savedUser.phone || '',
+                        street: savedUser.address?.street || '',
+                        city: savedUser.address?.city || '',
+                        zip: savedUser.address?.zip || '',
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to load user profile from localStorage", error);
+            }
         }
     };
     
@@ -152,10 +173,26 @@ export default function CheckoutPage() {
       },
       paymentDetails: {
           method: data.paymentMethod,
-          transactionId: data.transactionId,
+          transactionId: data.transactionId || null,
       },
       status: 'Processing' as const,
     };
+    
+     // Also save profile data to local storage for guests/persistence
+    const profileToSave = {
+        savedUser: {
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            address: {
+                street: data.street,
+                city: data.city,
+                state: shippingLocation,
+                zip: data.zip,
+            },
+        },
+    };
+    localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profileToSave));
 
     try {
         const orderRef = doc(firestore, 'orders', orderId);
@@ -470,3 +507,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

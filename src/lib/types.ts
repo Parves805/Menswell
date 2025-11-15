@@ -47,7 +47,7 @@ export interface Order {
   };
   paymentDetails?: {
       method: string;
-      transactionId?: string;
+      transactionId?: string | null;
   };
 }
 
