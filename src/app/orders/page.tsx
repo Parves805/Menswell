@@ -28,9 +28,9 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isEmailLoaded, setIsEmailLoaded] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
     try {
       const savedProfile = localStorage.getItem(USER_PROFILE_KEY);
       if (savedProfile) {
@@ -40,18 +40,21 @@ export default function OrdersPage() {
     } catch (error) {
       console.error("Failed to load user profile from localStorage", error);
     } finally {
-        // Even if profile fails, we might still want to try fetching orders
-        // if email was found previously, but for now let's stop loading.
-        // In a real app, you might handle this differently.
+        setIsEmailLoaded(true);
     }
   }, []);
 
   useEffect(() => {
+    if (!isEmailLoaded) {
+        return; // Wait for email to be loaded
+    }
+      
     if (!userEmail) {
         setIsLoading(false);
-        return;
+        return; // No user email, so no orders to fetch
     };
 
+    setIsLoading(true);
     const q = query(collection(firestore, "orders"), where("shippingInfo.email", "==", userEmail));
     
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -69,7 +72,7 @@ export default function OrdersPage() {
     });
 
     return () => unsubscribe();
-  }, [userEmail]);
+  }, [userEmail, isEmailLoaded]);
 
   if (isLoading) {
       return (
