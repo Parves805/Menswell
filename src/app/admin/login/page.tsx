@@ -42,18 +42,25 @@ export default function AdminLoginPage() {
   const [logoUrl, setLogoUrl] = useState('');
 
   useEffect(() => {
-    try {
-        const storedUsers = localStorage.getItem(ADMIN_USERS_KEY);
-        if (storedUsers) {
-            setAdminUsers([defaultAdmin, ...JSON.parse(storedUsers)]);
+    // This effect fetches the admin users from localStorage when the component mounts.
+    const loadUsers = () => {
+        try {
+            const storedUsers = localStorage.getItem(ADMIN_USERS_KEY);
+            if (storedUsers) {
+                setAdminUsers([defaultAdmin, ...JSON.parse(storedUsers)]);
+            } else {
+                setAdminUsers([defaultAdmin]);
+            }
+        } catch (e) {
+            console.error("Failed to parse admin users from localStorage", e);
+            setAdminUsers([defaultAdmin]);
         }
-    } catch (e) {
-        console.error("Failed to parse admin users from localStorage", e);
-        setAdminUsers([defaultAdmin]);
-    }
+    };
+    loadUsers();
   }, []);
 
   useEffect(() => {
+    // This effect fetches the logo URL from Firestore.
     const unsub = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
         if (doc.exists()) {
             const settings = doc.data().websiteSettings as WebsiteSettings;
