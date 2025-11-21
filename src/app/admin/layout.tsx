@@ -397,7 +397,7 @@ export default function AdminLayout({
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
-              <Image src="https://menswell.stapler.studio/uploads/1763734414_c2738fc124cf4ebc.png" alt="Logo" width={32} height={32} />
+              <Image src="https://menswell.stapler.studio/uploads/1763734414_c2738fc124cf4ebc.png" alt="Logo" width={24} height={24} />
               <h1 className="text-xl font-bold font-headline">Admin Panel</h1>
             </div>
           </SidebarHeader>
@@ -474,7 +474,3 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
-
-    
-
-    
