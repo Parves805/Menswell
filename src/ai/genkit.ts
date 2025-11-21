@@ -5,9 +5,12 @@ import {googleAI} from '@genkit-ai/googleai';
 let ai;
 const apiKey = process.env.GOOGLE_API_KEY;
 
+const defaultModel = 'googleai/gemini-pro';
+
 if (apiKey) {
   ai = genkit({
     plugins: [googleAI({ apiKey })],
+    model: defaultModel,
   });
 } else {
   // This warning will appear in the server console if the key is missing.
@@ -18,9 +21,8 @@ if (apiKey) {
   // Initialize with a model but no key to prevent crashing, but AI calls will fail with a clear error.
   ai = genkit({
     plugins: [googleAI({ apiKey: ''})],
+    model: defaultModel,
   });
 }
-
-const defaultModel = 'gemini-pro';
 
 export { ai, defaultModel };
