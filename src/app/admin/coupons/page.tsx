@@ -105,21 +105,34 @@ export default function AdminCouponsPage() {
 
         const doc = new jsPDF();
         
+        const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + order.subtotal, 0);
+        const totalDiscount = ordersForCoupon.reduce((sum, order) => sum + order.discount, 0);
+
         doc.setFontSize(18);
         doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Total Orders: ${ordersForCoupon.length}`, 14, 30);
 
         autoTable(doc, {
-            startY: 30,
-            head: [['Order ID', 'Customer', 'Date', 'Total']],
+            startY: 35,
+            head: [['Order ID', 'Customer', 'Date', 'Subtotal', 'Discount', 'Shipping', 'Total']],
             body: ordersForCoupon.map(order => [
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
+                `৳${order.subtotal.toLocaleString('en-IN')}`,
+                `৳${order.discount.toLocaleString('en-IN')}`,
+                `৳${order.shippingCost.toLocaleString('en-IN')}`,
                 `৳${order.total.toLocaleString('en-IN')}`
             ]),
+            footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
+            foot: [
+                ['Total', '', '', `৳${totalSubtotal.toLocaleString('en-IN')}`, `৳${totalDiscount.toLocaleString('en-IN')}`, '', '']
+            ]
         });
 
-        doc.save(`coupon_${viewingOrdersFor}_usage.pdf`);
+        doc.save(`coupon_${viewingOrdersFor}_usage_report.pdf`);
     };
 
     const handleAddCoupon = async (data: CouponFormValues) => {
@@ -348,3 +361,5 @@ export default function AdminCouponsPage() {
         </div>
     );
 }
+
+    
