@@ -7,9 +7,9 @@
  * - GenerateOrderEmailInput - The input type for the function.
  */
 
-import { ai, defaultModel } from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import type { Order } from '@/lib/types';
+import { googleAI } from '@genkit-ai/googleai';
 
 const CartItemSchema = z.object({
   id: z.string(),
@@ -85,7 +85,7 @@ Your task is to generate a professional, modern, and clean HTML order confirmati
 
 Generate ONLY the HTML code for the email. Do not add any extra text or explanations before or after the HTML block.
 `,
-  model: defaultModel,
+  model: googleAI.model('gemini-1.5-flash-latest'),
 });
 
 const generateOrderEmailFlow = ai.defineFlow(
