@@ -15,11 +15,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type { AdminUser, AdminRole } from '@/lib/types';
-import { Loader2, Trash2, PlusCircle, UserCog } from 'lucide-react';
+import { Loader2, Trash2, PlusCircle, UserCog, Edit } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { firestore } from '@/lib/firebase';
-import { collection, onSnapshot, addDoc, deleteDoc, doc, query, where, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, query, where, getDocs, setDoc } from 'firebase/firestore';
 
 
 const adminUserSchema = z.object({
@@ -29,7 +29,16 @@ const adminUserSchema = z.object({
     role: z.enum(['Admin', 'Editor', 'Viewer'], { required_error: 'Role is required.' }),
 });
 
+const editAdminUserSchema = z.object({
+    name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+    email: z.string().email({ message: 'A valid email is required.' }),
+    password: z.string().optional(),
+    role: z.enum(['Admin', 'Editor', 'Viewer'], { required_error: 'Role is required.' }),
+});
+
+
 type AdminUserFormValues = z.infer<typeof adminUserSchema>;
+type EditAdminUserFormValues = z.infer<typeof editAdminUserSchema>;
 
 const ROLES: AdminRole[] = ['Admin', 'Editor', 'Viewer'];
 const MAIN_ADMIN_EMAIL = 'mafuz@gmail.com';
@@ -39,11 +48,17 @@ export default function AdminUsersPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
     const { toast } = useToast();
     const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
     const form = useForm<AdminUserFormValues>({
         resolver: zodResolver(adminUserSchema),
+        defaultValues: { name: '', email: '', password: '', role: 'Editor' },
+    });
+
+    const editForm = useForm<EditAdminUserFormValues>({
+        resolver: zodResolver(editAdminUserSchema),
         defaultValues: { name: '', email: '', password: '', role: 'Editor' },
     });
     
@@ -65,6 +80,18 @@ export default function AdminUsersPage() {
         
         return () => unsubscribe();
     }, [toast]);
+    
+    useEffect(() => {
+        if (editingUser) {
+            editForm.reset({
+                name: editingUser.name,
+                email: editingUser.email,
+                role: editingUser.role,
+                password: '',
+            });
+        }
+    }, [editingUser, editForm]);
+
 
     if (currentUserEmail && currentUserEmail !== MAIN_ADMIN_EMAIL) {
         return (
@@ -109,6 +136,30 @@ export default function AdminUsersPage() {
         setIsSubmitting(false);
         setIsAddDialogOpen(false);
         form.reset();
+    };
+
+    const handleEditUser = async (data: EditAdminUserFormValues) => {
+        if (!editingUser) return;
+        setIsSubmitting(true);
+
+        try {
+            const userRef = doc(firestore, 'adminUsers', editingUser.id);
+            const dataToUpdate: Partial<AdminUser> = {
+                name: data.name,
+                role: data.role,
+            };
+            if (data.password) {
+                dataToUpdate.password = data.password;
+            }
+            await setDoc(userRef, dataToUpdate, { merge: true });
+            toast({ title: 'Admin Updated', description: `Admin user "${data.name}" has been updated.` });
+        } catch(error) {
+            console.error("Error updating admin:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update admin user.' });
+        }
+        
+        setIsSubmitting(false);
+        setEditingUser(null);
     };
 
     const handleDeleteUser = async (userId: string) => {
@@ -211,7 +262,11 @@ export default function AdminUsersPage() {
                                          </TableCell>
                                          <TableCell>{user.email}</TableCell>
                                          <TableCell>{user.role}</TableCell>
-                                         <TableCell className="text-right">
+                                         <TableCell className="text-right space-x-2">
+                                            <Button variant="outline" size="icon" onClick={() => setEditingUser(user)}>
+                                                <Edit className="h-4 w-4" />
+                                                <span className="sr-only">Edit</span>
+                                            </Button>
                                              <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button variant="destructive" size="icon">
@@ -243,6 +298,44 @@ export default function AdminUsersPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Admin User</DialogTitle>
+                    </DialogHeader>
+                    <Form {...editForm}>
+                        <form onSubmit={editForm.handleSubmit(handleEditUser)} className="space-y-4">
+                                <FormField control={editForm.control} name="name" render={({ field }) => (
+                                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                                <FormField control={editForm.control} name="email" render={({ field }) => (
+                                <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={editForm.control} name="password" render={({ field }) => (
+                                <FormItem><FormLabel>New Password (Optional)</FormLabel><FormControl><Input type="password" placeholder="Leave blank to keep current password" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={editForm.control} name="role" render={({ field }) => (
+                                <FormItem><FormLabel>Role</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            {ROLES.map(role => <SelectItem key={role} value={role}>{role}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                <FormMessage /></FormItem>
+                            )} />
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Save Changes
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
