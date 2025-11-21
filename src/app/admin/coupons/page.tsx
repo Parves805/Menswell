@@ -129,21 +129,29 @@ export default function AdminCouponsPage() {
 
             if (websiteSettings?.logoUrl) {
                 try {
-                    const response = await fetch(websiteSettings.logoUrl);
-                    const blob = await response.blob();
-                    const reader = new FileReader();
-                    await new Promise<void>((resolve, reject) => {
-                        reader.onload = () => {
-                            const dataUrl = reader.result as string;
-                            const imageFormat = blob.type.split('/')[1]?.toUpperCase() || 'JPEG';
+                    const img = new Image();
+                    img.crossOrigin = 'Anonymous';
+                    img.src = websiteSettings.logoUrl;
+                    await new Promise((resolve, reject) => {
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            const ctx = canvas.getContext('2d');
+                            ctx?.drawImage(img, 0, 0);
+                            const dataUrl = canvas.toDataURL('image/png');
+                            const imageFormat = (img.src.split('.').pop() || 'jpeg').toUpperCase();
                             doc.addImage(dataUrl, imageFormat, 14, 15, 40, 12);
-                            resolve();
+                            resolve(true);
                         };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
+                        img.onerror = (err) => {
+                            console.error("Image Onload Error:", err);
+                            reject(err);
+                        };
                     });
                 } catch (e) {
                     console.error("Could not add logo to PDF:", e);
+                    // Fallback to text if image fails
                     doc.setFontSize(12);
                     doc.text(websiteSettings.storeName || 'BazaarGo', 14, 20);
                 }
@@ -175,7 +183,7 @@ export default function AdminCouponsPage() {
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                ['Total Orders', ordersForCoupon.length, 'Total Subtotal', `BDT ${totalSubtotal.toFixed(2)}`]
+                ['Total Orders', ordersForCoupon.length.toString(), 'Total Subtotal', `BDT ${totalSubtotal.toFixed(2)}`]
             ],
             didDrawPage: async function (data) {
                 if (data.pageNumber > 1) {
