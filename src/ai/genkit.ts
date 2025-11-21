@@ -9,7 +9,7 @@ const defaultModel = 'gemini-1.5-flash-latest';
 
 if (apiKey) {
   ai = genkit({
-    plugins: [googleAI({ apiKey, apiVersion: 'v1beta' })],
+    plugins: [googleAI({ apiKey })],
   });
 } else {
   // This warning will appear in the server console if the key is missing.
