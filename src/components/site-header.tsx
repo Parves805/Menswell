@@ -239,8 +239,8 @@ export function SiteHeader() {
             {logoContent()}
         </div>
 
-        {/* Center: Search Bar & Main Menu (Desktop) */}
-        <div className="hidden md:flex flex-1 justify-center items-center gap-6">
+        {/* Right side group for desktop */}
+        <div className="hidden md:flex flex-1 justify-end items-center gap-6">
             <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
                 <PopoverTrigger asChild>
                     <form onSubmit={handleSearch} className="w-full max-w-lg relative">
@@ -281,55 +281,8 @@ export function SiteHeader() {
             <nav className="flex items-center space-x-6 text-sm font-medium">
                 {mainMenuLinks}
             </nav>
-        </div>
-        
-        {/* Right Side: Icons */}
-        <div className="flex items-center">
-            <nav className="flex items-center">
-              
-              {/* Mobile Search Icon */}
-              <div className="md:hidden">
-                <Dialog open={isMobileSearchOpen} onOpenChange={setIsMobileSearchOpen}>
-                    <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                            <Search className="h-6 w-6" />
-                            <span className="sr-only">Search</span>
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="top-1/4">
-                        <DialogHeader>
-                            <DialogTitle>Search for products</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleSearch} className="w-full relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input 
-                                name="query" 
-                                type="search" 
-                                placeholder="What are you looking for?" 
-                                className="pl-12 h-12 text-base" 
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                autoComplete="off"
-                            />
-                        </form>
-                         <ScrollArea className="max-h-64 mt-2">
-                            {searchResults.map(product => (
-                                <Link key={product.id} href={`/product/${product.id}`} className="flex items-center gap-4 p-2 rounded-md hover:bg-accent" onClick={() => setIsMobileSearchOpen(false)}>
-                                    <Image src={product.images[0]} alt={product.name} width={40} height={40} className="rounded-md object-cover"/>
-                                    <div className="flex-grow overflow-hidden">
-                                        <p className="font-medium truncate">{product.name}</p>
-                                    </div>
-                                    <p className="text-sm font-semibold">৳{product.price}</p>
-                                </Link>
-                            ))}
-                        </ScrollArea>
-                    </DialogContent>
-                </Dialog>
-              </div>
-
-              {/* Desktop Icons */}
-              <div className="hidden md:flex items-center space-x-1">
-                  <Button asChild variant="ghost" size="icon" className="relative">
+            <div className="flex items-center space-x-1">
+                <Button asChild variant="ghost" size="icon" className="relative">
                     <Link href="/wishlist">
                         <Heart className="h-6 w-6" />
                         {isMounted && wishlistCount > 0 && (
@@ -339,83 +292,134 @@ export function SiteHeader() {
                         )}
                         <span className="sr-only">Wishlist</span>
                     </Link>
-                  </Button>
+                </Button>
 
-                  <DropdownMenu onOpenChange={(open) => { if (open) handleMarkNotificationsAsRead(); }}>
+                <DropdownMenu onOpenChange={(open) => { if (open) handleMarkNotificationsAsRead(); }}>
                     <DropdownMenuTrigger asChild>
-                      {notificationTrigger}
+                        {notificationTrigger}
                     </DropdownMenuTrigger>
                     {notificationDropdownContent}
                 </DropdownMenu>
 
-                  <DropdownMenu>
+                <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon">
                         <User className="h-6 w-6" />
                         <span className="sr-only">User Menu</span>
-                      </Button>
+                        </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {isMounted && isAuthenticated ? (
+                        {isMounted && isAuthenticated ? (
                         <>
-                          <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                           <DropdownMenuItem asChild>
-                             <Link href="/profile">
-                               <UserCircle className="mr-2 h-4 w-4" />
-                               <span>Profile</span>
-                             </Link>
-                           </DropdownMenuItem>
-                           <DropdownMenuItem asChild>
-                             <Link href="/orders">
-                               <ListOrdered className="mr-2 h-4 w-4" />
-                               <span>My Orders</span>
-                             </Link>
-                           </DropdownMenuItem>
-                           <DropdownMenuItem asChild>
-                             <Link href="/settings">
-                               <Settings className="mr-2 h-4 w-4" />
-                               <span>Settings</span>
-                             </Link>
-                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={handleLogout}>
+                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <Link href="/profile">
+                                <UserCircle className="mr-2 h-4 w-4" />
+                                <span>Profile</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/orders">
+                                <ListOrdered className="mr-2 h-4 w-4" />
+                                <span>My Orders</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/settings">
+                                <Settings className="mr-2 h-4 w-4" />
+                                <span>Settings</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleLogout}>
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>Log out</span>
-                          </DropdownMenuItem>
+                            </DropdownMenuItem>
                         </>
-                      ) : (
+                        ) : (
                         <>
-                          <DropdownMenuLabel>Welcome</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
+                            <DropdownMenuLabel>Welcome</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
                             <Link href="/login">
-                              <LogIn className="mr-2 h-4 w-4" />
-                              <span>Log In</span>
+                                <LogIn className="mr-2 h-4 w-4" />
+                                <span>Log In</span>
                             </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
                             <Link href="/signup">
-                              <UserPlus className="mr-2 h-4 w-4" />
-                              <span>Sign Up</span>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                <span>Sign Up</span>
                             </Link>
-                          </DropdownMenuItem>
+                            </DropdownMenuItem>
                         </>
-                      )}
+                        )}
                     </DropdownMenuContent>
-                  </DropdownMenu>
-              </div>
+                </DropdownMenu>
+                <Button asChild variant="ghost" size="icon" className="relative">
+                    <Link href="/cart">
+                        <ShoppingCart className="h-6 w-6" />
+                        {isMounted && totalItems > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs">
+                            {totalItems}
+                        </span>
+                        )}
+                        <span className="sr-only">Cart</span>
+                    </Link>
+                </Button>
+            </div>
+        </div>
+        
+        {/* Mobile Icons & Menu */}
+        <div className="flex items-center md:hidden">
+            <nav className="flex items-center">
+              
+              {/* Mobile Search Icon */}
+              <Dialog open={isMobileSearchOpen} onOpenChange={setIsMobileSearchOpen}>
+                  <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                          <Search className="h-6 w-6" />
+                          <span className="sr-only">Search</span>
+                      </Button>
+                  </DialogTrigger>
+                  <DialogContent className="top-1/4">
+                      <DialogHeader>
+                          <DialogTitle>Search for products</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleSearch} className="w-full relative">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                          <Input 
+                              name="query" 
+                              type="search" 
+                              placeholder="What are you looking for?" 
+                              className="pl-12 h-12 text-base" 
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              autoComplete="off"
+                          />
+                      </form>
+                        <ScrollArea className="max-h-64 mt-2">
+                          {searchResults.map(product => (
+                              <Link key={product.id} href={`/product/${product.id}`} className="flex items-center gap-4 p-2 rounded-md hover:bg-accent" onClick={() => setIsMobileSearchOpen(false)}>
+                                  <Image src={product.images[0]} alt={product.name} width={40} height={40} className="rounded-md object-cover"/>
+                                  <div className="flex-grow overflow-hidden">
+                                      <p className="font-medium truncate">{product.name}</p>
+                                  </div>
+                                  <p className="text-sm font-semibold">৳{product.price}</p>
+                              </Link>
+                          ))}
+                      </ScrollArea>
+                  </DialogContent>
+              </Dialog>
 
-               {/* Mobile Notification Icon */}
-              <div className="md:hidden">
+              {/* Mobile Notification Icon */}
                 <DropdownMenu onOpenChange={(open) => { if (open) handleMarkNotificationsAsRead(); }}>
                     <DropdownMenuTrigger asChild>
                       {notificationTrigger}
                     </DropdownMenuTrigger>
                     {notificationDropdownContent}
                 </DropdownMenu>
-              </div>
-
 
                <Button asChild variant="ghost" size="icon" className="relative">
                 <Link href="/cart">
@@ -430,54 +434,52 @@ export function SiteHeader() {
               </Button>
 
                 {/* Mobile Menu Icon */}
-                <div className="md:hidden">
-                    <Sheet>
-                    <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                        <Menu />
-                        <span className="sr-only">Toggle Menu</span>
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0 flex flex-col">
-                        <SheetHeader className="p-4 border-b">
-                            <SheetTitle className="text-left sr-only">Main Menu</SheetTitle>
-                            <SheetClose asChild>
-                               {logoContent(true)}
-                            </SheetClose>
-                        </SheetHeader>
-                        <nav className="flex flex-col space-y-1 p-4">
-                            <SheetClose asChild>
-                                <Link href="/" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Home</Link>
-                            </SheetClose>
-                            
-                            <Accordion type="single" collapsible className="w-full">
-                                <AccordionItem value="categories" className="border-b-0">
-                                <AccordionTrigger className="py-2 text-lg font-medium text-foreground/80 hover:text-primary hover:no-underline">
-                                    Categories
-                                </AccordionTrigger>
-                                <AccordionContent className="pl-4 pt-2">
-                                    <nav className="grid gap-2">
-                                    {categories.map((category) => (
-                                        <SheetClose asChild key={category.id}>
-                                        <Link href={`/category/${category.id}`} className="text-base text-foreground/70 hover:text-primary">
-                                            {category.name}
-                                        </Link>
-                                        </SheetClose>
-                                    ))}
-                                    </nav>
-                                </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-                            <SheetClose asChild>
-                                <Link href="/shop" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Shop</Link>
-                            </SheetClose>
-                            <SheetClose asChild>
-                                <Link href="/about" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">About Us</Link>
-                            </SheetClose>
-                        </nav>
-                    </SheetContent>
-                    </Sheet>
-                </div>
+                <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                    <Menu />
+                    <span className="sr-only">Toggle Menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0 flex flex-col">
+                    <SheetHeader className="p-4 border-b">
+                        <SheetTitle className="text-left sr-only">Main Menu</SheetTitle>
+                        <SheetClose asChild>
+                            {logoContent(true)}
+                        </SheetClose>
+                    </SheetHeader>
+                    <nav className="flex flex-col space-y-1 p-4">
+                        <SheetClose asChild>
+                            <Link href="/" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Home</Link>
+                        </SheetClose>
+                        
+                        <Accordion type="single" collapsible className="w-full">
+                            <AccordionItem value="categories" className="border-b-0">
+                            <AccordionTrigger className="py-2 text-lg font-medium text-foreground/80 hover:text-primary hover:no-underline">
+                                Categories
+                            </AccordionTrigger>
+                            <AccordionContent className="pl-4 pt-2">
+                                <nav className="grid gap-2">
+                                {categories.map((category) => (
+                                    <SheetClose asChild key={category.id}>
+                                    <Link href={`/category/${category.id}`} className="text-base text-foreground/70 hover:text-primary">
+                                        {category.name}
+                                    </Link>
+                                    </SheetClose>
+                                ))}
+                                </nav>
+                            </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                        <SheetClose asChild>
+                            <Link href="/shop" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Shop</Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                            <Link href="/about" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">About Us</Link>
+                        </SheetClose>
+                    </nav>
+                </SheetContent>
+                </Sheet>
             </nav>
         </div>
       </div>
