@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -45,12 +44,9 @@ export default function AdminLoginPage() {
     // This effect fetches the admin users from localStorage when the component mounts.
     const loadUsers = () => {
         try {
-            const storedUsers = localStorage.getItem(ADMIN_USERS_KEY);
-            if (storedUsers) {
-                setAdminUsers([defaultAdmin, ...JSON.parse(storedUsers)]);
-            } else {
-                setAdminUsers([defaultAdmin]);
-            }
+            const storedUsersJSON = localStorage.getItem(ADMIN_USERS_KEY);
+            const storedUsers = storedUsersJSON ? JSON.parse(storedUsersJSON) : [];
+            setAdminUsers([defaultAdmin, ...storedUsers]);
         } catch (e) {
             console.error("Failed to parse admin users from localStorage", e);
             setAdminUsers([defaultAdmin]);
@@ -84,8 +80,21 @@ export default function AdminLoginPage() {
   const onSubmit = (data: AdminLoginFormValues) => {
     setIsLoading(true);
 
+    // Re-fetch users from local storage right before submission
+    // to ensure the list is up-to-date.
+    let currentAdminUsers = [defaultAdmin];
+    try {
+        const storedUsersJSON = localStorage.getItem(ADMIN_USERS_KEY);
+        const storedUsers = storedUsersJSON ? JSON.parse(storedUsersJSON) : [];
+        currentAdminUsers = [defaultAdmin, ...storedUsers];
+    } catch (e) {
+        console.error("Failed to parse admin users from localStorage on submit", e);
+    }
+    setAdminUsers(currentAdminUsers);
+
+
     setTimeout(() => {
-      const user = adminUsers.find(
+      const user = currentAdminUsers.find(
         (u) => u.email === data.email && u.password === data.password
       );
 
