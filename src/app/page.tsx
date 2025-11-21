@@ -131,7 +131,6 @@ export default function Home() {
                                 data-ai-hint={slide.dataAiHint}
                                 priority={index === 0}
                             />
-                            <div className="absolute inset-0 bg-black/30" />
                             </div>
                         </Link>
                     </CarouselItem>

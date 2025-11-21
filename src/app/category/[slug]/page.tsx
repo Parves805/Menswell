@@ -99,7 +99,7 @@ export default function CategoryPage() {
                 data-ai-hint={`mens ${category.id.replace('-', ' ')}`}
                 priority
             />
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                 <div className="text-center text-white p-4">
                     <h1 className="text-3xl md:text-5xl font-bold font-headline">{category.name}</h1>
                     <p className="text-md md:text-lg mt-2">Explore our collection of {category.name.toLowerCase()}.</p>
