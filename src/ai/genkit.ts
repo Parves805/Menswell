@@ -8,7 +8,7 @@ const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY;
 if (apiKey) {
   ai = genkit({
     plugins: [googleAI({ apiKey })],
-    model: "models/gemini-1.5-flash",
+    model: "gemini-pro",
   });
 } else {
   console.warn("\n[Menswell] WARNING: GOOGLE_GENAI_API_KEY is not set.");
@@ -17,7 +17,7 @@ if (apiKey) {
 
   ai = genkit({
     plugins: [googleAI({ apiKey: "" })],
-    model: "models/gemini-1.5-flash",
+    model: "gemini-pro",
   });
 }
 
