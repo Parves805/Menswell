@@ -59,7 +59,7 @@ export default function AdminCouponsPage() {
             const fetchedCoupons = couponSnapshot.docs.map(doc => {
                 const data = doc.data();
                 // Ensure expiryDate is a Date object
-                const expiryDate = data.expiryDate?.toDate ? data.expiryDate.toDate() : data.expiryDate;
+                const expiryDate = data.expiryDate?.toDate ? data.expiryDate.toDate() : new Date(data.expiryDate);
                 return {
                     id: doc.id,
                     ...data,
@@ -113,6 +113,7 @@ export default function AdminCouponsPage() {
         const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0);
         const totalDiscount = ordersForCoupon.reduce((sum, order) => sum + (order.discount || 0), 0);
         const totalShipping = ordersForCoupon.reduce((sum, order) => sum + (order.shippingCost || 0), 0);
+        const grandTotal = ordersForCoupon.reduce((sum, order) => sum + order.total, 0);
 
 
         doc.setFontSize(18);
@@ -128,14 +129,14 @@ export default function AdminCouponsPage() {
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
-                `৳${(order.subtotal || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
-                `৳${(order.discount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
-                `৳${(order.shippingCost || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
-                `৳${order.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                `BDT ${(order.subtotal || 0).toFixed(2)}`,
+                `BDT ${(order.discount || 0).toFixed(2)}`,
+                `BDT ${(order.shippingCost || 0).toFixed(2)}`,
+                `BDT ${order.total.toFixed(2)}`
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                 ['Total', '', '', `৳${totalSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, `৳${totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, `৳${totalShipping.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, '']
+                 ['Total', '', '', `BDT ${totalSubtotal.toFixed(2)}`, `BDT ${totalDiscount.toFixed(2)}`, `BDT ${totalShipping.toFixed(2)}`, `BDT ${grandTotal.toFixed(2)}`]
             ]
         });
 
@@ -368,5 +369,3 @@ export default function AdminCouponsPage() {
         </div>
     );
 }
-
-    
