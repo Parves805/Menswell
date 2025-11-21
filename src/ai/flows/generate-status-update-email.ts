@@ -91,6 +91,7 @@ const prompt = ai.definePrompt({
     message: z.string(),
   }) },
   output: { format: 'text' },
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `
 You are an expert email designer for an e-commerce store called "Menswell".
 Your task is to generate a professional, modern, and clean HTML order status update email.
@@ -117,7 +118,6 @@ Use the following information to tailor the email content:
 
 Generate ONLY the HTML code for the email. Do not add any extra text or explanations before or after the HTML block.
 `,
-  model: googleAI.model('gemini-1.5-flash-latest'),
 });
 
 const generateStatusUpdateEmailFlow = ai.defineFlow(
