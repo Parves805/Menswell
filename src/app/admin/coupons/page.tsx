@@ -127,11 +127,6 @@ export default function AdminCouponsPage() {
         const doc = new jsPDF();
         
         const addHeader = async () => {
-             // Main Title
-            doc.setFontSize(12);
-            doc.setTextColor(0);
-            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-
             if (websiteSettings?.logoUrl) {
                 try {
                     const img = new Image();
@@ -166,17 +161,21 @@ export default function AdminCouponsPage() {
                 doc.text(websiteSettings.storeName, 14, 20);
             }
             
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 26);
+            
             doc.setFontSize(9);
             doc.setTextColor(100);
-            doc.text('01617574456', 14, 26);
-            doc.text('hridoygd4456@gmail.com', 14, 30);
-            doc.text('Road-21, Sector-11, Uttara, Dhaka, Bangladesh', 14, 34);
+            doc.text('01617574456', 14, 32);
+            doc.text('hridoygd4456@gmail.com', 14, 36);
+            doc.text('Road-21, Sector-11, Uttara, Dhaka, Bangladesh', 14, 40);
         };
 
         await addHeader();
         
         autoTable(doc, {
-            startY: 45,
+            startY: 48,
             head: [['Order ID', 'Customer', 'Date', 'Subtotal']],
             body: ordersForCoupon.map(order => [
                 `#${order.id.slice(-6)}`,
