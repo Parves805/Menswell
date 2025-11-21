@@ -151,13 +151,17 @@ export default function AdminCouponsPage() {
                     if(websiteSettings.storeName){
                         doc.setFontSize(22);
                         doc.setTextColor(themeSettings?.primary || '#000000');
+                        doc.setFont('helvetica', 'bold');
                         doc.text((websiteSettings.storeName || '').toUpperCase(), 14, 20);
+                        doc.setFont('helvetica', 'normal');
                     }
                 }
             } else if (websiteSettings?.storeName) {
                 doc.setFontSize(22);
                 doc.setTextColor(themeSettings?.primary || '#000000');
+                doc.setFont('helvetica', 'bold');
                 doc.text((websiteSettings.storeName || '').toUpperCase(), 14, 20);
+                doc.setFont('helvetica', 'normal');
             }
             
             doc.setFontSize(11);
