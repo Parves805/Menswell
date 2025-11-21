@@ -227,59 +227,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between gap-2">
-        {/* Left Side: Mobile Menu & Logo */}
-        <div className="flex items-center gap-2">
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0 flex flex-col">
-                  <SheetHeader className="p-4 border-b">
-                    <SheetTitle className="text-left sr-only">Main Menu</SheetTitle>
-                    <SheetClose asChild>
-                      {logoContent(true)}
-                    </SheetClose>
-                  </SheetHeader>
-                  <nav className="flex flex-col space-y-1 p-4">
-                      <SheetClose asChild>
-                        <Link href="/" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Home</Link>
-                      </SheetClose>
-                      
-                       <Accordion type="single" collapsible className="w-full">
-                        <AccordionItem value="categories" className="border-b-0">
-                          <AccordionTrigger className="py-2 text-lg font-medium text-foreground/80 hover:text-primary hover:no-underline">
-                              Categories
-                          </AccordionTrigger>
-                          <AccordionContent className="pl-4 pt-2">
-                            <nav className="grid gap-2">
-                              {categories.map((category) => (
-                                <SheetClose asChild key={category.id}>
-                                  <Link href={`/category/${category.id}`} className="text-base text-foreground/70 hover:text-primary">
-                                    {category.name}
-                                  </Link>
-                                </SheetClose>
-                              ))}
-                            </nav>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                      <SheetClose asChild>
-                        <Link href="/shop" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Shop</Link>
-                      </SheetClose>
-                      <SheetClose asChild>
-                        <Link href="/about" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">About Us</Link>
-                      </SheetClose>
-                  </nav>
-              </SheetContent>
-            </Sheet>
-          </div>
-          <div className="hidden md:block">
+        {/* Left Side: Logo */}
+        <div className="flex items-center">
             {logoContent()}
-          </div>
         </div>
 
         {/* Center: Search Bar (Desktop) */}
@@ -468,6 +418,56 @@ export function SiteHeader() {
                   <span className="sr-only">Cart</span>
                 </Link>
               </Button>
+
+                {/* Mobile Menu Icon */}
+                <div className="md:hidden">
+                    <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                        <Menu />
+                        <span className="sr-only">Toggle Menu</span>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0 flex flex-col">
+                        <SheetHeader className="p-4 border-b">
+                            <SheetTitle className="text-left sr-only">Main Menu</SheetTitle>
+                            <SheetClose asChild>
+                               {logoContent(true)}
+                            </SheetClose>
+                        </SheetHeader>
+                        <nav className="flex flex-col space-y-1 p-4">
+                            <SheetClose asChild>
+                                <Link href="/" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Home</Link>
+                            </SheetClose>
+                            
+                            <Accordion type="single" collapsible className="w-full">
+                                <AccordionItem value="categories" className="border-b-0">
+                                <AccordionTrigger className="py-2 text-lg font-medium text-foreground/80 hover:text-primary hover:no-underline">
+                                    Categories
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-4 pt-2">
+                                    <nav className="grid gap-2">
+                                    {categories.map((category) => (
+                                        <SheetClose asChild key={category.id}>
+                                        <Link href={`/category/${category.id}`} className="text-base text-foreground/70 hover:text-primary">
+                                            {category.name}
+                                        </Link>
+                                        </SheetClose>
+                                    ))}
+                                    </nav>
+                                </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                            <SheetClose asChild>
+                                <Link href="/shop" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Shop</Link>
+                            </SheetClose>
+                            <SheetClose asChild>
+                                <Link href="/about" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">About Us</Link>
+                            </SheetClose>
+                        </nav>
+                    </SheetContent>
+                    </Sheet>
+                </div>
             </nav>
         </div>
       </div>
