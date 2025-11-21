@@ -169,10 +169,12 @@ export default function AdminCouponsPage() {
             if (websiteSettings) {
                 doc.setFontSize(9);
                 doc.setTextColor(100);
-                let y = 30;
-                if (websiteSettings.address) { doc.text(websiteSettings.address, 14, y); y += 5; }
-                if (websiteSettings.contactEmail) { doc.text(websiteSettings.contactEmail, 14, y); y += 5; }
-                if (websiteSettings.contactPhone) { doc.text(websiteSettings.contactPhone, 14, y); }
+                const contactParts = [
+                    websiteSettings.address,
+                    websiteSettings.contactEmail,
+                    websiteSettings.contactPhone
+                ].filter(Boolean);
+                doc.text(contactParts.join(' | '), 14, 30);
             }
         };
 
