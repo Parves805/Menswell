@@ -9,7 +9,7 @@ const defaultModel = 'googleai/gemini-pro';
 
 if (apiKey) {
   ai = genkit({
-    plugins: [googleAI({ apiKey })],
+    plugins: [googleAI({ apiKey, apiVersion: 'v1' })],
     model: defaultModel,
   });
 } else {
@@ -20,7 +20,7 @@ if (apiKey) {
   
   // Initialize with a model but no key to prevent crashing, but AI calls will fail with a clear error.
   ai = genkit({
-    plugins: [googleAI({ apiKey: ''})],
+    plugins: [googleAI({ apiKey: '', apiVersion: 'v1' })],
     model: defaultModel,
   });
 }
