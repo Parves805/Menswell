@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import type { Coupon, Order, WebsiteSettings } from '@/lib/types';
+import type { Coupon, Order, WebsiteSettings, ThemeSettings } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle, CalendarIcon, Ticket, Eye, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { firestore } from '@/lib/firebase';
@@ -47,6 +47,7 @@ export default function AdminCouponsPage() {
     const [viewingOrdersFor, setViewingOrdersFor] = useState<string | null>(null);
     const { toast } = useToast();
     const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings | null>(null);
+    const [themeSettings, setThemeSettings] = useState<ThemeSettings | null>(null);
 
     const form = useForm<CouponFormValues>({
         resolver: zodResolver(couponSchema),
@@ -57,8 +58,10 @@ export default function AdminCouponsPage() {
 
     useEffect(() => {
         const settingsUnsub = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
-            if (doc.exists() && doc.data().websiteSettings) {
-                setWebsiteSettings(doc.data().websiteSettings);
+            if (doc.exists()) {
+                const data = doc.data();
+                setWebsiteSettings(data.websiteSettings);
+                setThemeSettings(data.themeSettings);
             }
         });
         
@@ -124,6 +127,7 @@ export default function AdminCouponsPage() {
         const doc = new jsPDF();
         
         const addHeader = async () => {
+             // Main Title
             doc.setFontSize(18);
             doc.setTextColor(0);
             doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
@@ -131,7 +135,6 @@ export default function AdminCouponsPage() {
             if (websiteSettings?.logoUrl) {
                 try {
                     const img = new Image();
-                    // Use a CORS proxy to bypass browser security restrictions
                     img.crossOrigin = 'Anonymous';
                     const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
                     img.src = proxyUrl + websiteSettings.logoUrl;
@@ -147,19 +150,19 @@ export default function AdminCouponsPage() {
                             doc.addImage(dataUrl, 'PNG', 14, 15, 40, 12);
                             resolve();
                         };
-                        img.onerror = (err) => {
-                            console.error("Image Onload Error:", err);
-                            reject(err);
-                        };
+                        img.onerror = (err) => reject(err);
                     });
                 } catch (e) {
-                    console.error("Could not add logo to PDF:", e);
-                    // Fallback to text if image fails
-                    doc.setFontSize(12);
-                    doc.text(websiteSettings.storeName || 'BazaarGo', 14, 20);
+                     // Fallback to text if image fails
+                    if(websiteSettings.storeName){
+                        doc.setFontSize(22);
+                        doc.setTextColor(themeSettings?.primary || '#000000');
+                        doc.text(websiteSettings.storeName, 14, 20);
+                    }
                 }
             } else if (websiteSettings?.storeName) {
-                doc.setFontSize(12);
+                doc.setFontSize(22);
+                doc.setTextColor(themeSettings?.primary || '#000000');
                 doc.text(websiteSettings.storeName, 14, 20);
             }
             
