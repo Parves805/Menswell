@@ -32,6 +32,7 @@ import Image from 'next/image';
 import { firestore } from '@/lib/firebase';
 import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { debounce } from 'lodash';
+import { Separator } from './ui/separator';
 
 export function SiteHeader() {
   const { toast } = useToast();
@@ -448,36 +449,34 @@ export function SiteHeader() {
                             {logoContent(true)}
                         </SheetClose>
                     </SheetHeader>
-                    <nav className="flex flex-col space-y-1 p-4">
-                        <SheetClose asChild>
-                            <Link href="/" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Home</Link>
-                        </SheetClose>
-                        
-                        <Accordion type="single" collapsible className="w-full">
-                            <AccordionItem value="categories" className="border-b-0">
-                            <AccordionTrigger className="py-2 text-lg font-medium text-foreground/80 hover:text-primary hover:no-underline">
-                                Categories
-                            </AccordionTrigger>
-                            <AccordionContent className="pl-4 pt-2">
-                                <nav className="grid gap-2">
+                    <div className="flex-grow flex flex-col">
+                        <nav className="flex flex-col space-y-1 p-4">
+                            <SheetClose asChild>
+                                <Link href="/" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Home</Link>
+                            </SheetClose>
+                            <SheetClose asChild>
+                                <Link href="/shop" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Shop</Link>
+                            </SheetClose>
+                            <SheetClose asChild>
+                                <Link href="/about" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">About Us</Link>
+                            </SheetClose>
+                        </nav>
+                        <Separator className="my-2" />
+                        <div className="p-4 flex-shrink-0">
+                            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Categories</h3>
+                        </div>
+                        <ScrollArea className="flex-grow">
+                            <nav className="grid gap-2 px-4 pb-4">
                                 {categories.map((category) => (
                                     <SheetClose asChild key={category.id}>
-                                    <Link href={`/category/${category.id}`} className="text-base text-foreground/70 hover:text-primary">
-                                        {category.name}
-                                    </Link>
+                                        <Link href={`/category/${category.id}`} className="text-base text-foreground/70 hover:text-primary py-1">
+                                            {category.name}
+                                        </Link>
                                     </SheetClose>
                                 ))}
-                                </nav>
-                            </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-                        <SheetClose asChild>
-                            <Link href="/shop" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">Shop</Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                            <Link href="/about" className="text-lg font-medium text-foreground/80 hover:text-primary py-2">About Us</Link>
-                        </SheetClose>
-                    </nav>
+                            </nav>
+                        </ScrollArea>
+                    </div>
                 </SheetContent>
                 </Sheet>
             </nav>
