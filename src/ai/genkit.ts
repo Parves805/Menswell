@@ -21,6 +21,6 @@ if (apiKey) {
   });
 }
 
-const defaultModel = 'gemini-1.5-flash';
+const defaultModel = 'gemini-pro';
 
 export { ai, defaultModel };
