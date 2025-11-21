@@ -65,6 +65,7 @@ export default function AdminCouponsPage() {
         const couponUnsub = onSnapshot(collection(firestore, "coupons"), (couponSnapshot) => {
             const fetchedCoupons = couponSnapshot.docs.map(doc => {
                 const data = doc.data();
+                // Firestore timestamps need to be converted to JS Date objects
                 const expiryDate = data.expiryDate?.toDate ? data.expiryDate.toDate() : new Date(data.expiryDate);
                 return {
                     id: doc.id,
@@ -130,9 +131,12 @@ export default function AdminCouponsPage() {
             if (websiteSettings?.logoUrl) {
                 try {
                     const img = new Image();
+                    // Use a CORS proxy to bypass browser security restrictions
                     img.crossOrigin = 'Anonymous';
-                    img.src = websiteSettings.logoUrl;
-                    await new Promise((resolve, reject) => {
+                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                    img.src = proxyUrl + websiteSettings.logoUrl;
+
+                    await new Promise<void>((resolve, reject) => {
                         img.onload = () => {
                             const canvas = document.createElement('canvas');
                             canvas.width = img.width;
@@ -140,9 +144,8 @@ export default function AdminCouponsPage() {
                             const ctx = canvas.getContext('2d');
                             ctx?.drawImage(img, 0, 0);
                             const dataUrl = canvas.toDataURL('image/png');
-                            const imageFormat = (img.src.split('.').pop() || 'jpeg').toUpperCase();
-                            doc.addImage(dataUrl, imageFormat, 14, 15, 40, 12);
-                            resolve(true);
+                            doc.addImage(dataUrl, 'PNG', 14, 15, 40, 12);
+                            resolve();
                         };
                         img.onerror = (err) => {
                             console.error("Image Onload Error:", err);
@@ -169,9 +172,7 @@ export default function AdminCouponsPage() {
         };
 
         await addHeader();
-
-        const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0);
-
+        
         autoTable(doc, {
             startY: 45,
             head: [['Order ID', 'Customer', 'Date', 'Subtotal']],
@@ -183,7 +184,7 @@ export default function AdminCouponsPage() {
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                ['Total Orders', ordersForCoupon.length.toString(), 'Total Subtotal', `BDT ${totalSubtotal.toFixed(2)}`]
+                ['Total Orders', ordersForCoupon.length.toString(), 'Total Subtotal', `BDT ${ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0).toFixed(2)}`]
             ],
             didDrawPage: async function (data) {
                 if (data.pageNumber > 1) {
