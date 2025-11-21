@@ -132,20 +132,19 @@ export default function AdminCouponsPage() {
             // Add Logo
             if (websiteSettings?.logoUrl) {
                 try {
-                    // Let jspdf auto-detect the format
-                    doc.addImage(websiteSettings.logoUrl, '', 14, 15, 40, 12);
+                    const imageUrl = websiteSettings.logoUrl;
+                    const imageFormat = (imageUrl.split('.').pop() || 'jpeg').toUpperCase();
+                    doc.addImage(imageUrl, imageFormat, 14, 15, 40, 12);
                 } catch (e) {
                     console.error("Could not add logo to PDF:", e);
-                    // Fallback to text if image fails
                     doc.setFontSize(12);
-                    doc.text(websiteSettings.storeName || 'Menswell', 14, 20);
+                    doc.text(websiteSettings.storeName || 'BazaarGo', 14, 20);
                 }
             } else if (websiteSettings?.storeName) {
                 doc.setFontSize(12);
                 doc.text(websiteSettings.storeName, 14, 20);
             }
 
-            // Add Contact Info below logo/name
             if (websiteSettings) {
                 doc.setFontSize(9);
                 doc.setTextColor(100);
