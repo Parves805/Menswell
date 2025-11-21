@@ -58,7 +58,6 @@ export default function AdminCouponsPage() {
         const couponUnsub = onSnapshot(collection(firestore, "coupons"), (couponSnapshot) => {
             const fetchedCoupons = couponSnapshot.docs.map(doc => {
                 const data = doc.data();
-                // Ensure expiryDate is a Date object
                 const expiryDate = data.expiryDate?.toDate ? data.expiryDate.toDate() : new Date(data.expiryDate);
                 return {
                     id: doc.id,
@@ -111,10 +110,6 @@ export default function AdminCouponsPage() {
         const doc = new jsPDF();
         
         const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0);
-        const totalDiscount = ordersForCoupon.reduce((sum, order) => sum + (order.discount || 0), 0);
-        const totalShipping = ordersForCoupon.reduce((sum, order) => sum + (order.shippingCost || 0), 0);
-        const grandTotal = ordersForCoupon.reduce((sum, order) => sum + order.total, 0);
-
 
         doc.setFontSize(18);
         doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
@@ -124,19 +119,16 @@ export default function AdminCouponsPage() {
 
         autoTable(doc, {
             startY: 35,
-            head: [['Order ID', 'Customer', 'Date', 'Subtotal', 'Discount', 'Shipping', 'Total']],
+            head: [['Order ID', 'Customer', 'Date', 'Subtotal']],
             body: ordersForCoupon.map(order => [
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
-                `BDT ${(order.subtotal || 0).toFixed(2)}`,
-                `BDT ${(order.discount || 0).toFixed(2)}`,
-                `BDT ${(order.shippingCost || 0).toFixed(2)}`,
-                `BDT ${order.total.toFixed(2)}`
+                `BDT ${(order.subtotal || 0).toFixed(2)}`
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                 ['Total', '', '', `BDT ${totalSubtotal.toFixed(2)}`, `BDT ${totalDiscount.toFixed(2)}`, `BDT ${totalShipping.toFixed(2)}`, `BDT ${grandTotal.toFixed(2)}`]
+                 ['Total', '', '', `BDT ${totalSubtotal.toFixed(2)}`]
             ]
         });
 
@@ -226,7 +218,7 @@ export default function AdminCouponsPage() {
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value="fixed">Fixed Amount (৳)</SelectItem>
+                                                        <SelectItem value="fixed">Fixed Amount (BDT)</SelectItem>
                                                         <SelectItem value="percentage">Percentage (%)</SelectItem>
                                                     </SelectContent>
                                                 </Select>
@@ -286,7 +278,7 @@ export default function AdminCouponsPage() {
                                 {coupons.map((coupon) => (
                                      <TableRow key={coupon.id}>
                                          <TableCell className="font-medium">{coupon.code}</TableCell>
-                                         <TableCell>{coupon.discountType === 'percentage' ? `${coupon.discountValue}%` : `৳${coupon.discountValue}`}</TableCell>
+                                         <TableCell>{coupon.discountType === 'percentage' ? `${coupon.discountValue}%` : `BDT ${coupon.discountValue}`}</TableCell>
                                          <TableCell>{format(coupon.expiryDate, 'PPP')}</TableCell>
                                          <TableCell>{coupon.usageCount}</TableCell>
                                          <TableCell className="text-right space-x-2">
@@ -346,7 +338,7 @@ export default function AdminCouponsPage() {
                                             </TableCell>
                                             <TableCell>{order.shippingInfo.name}</TableCell>
                                             <TableCell>{format(new Date(order.date), "PPP")}</TableCell>
-                                            <TableCell className="text-right">৳{order.total.toLocaleString('en-IN')}</TableCell>
+                                            <TableCell className="text-right">BDT {order.total.toLocaleString('en-IN')}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
