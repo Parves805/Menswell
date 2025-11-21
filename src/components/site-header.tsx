@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Search, User, Heart, ShoppingBag, Menu, LogIn, UserPlus, UserCircle, Settings, LogOut, ListOrdered, ShoppingCart, ChevronDown, Bell } from 'lucide-react';
@@ -223,17 +222,25 @@ export function SiteHeader() {
         <span className="sr-only">Notifications</span>
     </Button>
   );
+  
+  const mainMenuLinks = (
+      <>
+        <Link href="/" className="text-foreground transition-colors hover:text-primary">Home</Link>
+        <Link href="/shop" className="text-foreground transition-colors hover:text-primary">Shop</Link>
+        <Link href="/about" className="text-foreground transition-colors hover:text-primary">About Us</Link>
+      </>
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between gap-2">
+      <div className="container flex h-16 items-center justify-between gap-4">
         {/* Left Side: Logo */}
         <div className="flex items-center">
             {logoContent()}
         </div>
 
-        {/* Center: Search Bar (Desktop) */}
-        <div className="hidden md:flex flex-1 justify-center px-4 lg:px-8">
+        {/* Center: Search Bar & Main Menu (Desktop) */}
+        <div className="hidden md:flex flex-1 justify-center items-center gap-6">
             <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
                 <PopoverTrigger asChild>
                     <form onSubmit={handleSearch} className="w-full max-w-lg relative">
@@ -271,6 +278,9 @@ export function SiteHeader() {
                     </ScrollArea>
                 </PopoverContent>
             </Popover>
+            <nav className="flex items-center space-x-6 text-sm font-medium">
+                {mainMenuLinks}
+            </nav>
         </div>
         
         {/* Right Side: Icons */}
@@ -471,13 +481,10 @@ export function SiteHeader() {
             </nav>
         </div>
       </div>
-      {/* Desktop Navigation */}
-      <div className="hidden md:block">
-        <div className="container flex justify-end">
+      {/* Desktop Category Navigation */}
+      <div className="hidden md:block border-b">
+        <div className="container flex justify-center">
             <nav className="flex items-center space-x-6 text-sm font-medium h-12">
-                <Link href="/" className="text-foreground transition-colors hover:text-primary">Home</Link>
-                <Link href="/shop" className="text-foreground transition-colors hover:text-primary">Shop</Link>
-                <Link href="/about" className="text-foreground transition-colors hover:text-primary">About Us</Link>
                 {categories.map((category) => (
                   <Link key={category.id} href={`/category/${category.id}`} className="text-foreground transition-colors hover:text-primary">
                     {category.name}
