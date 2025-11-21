@@ -39,9 +39,9 @@ const defaultWebsiteSettings: WebsiteSettings = {
   logoUrl: 'https://menswell.stapler.studio/uploads/1763734414_c2738fc124cf4ebc.png',
   footerLogoUrl: '',
   tagline: 'Your one-stop online marketplace.',
-  contactEmail: 'support@menswell.com',
-  contactPhone: '+1 (234) 567-890',
-  address: '123 Bazaar Street, Dhaka, Bangladesh',
+  contactEmail: 'hridoygd4456@gmail.com',
+  contactPhone: '01617574456',
+  address: 'Road-21, Sector-11, Uttara, Dhaka, Bangladesh',
   shippingRates: [],
 };
 

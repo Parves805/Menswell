@@ -130,7 +130,7 @@ export default function AdminCouponsPage() {
              // Main Title
             doc.setFontSize(12);
             doc.setTextColor(0);
-            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
 
             if (websiteSettings?.logoUrl) {
                 try {
@@ -166,16 +166,11 @@ export default function AdminCouponsPage() {
                 doc.text(websiteSettings.storeName, 14, 20);
             }
             
-            if (websiteSettings) {
-                doc.setFontSize(9);
-                doc.setTextColor(100);
-                const contactParts = [
-                    websiteSettings.address,
-                    websiteSettings.contactEmail,
-                    websiteSettings.contactPhone
-                ].filter(Boolean);
-                doc.text(contactParts.join(' | '), 14, 30);
-            }
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text('01617574456', 14, 26);
+            doc.text('hridoygd4456@gmail.com', 14, 30);
+            doc.text('Road-21, Sector-11, Uttara, Dhaka, Bangladesh', 14, 34);
         };
 
         await addHeader();

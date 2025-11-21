@@ -30,7 +30,7 @@ const defaultContent = `রিটার্ন ও এক্সচেঞ্জ �
 
 🚚 ৩. রিটার্ন প্রক্রিয়া (Return Process)
 ১. রিটার্ন করতে চাইলে আমাদের কাস্টমার কেয়ারে যোগাযোগ করুন:
-📞 +880 1617574456
+📞 01617574456
 📧 hridoygd4456@gmail.com
 ২. যাচাই শেষে আপনাকে রিটার্ন ঠিকানা জানিয়ে দেওয়া হবে।
 ৩. কুরিয়ার মারফত পণ্যটি পাঠাতে হবে, এবং রিটার্ন ডেলিভারি চার্জ গ্রাহককে বহন করতে হবে (যদি পণ্য ত্রুটিমুক্ত হয়)।
@@ -52,7 +52,7 @@ const defaultContent = `রিটার্ন ও এক্সচেঞ্জ �
 
 💬 যোগাযোগ করুন (Contact Us)
 রিটার্ন বা এক্সচেঞ্জ সংক্রান্ত যেকোনো প্রশ্নের জন্য আমাদের সাথে যোগাযোগ করুন:
-📞 +880 1617574456
+📞 01617574456
 📧 hridoygd4456@gmail.com
 `;
 
@@ -60,8 +60,10 @@ function markdownToHtml(text: string): string {
     return text
         .replace(/^(🛍️|👕|🚚|💵|🧥|⚠️|💬) (.*\S.*)/gim, '<h3 class="font-semibold text-lg text-foreground mt-4 mb-2 flex items-center gap-2">$1 $2</h3>')
         .replace(/\* (.*$)/gim, '<li class="list-disc list-inside">$1</li>')
+        .replace(/📞 (.+)/g, '<p>📞 <a href="tel:$1" class="hover:underline">$1</a></p>')
+        .replace(/📧 (.+)/g, '<p>📧 <a href="mailto:$1" class="hover:underline">$1</a></p>')
         .replace(/\n/g, '<br />')
-        .replace(/<br \/>(\s*<br \/>)+/g, '<br /><br />'); // handle multiple newlines
+        .replace(/<br \/>(\s*<br \/>)+/g, '<br /><br />');
 }
 
 export default function ReturnsPage() {

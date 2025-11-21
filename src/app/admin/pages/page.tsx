@@ -15,10 +15,10 @@ import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 
 const defaultAboutUsSettings: AboutUsSettings = {
-    headline: 'Welcome to BazaarGo',
+    headline: 'Welcome to Menswell',
     subheadline: '— Where Style Meets Confidence —',
     storyTitle: 'Our Story',
-    storyText: 'BazaarGo is a young and vibrant clothing brand built for today’s generation. We design fashion that blends comfort, confidence, and creativity — made especially for students and young adults who want to look sharp without trying too hard.',
+    storyText: 'Menswell is a young and vibrant clothing brand built for today’s generation. We design fashion that blends comfort, confidence, and creativity — made especially for students and young adults who want to look sharp without trying too hard.',
     storyImageUrl: 'https://scontent.fcgp7-1.fna.fbcdn.net/v/t39.30808-6/441006129_122158359262109539_589311497273397987_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeGq_vD7gB8fU-1pMv_dJg_i0bRPk42-yObRtE-Tjb7I5rT0Z1-sA3HqU2-F5-7K8P09K7Z7n7f3z8o8y9mY8P09&_nc_ohc=8x2q8p7q8gYQ7kNvgGCtWq-&_nc_ht=scontent.fcgp7-1.fna&oh=00_AYDR_G9WjK_O8zY9g_J8oXf3e9V8k8b7c8d9g_B9a9b8A&oe=669B0B7A',
     audienceTitle: 'Our Audience',
     audienceText: 'Our target customers are 16–28-year-old school, college, and university students who believe that style is more than just what you wear — it’s how you express yourself.',
@@ -46,11 +46,11 @@ const defaultLegalSettings: LegalPagesSettings = {
 
 🚚 ৩. রিটার্ন প্রক্রিয়া (Return Process)
 ১. রিটার্ন করতে চাইলে আমাদের কাস্টমার কেয়ারে যোগাযোগ করুন:
-📞 +880 1617574456
+📞 01617574456
 📧 hridoygd4456@gmail.com
 ২. যাচাই শেষে আপনাকে রিটার্ন ঠিকানা জানিয়ে দেওয়া হবে।
 ৩. কুরিয়ার মারফত পণ্যটি পাঠাতে হবে, এবং রিটার্ন ডেলিভারি চার্জ গ্রাহককে বহন করতে হবে (যদি পণ্য ত্রুটিমুক্ত হয়)।
-৪. যদি পণ্যটি ক্ষতিগ্রস্ত বা ভুলভাবে পাঠানো হয়, তাহলে BazaarGo সম্পূর্ণ ডেলিভারি খরচ বহন করবে।
+৪. যদি পণ্যটি ক্ষতিগ্রস্ত বা ভুলভাবে পাঠানো হয়, তাহলে Menswell সম্পূর্ণ ডেলিভারি খরচ বহন করবে।
 
 💵 ৪. রিফান্ড নীতি (Refund Policy)
 পণ্যটি আমাদের হাতে পৌঁছানোর পর এবং যাচাই শেষে ৫–১০ কর্মদিবসের মধ্যে রিফান্ড প্রক্রিয়া সম্পন্ন হবে।
@@ -68,11 +68,11 @@ const defaultLegalSettings: LegalPagesSettings = {
 
 💬 যোগাযোগ করুন (Contact Us)
 রিটার্ন বা এক্সচেঞ্জ সংক্রান্ত যেকোনো প্রশ্নের জন্য আমাদের সাথে যোগাযোগ করুন:
-📞 +880 1617574456
+📞 01617574456
 📧 hridoygd4456@gmail.com
 `,
-    terms: 'Last Updated: November 2025\nWelcome to BazaarGo. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services...\n\n(Full default content for terms and conditions)',
-    privacy: 'BazaarGo ("us", "we", or "our") operates the BazaarGo website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.\n\n### Information Collection and Use\nWe collect several different types of information for various purposes to provide and improve our Service to you. This may include, but is not limited to, your name, email address, phone number, and shipping address.\n\n(Full default content for privacy policy)',
+    terms: 'Last Updated: November 2025\nWelcome to Menswell. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services...\n\n(Full default content for terms and conditions)',
+    privacy: 'Menswell ("us", "we", or "our") operates the Menswell website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.\n\n### Information Collection and Use\nWe collect several different types of information for various purposes to provide and improve our Service to you. This may include, but is not limited to, your name, email address, phone number, and shipping address.\n\n(Full default content for privacy policy)',
 };
 
 export default function PageSettings() {
