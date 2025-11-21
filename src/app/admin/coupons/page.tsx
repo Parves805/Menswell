@@ -170,8 +170,8 @@ export default function AdminCouponsPage() {
                 doc.setFontSize(9);
                 doc.setTextColor(100);
                 let y = 30;
-                if (websiteSettings.address) { doc.text(websiteSettings.address, 14, y); y += 6; }
-                if (websiteSettings.contactEmail) { doc.text(websiteSettings.contactEmail, 14, y); y += 6; }
+                if (websiteSettings.address) { doc.text(websiteSettings.address, 14, y); y += 5; }
+                if (websiteSettings.contactEmail) { doc.text(websiteSettings.contactEmail, 14, y); y += 5; }
                 if (websiteSettings.contactPhone) { doc.text(websiteSettings.contactPhone, 14, y); }
             }
         };
