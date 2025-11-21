@@ -56,11 +56,16 @@ export default function AdminCouponsPage() {
 
     useEffect(() => {
         const couponUnsub = onSnapshot(collection(firestore, "coupons"), (couponSnapshot) => {
-            const fetchedCoupons = couponSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                expiryDate: (doc.data().expiryDate as any).toDate()
-            } as Coupon));
+            const fetchedCoupons = couponSnapshot.docs.map(doc => {
+                const data = doc.data();
+                // Ensure expiryDate is a Date object
+                const expiryDate = data.expiryDate?.toDate ? data.expiryDate.toDate() : data.expiryDate;
+                return {
+                    id: doc.id,
+                    ...data,
+                    expiryDate,
+                } as Coupon;
+            });
 
             const orderUnsub = onSnapshot(collection(firestore, "orders"), (orderSnapshot) => {
                 const fetchedOrders: Order[] = orderSnapshot.docs.map(doc => doc.data() as Order);
@@ -107,6 +112,8 @@ export default function AdminCouponsPage() {
         
         const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0);
         const totalDiscount = ordersForCoupon.reduce((sum, order) => sum + (order.discount || 0), 0);
+        const totalShipping = ordersForCoupon.reduce((sum, order) => sum + (order.shippingCost || 0), 0);
+
 
         doc.setFontSize(18);
         doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
@@ -128,7 +135,7 @@ export default function AdminCouponsPage() {
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                 ['Total', '', '', `৳${totalSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, `৳${totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, '', '']
+                 ['Total', '', '', `৳${totalSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, `৳${totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, `৳${totalShipping.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, '']
             ]
         });
 
@@ -279,7 +286,7 @@ export default function AdminCouponsPage() {
                                      <TableRow key={coupon.id}>
                                          <TableCell className="font-medium">{coupon.code}</TableCell>
                                          <TableCell>{coupon.discountType === 'percentage' ? `${coupon.discountValue}%` : `৳${coupon.discountValue}`}</TableCell>
-                                         <TableCell>{format(new Date(coupon.expiryDate.toDate ? coupon.expiryDate.toDate() : coupon.expiryDate), 'PPP')}</TableCell>
+                                         <TableCell>{format(coupon.expiryDate, 'PPP')}</TableCell>
                                          <TableCell>{coupon.usageCount}</TableCell>
                                          <TableCell className="text-right space-x-2">
                                               <Button variant="outline" size="icon" onClick={() => setViewingOrdersFor(coupon.code)} disabled={coupon.usageCount === 0}>
