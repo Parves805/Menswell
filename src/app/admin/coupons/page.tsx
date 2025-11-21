@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -210,7 +209,7 @@ export default function AdminCouponsPage() {
                                      <TableRow key={coupon.id}>
                                          <TableCell className="font-medium">{coupon.code}</TableCell>
                                          <TableCell>{coupon.discountType === 'percentage' ? `${coupon.discountValue}%` : `৳${coupon.discountValue}`}</TableCell>
-                                         <TableCell>{format(coupon.expiryDate, 'PPP')}</TableCell>
+                                         <TableCell>{format(new Date(coupon.expiryDate.toDate()), 'PPP')}</TableCell>
                                          <TableCell className="text-right">
                                              <AlertDialog>
                                                 <AlertDialogTrigger asChild>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,7 +22,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings, ShippingRate, Coupon } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { doc, setDoc, getDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 
 
 const checkoutSchema = z.object({
@@ -177,7 +176,7 @@ export default function CheckoutPage() {
           const couponDoc = querySnapshot.docs[0];
           const couponData = couponDoc.data() as Coupon;
           
-          if (new Date(couponData.expiryDate) < new Date()) {
+          if (new Date(couponData.expiryDate.toDate()) < new Date()) {
               setCouponError('This coupon has expired.');
           } else {
               setAppliedCoupon({ ...couponData, id: couponDoc.id });
