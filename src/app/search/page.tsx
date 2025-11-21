@@ -42,7 +42,9 @@ function SearchResults() {
     } else {
         setFilteredProducts([]);
     }
-    setIsLoading(false);
+    // Add a small delay to prevent skeleton flash on fast searches
+    const timer = setTimeout(() => setIsLoading(false), 200);
+    return () => clearTimeout(timer);
   }, [query, allProducts]);
 
   return (
@@ -53,7 +55,7 @@ function SearchResults() {
             {query ? (
                 <>
                     <h1 className="text-4xl font-bold font-headline">Search Results for "{query}"</h1>
-                    <p className="text-muted-foreground mt-2">{filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found.</p>
+                    {!isLoading && <p className="text-muted-foreground mt-2">{filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found.</p>}
                 </>
             ) : (
                 <h1 className="text-4xl font-bold font-headline">Search</h1>
@@ -81,7 +83,7 @@ function SearchResults() {
         ) : (
             <div className="text-center py-20 border-2 border-dashed border-primary/20 rounded-lg">
                 <Search className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
-                <h2 className="text-2xl font-semibold">No products found for "{query}"</h2>
+                <h2 className="text-2xl font-semibold">No products found {query && `for "${query}"`}</h2>
                 <p className="text-muted-foreground mt-2">Try a different search term or browse our categories.</p>
             </div>
         )}
@@ -94,7 +96,7 @@ function SearchResults() {
 
 export default function SearchPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading search results...</div>}>
             <SearchResults />
         </Suspense>
     )

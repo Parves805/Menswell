@@ -7,22 +7,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from 'next/navigation';
 import { useWishlist } from '@/context/wishlist-context';
 import { useCart } from '@/context/cart-context';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import type { Category, WebsiteSettings } from '@/lib/types';
+import type { Category, WebsiteSettings, Product } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { firestore } from '@/lib/firebase';
 import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { debounce } from 'lodash';
 
 export function SiteHeader() {
   const { toast } = useToast();
@@ -35,6 +38,13 @@ export function SiteHeader() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ storeName: 'Menswell' });
   const [categories, setCategories] = useState<Category[]>([]);
+  
+  // States for instant search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
 
   useEffect(() => {
     setIsMounted(true);
@@ -68,19 +78,56 @@ export function SiteHeader() {
         setUnreadCount(notifs.filter(n => !n.read).length);
     });
 
+    const unsubProducts = onSnapshot(collection(firestore, 'products'), (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setAllProducts(productsData);
+    });
+
     return () => {
         clearInterval(authInterval);
         unsubSettings();
         unsubCategories();
         unsubNotifications();
+        unsubProducts();
     };
   }, [isAuthenticated]);
+
+
+  // Debounced search handler
+  const debouncedSearch = useCallback(
+    debounce((query: string) => {
+      if (query && allProducts.length > 0) {
+        const lowerCaseQuery = query.toLowerCase();
+        const results = allProducts.filter(product => 
+            product.name.toLowerCase().includes(lowerCaseQuery) ||
+            product.category.toLowerCase().includes(lowerCaseQuery) ||
+            (product.tags && product.tags.some(tag => tag.toLowerCase().includes(lowerCaseQuery)))
+        ).slice(0, 5); // Limit to 5 results
+        setSearchResults(results);
+        if (results.length > 0) {
+            setIsSearchOpen(true);
+        } else {
+            setIsSearchOpen(false);
+        }
+      } else {
+        setSearchResults([]);
+        setIsSearchOpen(false);
+      }
+    }, 300), 
+    [allProducts]
+  );
+
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
+
 
   const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const query = formData.get('query') as string;
     if (query) {
+      setIsSearchOpen(false);
       router.push(`/search?q=${encodeURIComponent(query)}`);
     }
   };
@@ -230,14 +277,43 @@ export function SiteHeader() {
 
         {/* Center: Search Bar */}
         <div className="flex-1 flex justify-center px-4 lg:px-8">
-            <div className="w-full max-w-lg">
-                <form onSubmit={handleSearch}>
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input name="query" type="search" placeholder="Search products..." className="pl-12 h-12 text-base" />
-                  </div>
-                </form>
-            </div>
+            <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+                <PopoverTrigger asChild>
+                    <form onSubmit={handleSearch} className="w-full max-w-lg relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input 
+                            name="query" 
+                            type="search" 
+                            placeholder="Search products..." 
+                            className="pl-12 h-12 text-base" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            autoComplete="off"
+                        />
+                    </form>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] mt-2 p-0" align="start">
+                    <ScrollArea className="max-h-96">
+                        {searchResults.length > 0 ? (
+                            <div className="p-2">
+                                {searchResults.map(product => (
+                                    <Link key={product.id} href={`/product/${product.id}`} className="flex items-center gap-4 p-2 rounded-md hover:bg-accent" onClick={() => setIsSearchOpen(false)}>
+                                        <Image src={product.images[0]} alt={product.name} width={40} height={40} className="rounded-md object-cover"/>
+                                        <div className="flex-grow overflow-hidden">
+                                            <p className="font-medium truncate">{product.name}</p>
+                                        </div>
+                                        <p className="text-sm font-semibold">৳{product.price}</p>
+                                    </Link>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-4 text-center text-sm text-muted-foreground">
+                                No products found.
+                            </div>
+                        )}
+                    </ScrollArea>
+                </PopoverContent>
+            </Popover>
         </div>
         
         {/* Right Side: Icons */}
