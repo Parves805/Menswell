@@ -15,6 +15,8 @@ if (apiKey) {
   console.warn("[Menswell] AI features like product recommendations will be disabled.");
   console.warn("[Menswell] Get a key from https://aistudio.google.com/app/apikey and add it to your .env file.\n");
 
+  // Even without a key, we configure genkit with a model to prevent crashes.
+  // The generate calls will fail gracefully with a proper error.
   ai = genkit({
     plugins: [googleAI({ apiKey: "" })],
     model: "gemini-1.5-flash",
