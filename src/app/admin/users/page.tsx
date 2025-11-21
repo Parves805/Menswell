@@ -32,6 +32,7 @@ const adminUserSchema = z.object({
 type AdminUserFormValues = z.infer<typeof adminUserSchema>;
 
 const ROLES: AdminRole[] = ['Admin', 'Editor', 'Viewer'];
+const MAIN_ADMIN_EMAIL = 'mafuz@gmail.com';
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState<AdminUser[]>([]);
@@ -39,6 +40,7 @@ export default function AdminUsersPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const { toast } = useToast();
+    const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
 
     const form = useForm<AdminUserFormValues>({
         resolver: zodResolver(adminUserSchema),
@@ -46,6 +48,11 @@ export default function AdminUsersPage() {
     });
     
     useEffect(() => {
+        const adminDetails = localStorage.getItem('adminUserDetails');
+        if (adminDetails) {
+            setCurrentUserEmail(JSON.parse(adminDetails).email);
+        }
+
         const unsubscribe = onSnapshot(collection(firestore, 'adminUsers'), (snapshot) => {
             const fetchedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdminUser));
             setUsers(fetchedUsers);
@@ -58,6 +65,21 @@ export default function AdminUsersPage() {
         
         return () => unsubscribe();
     }, [toast]);
+
+    if (currentUserEmail && currentUserEmail !== MAIN_ADMIN_EMAIL) {
+        return (
+             <div className="space-y-4 md:space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Access Denied</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p>You do not have permission to manage admin users.</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
     
     const handleAddUser = async (data: AdminUserFormValues) => {
         setIsSubmitting(true);
