@@ -128,7 +128,7 @@ export default function AdminCouponsPage() {
         
         const addHeader = async () => {
              // Main Title
-            doc.setFontSize(18);
+            doc.setFontSize(12);
             doc.setTextColor(0);
             doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
 
@@ -169,8 +169,10 @@ export default function AdminCouponsPage() {
             if (websiteSettings) {
                 doc.setFontSize(9);
                 doc.setTextColor(100);
-                doc.text(websiteSettings.contactEmail || '', 14, 30);
-                doc.text(websiteSettings.contactPhone || '', 14, 35);
+                let y = 30;
+                if (websiteSettings.address) { doc.text(websiteSettings.address, 14, y); y += 5; }
+                if (websiteSettings.contactEmail) { doc.text(websiteSettings.contactEmail, 14, y); y += 5; }
+                if (websiteSettings.contactPhone) { doc.text(websiteSettings.contactPhone, 14, y); }
             }
         };
 
