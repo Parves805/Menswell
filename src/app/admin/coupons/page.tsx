@@ -65,7 +65,6 @@ export default function AdminCouponsPage() {
         const couponUnsub = onSnapshot(collection(firestore, "coupons"), (couponSnapshot) => {
             const fetchedCoupons = couponSnapshot.docs.map(doc => {
                 const data = doc.data();
-                // Firestore timestamps need to be converted to JS Date objects
                 const expiryDate = data.expiryDate?.toDate ? data.expiryDate.toDate() : new Date(data.expiryDate);
                 return {
                     id: doc.id,
@@ -120,21 +119,29 @@ export default function AdminCouponsPage() {
 
         const { default: jsPDF } = await import('jspdf');
         const { default: autoTable } = await import('jspdf-autotable');
-
+        
         const doc = new jsPDF();
         
-        const addHeader = () => {
-            // Add Title first
+        const addHeader = async () => {
             doc.setFontSize(18);
             doc.setTextColor(0);
             doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
 
-            // Add Logo
             if (websiteSettings?.logoUrl) {
                 try {
-                    const imageUrl = websiteSettings.logoUrl;
-                    const imageFormat = (imageUrl.split('.').pop() || 'jpeg').toUpperCase();
-                    doc.addImage(imageUrl, imageFormat, 14, 15, 40, 12);
+                    const response = await fetch(websiteSettings.logoUrl);
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    await new Promise<void>((resolve, reject) => {
+                        reader.onload = () => {
+                            const dataUrl = reader.result as string;
+                            const imageFormat = blob.type.split('/')[1]?.toUpperCase() || 'JPEG';
+                            doc.addImage(dataUrl, imageFormat, 14, 15, 40, 12);
+                            resolve();
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
                 } catch (e) {
                     console.error("Could not add logo to PDF:", e);
                     doc.setFontSize(12);
@@ -144,7 +151,7 @@ export default function AdminCouponsPage() {
                 doc.setFontSize(12);
                 doc.text(websiteSettings.storeName, 14, 20);
             }
-
+            
             if (websiteSettings) {
                 doc.setFontSize(9);
                 doc.setTextColor(100);
@@ -152,8 +159,8 @@ export default function AdminCouponsPage() {
                 doc.text(websiteSettings.contactPhone || '', 14, 35);
             }
         };
-        
-        addHeader();
+
+        await addHeader();
 
         const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0);
 
@@ -164,15 +171,15 @@ export default function AdminCouponsPage() {
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
-                `BDT ${(order.subtotal || 0).toFixed(2)}`
+                `BDT ${order.subtotal?.toFixed(2) || '0.00'}`
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                 ['Total Orders', ordersForCoupon.length, 'Total Subtotal', `BDT ${totalSubtotal.toFixed(2)}`]
+                ['Total Orders', ordersForCoupon.length, 'Total Subtotal', `BDT ${totalSubtotal.toFixed(2)}`]
             ],
-            didDrawPage: function (data) {
+            didDrawPage: async function (data) {
                 if (data.pageNumber > 1) {
-                    addHeader();
+                    await addHeader();
                 }
             }
         });
