@@ -7,7 +7,7 @@
  * - GenerateStatusUpdateEmailInput - The input type for the function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, defaultModel } from '@/ai/genkit';
 import { z } from 'genkit';
 import type { Order } from '@/lib/types';
 
@@ -117,6 +117,7 @@ Use the following information to tailor the email content:
 
 Generate ONLY the HTML code for the email. Do not add any extra text or explanations before or after the HTML block.
 `,
+  model: defaultModel,
 });
 
 const generateStatusUpdateEmailFlow = ai.defineFlow(
