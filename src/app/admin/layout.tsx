@@ -53,6 +53,7 @@ import { Sheet, SheetContent, SheetTitle, SheetHeader, SheetTrigger } from '@/co
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import type { AdminRole } from '@/lib/types';
+import Image from 'next/image';
 
 
 interface AdminDetails {
@@ -396,7 +397,7 @@ export default function AdminLayout({
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
-              <ShoppingBag className="h-8 w-8 text-primary" />
+              <Image src="https://filemanager.flexfashion.top/uploads/1763734224_85d3ff304ca7e068.png" alt="Logo" width={32} height={32} />
               <h1 className="text-xl font-bold font-headline">Admin Panel</h1>
             </div>
           </SidebarHeader>
@@ -435,7 +436,7 @@ export default function AdminLayout({
                         <SheetHeader className="p-4 border-b">
                             <SheetTitle className="text-left sr-only">Admin Menu</SheetTitle>
                                 <Link href="/" className="inline-flex items-center space-x-2">
-                                    <ShoppingBag className="h-6 w-6 text-primary" />
+                                    <Image src="https://filemanager.flexfashion.top/uploads/1763734224_85d3ff304ca7e068.png" alt="Logo" width={24} height={24} />
                                     <span className="font-bold font-headline">Admin Panel</span>
                                 </Link>
                         </SheetHeader>
