@@ -33,7 +33,7 @@ const ShippingInfoSchema = z.object({
 
 const PaymentDetailsSchema = z.object({
     method: z.string(),
-    transactionId: z.string().optional(),
+    transactionId: z.string().nullable().optional(),
 }).optional();
 
 const OrderSchema = z.object({
