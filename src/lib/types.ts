@@ -178,3 +178,9 @@ export interface Coupon {
     expiryDate: Date | any; // Can be Date object or Firestore Timestamp
     createdAt?: any; // Firestore Timestamp
 }
+
+export interface Slide {
+  url: string;
+  dataAiHint: string;
+  link?: string;
+}

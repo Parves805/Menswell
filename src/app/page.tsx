@@ -8,7 +8,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Card, CardContent } from '@/components/ui/card';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
-import type { Product, Category, PopupCampaign, WebsiteSettings, HomepageSection as HomepageSectionType, PromoSection, TestimonialsSettings } from '@/lib/types';
+import type { Product, Category, PopupCampaign, WebsiteSettings, HomepageSection as HomepageSectionType, PromoSection, TestimonialsSettings, Slide } from '@/lib/types';
 import { ProductCard } from '@/components/product-card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,11 +22,6 @@ import { firestore } from '@/lib/firebase';
 
 const VIEWING_HISTORY_KEY = 'menswellProductViewHistory';
 const POPUP_SEEN_SESSION_KEY = 'menswellPopupSeenSession';
-
-interface Slide {
-    url: string;
-    dataAiHint: string;
-}
 
 export default function Home() {
   const [heroSlides, setHeroSlides] = React.useState<Slide[]>([]);
@@ -126,17 +121,19 @@ export default function Home() {
                 <CarouselContent>
                     {heroSlides.filter(slide => slide.url).map((slide, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative w-full h-[135.25px] md:h-[70vh]">
-                        <Image
-                            src={slide.url}
-                            alt={`Hero slide ${index + 1}`}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={slide.dataAiHint}
-                            priority={index === 0}
-                        />
-                        <div className="absolute inset-0 bg-black/30" />
-                        </div>
+                        <Link href={slide.link || '#'} className="block">
+                            <div className="relative w-full h-[135.25px] md:h-[70vh]">
+                            <Image
+                                src={slide.url}
+                                alt={`Hero slide ${index + 1}`}
+                                fill
+                                className="object-cover"
+                                data-ai-hint={slide.dataAiHint}
+                                priority={index === 0}
+                            />
+                            <div className="absolute inset-0 bg-black/30" />
+                            </div>
+                        </Link>
                     </CarouselItem>
                     ))}
                 </CarouselContent>

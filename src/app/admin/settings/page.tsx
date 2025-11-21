@@ -11,25 +11,23 @@ import { Trash2, PlusCircle, Loader2, Star } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, Testimonial, TestimonialsSettings } from '@/lib/types';
+import type { WebsiteSettings, PaymentGatewaySettings, ThemeSettings, Testimonial, TestimonialsSettings, Slide } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
 
 
-const defaultHeroSlides = [
-  { url: 'https://img.lazcdn.com/us/domino/df7d0dca-dc55-4a5c-8cb2-dcf2b2a2f1cc_BD-1976-688.jpg_2200x2200q80.jpg_.webp', dataAiHint: 'electronics sale' },
-  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'mens fashion' },
-  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'winter collection' },
-  { url: 'https://placehold.co/1200x400.png', dataAiHint: 't-shirt sale' },
-  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'polo shirts' },
-  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'new arrivals' },
+const defaultHeroSlides: Slide[] = [
+  { url: 'https://img.lazcdn.com/us/domino/df7d0dca-dc55-4a5c-8cb2-dcf2b2a2f1cc_BD-1976-688.jpg_2200x2200q80.jpg_.webp', dataAiHint: 'electronics sale', link: '/shop' },
+  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'mens fashion', link: '/category/mens' },
+  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'winter collection', link: '/shop' },
+  { url: 'https://placehold.co/1200x400.png', dataAiHint: 't-shirt sale', link: '/category/half-sleeve' },
+  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'polo shirts', link: '/category/polo-tshirt' },
+  { url: 'https://placehold.co/1200x400.png', dataAiHint: 'new arrivals', link: '/shop' },
 ];
 
-interface Slide {
+interface SlideWithId extends Slide {
   id: number;
-  url: string;
-  dataAiHint: string;
 }
 
 interface AiSettings {
@@ -101,7 +99,7 @@ const StarRatingInput = ({ value, onChange, disabled = false }: { value: number;
 
 export default function AdminSettingsPage() {
     const { toast } = useToast();
-    const [slides, setSlides] = useState<Slide[]>([]);
+    const [slides, setSlides] = useState<SlideWithId[]>([]);
     const [settings, setSettings] = useState<WebsiteSettings>(defaultWebsiteSettings);
     const [aiSettings, setAiSettings] = useState<AiSettings>(defaultAiSettings);
     const [paymentSettings, setPaymentSettings] = useState<PaymentGatewaySettings>(defaultPaymentSettings);
@@ -133,7 +131,7 @@ export default function AdminSettingsPage() {
         return () => unsub();
     }, []);
 
-    const handleSlideChange = (id: number, field: 'url' | 'dataAiHint', value: string) => {
+    const handleSlideChange = (id: number, field: keyof Slide, value: string) => {
         setSlides(prevSlides => 
             prevSlides.map(slide => 
                 slide.id === id ? { ...slide, [field]: value } : slide
@@ -158,7 +156,7 @@ export default function AdminSettingsPage() {
     }
 
     const addSlide = () => {
-        setSlides(prevSlides => [...prevSlides, { id: Date.now(), url: '', dataAiHint: '' }]);
+        setSlides(prevSlides => [...prevSlides, { id: Date.now(), url: '', dataAiHint: '', link: '' }]);
     };
 
     const removeSlide = (id: number) => {
@@ -376,6 +374,15 @@ export default function AdminSettingsPage() {
                                         value={slide.url}
                                         onChange={(e) => handleSlideChange(slide.id, 'url', e.target.value)}
                                         placeholder="https://example.com/image.png"
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor={`slide-link-${slide.id}`}>Link URL (Optional)</Label>
+                                    <Input
+                                        id={`slide-link-${slide.id}`}
+                                        value={slide.link || ''}
+                                        onChange={(e) => handleSlideChange(slide.id, 'link', e.target.value)}
+                                        placeholder="/shop"
                                     />
                                 </div>
                                  <div>
