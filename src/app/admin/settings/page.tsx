@@ -42,7 +42,7 @@ const defaultWebsiteSettings: WebsiteSettings = {
   contactEmail: 'support@menswell.com',
   contactPhone: '+1 (234) 567-890',
   address: '123 Bazaar Street, Dhaka, Bangladesh',
-  shippingRates: ([]);
+  shippingRates: [],
 };
 
 const defaultAiSettings: AiSettings = {
@@ -602,5 +602,7 @@ export default function AdminSettingsPage() {
         </div>
     );
 }
+
+    
 
     
