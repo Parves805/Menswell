@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -28,6 +29,7 @@ const defaultAdmin: AdminUser = {
     name: 'Mafuz',
     email: 'mafuz@gmail.com',
     password: 'Mafuz@123',
+    role: 'Admin',
 };
 
 
@@ -62,14 +64,21 @@ export default function AdminLoginPage() {
   const onSubmit = async (data: AdminLoginFormValues) => {
     setIsLoading(true);
 
-    // Check default admin first
-    if (data.email === defaultAdmin.email && data.password === defaultAdmin.password) {
-        localStorage.setItem('isAdminAuthenticated', 'true');
-        toast({
-          title: 'Login Successful',
-          description: 'Welcome to the Admin Panel.',
-        });
-        router.push('/admin');
+    const checkDefaultAdmin = () => {
+        if (data.email === defaultAdmin.email && data.password === defaultAdmin.password) {
+            localStorage.setItem('isAdminAuthenticated', 'true');
+            localStorage.setItem('adminUserDetails', JSON.stringify({ name: defaultAdmin.name, email: defaultAdmin.email, role: defaultAdmin.role }));
+            toast({
+              title: 'Login Successful',
+              description: 'Welcome to the Admin Panel.',
+            });
+            router.push('/admin');
+            return true;
+        }
+        return false;
+    }
+
+    if (checkDefaultAdmin()) {
         setIsLoading(false);
         return;
     }
@@ -83,7 +92,9 @@ export default function AdminLoginPage() {
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
+            const adminData = querySnapshot.docs[0].data() as Omit<AdminUser, 'id'>;
             localStorage.setItem('isAdminAuthenticated', 'true');
+            localStorage.setItem('adminUserDetails', JSON.stringify({ name: adminData.name, email: adminData.email, role: adminData.role }));
             toast({
                 title: 'Login Successful',
                 description: 'Welcome to the Admin Panel.',

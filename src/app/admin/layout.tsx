@@ -52,7 +52,14 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetHeader, SheetTrigger } from '@/components/ui/sheet';
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
+import type { AdminRole } from '@/lib/types';
 
+
+interface AdminDetails {
+    name: string;
+    email: string;
+    role: AdminRole;
+}
 
 export default function AdminLayout({
   children,
@@ -62,6 +69,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminDetails, setAdminDetails] = useState<AdminDetails | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [newMessagesCount, setNewMessagesCount] = useState(0);
 
@@ -93,6 +101,10 @@ export default function AdminLayout({
     const authStatus = localStorage.getItem('isAdminAuthenticated');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
+      const details = localStorage.getItem('adminUserDetails');
+      if (details) {
+          setAdminDetails(JSON.parse(details));
+      }
     } else {
         if (pathname !== '/admin/login') {
             router.replace('/admin/login');
@@ -134,11 +146,15 @@ export default function AdminLayout({
 
   const handleLogout = () => {
     localStorage.removeItem('isAdminAuthenticated');
+    localStorage.removeItem('adminUserDetails');
     setIsAuthenticated(false);
+    setAdminDetails(null);
     router.push('/admin/login');
   };
 
   const isActive = (path: string) => pathname === path;
+  const userRole = adminDetails?.role || 'Viewer'; // Default to most restrictive role
+
 
   if (!isMounted) {
       return (
@@ -180,31 +196,36 @@ export default function AdminLayout({
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive('/admin/products')}>
-          <Link href="/admin/products">
-            <Package />
-            Products
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-        <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive('/admin/categories')}>
-          <Link href="/admin/categories">
-            <LayoutGrid />
-            Categories
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive('/admin/coupons')}>
-          <Link href="/admin/coupons">
-            <Ticket />
-            Coupons
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
       
+      { (userRole === 'Admin' || userRole === 'Editor') &&
+        <>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/admin/products')}>
+              <Link href="/admin/products">
+                <Package />
+                Products
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+            <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/admin/categories')}>
+              <Link href="/admin/categories">
+                <LayoutGrid />
+                Categories
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={isActive('/admin/coupons')}>
+              <Link href="/admin/coupons">
+                <Ticket />
+                Coupons
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </>
+      }
+
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={isActive('/admin/customers')}>
           <Link href="/admin/customers">
@@ -225,14 +246,16 @@ export default function AdminLayout({
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive('/admin/notifications')}>
-          <Link href="/admin/notifications">
-            <Bell />
-            <span>Notifications</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      { (userRole === 'Admin' || userRole === 'Editor') &&
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild isActive={isActive('/admin/notifications')}>
+            <Link href="/admin/notifications">
+              <Bell />
+              <span>Notifications</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      }
 
       <SidebarMenuItem>
         <SidebarMenuButton asChild>
@@ -243,75 +266,80 @@ export default function AdminLayout({
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <Collapsible asChild open={isMarketingOpen} onOpenChange={setIsMarketingOpen}>
-        <SidebarMenuItem className="flex flex-col">
-          <CollapsibleTrigger asChild>
-              <SidebarMenuButton
-                className="justify-between w-full"
-                isActive={areMarketingActive}
-                closeSheetOnClick={false}
-              >
-                <div className="flex items-center gap-2">
-                  <Megaphone />
-                  <span>Marketing</span>
-                </div>
-                <ChevronDown className={cn("h-4 w-4 transition-transform", isMarketingOpen && "rotate-180")} />
-              </SidebarMenuButton>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="w-full">
-            <SidebarMenu className="pl-6 pt-1">
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive('/admin/marketing/popup')}>
-                    <Link href="/admin/marketing/popup">Popup Campaign</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive('/admin/marketing/email')}>
-                    <Link href="/admin/marketing/email">Email Marketing</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-          </CollapsibleContent>
-        </SidebarMenuItem>
-      </Collapsible>
-
-      <Collapsible asChild open={isPagesOpen} onOpenChange={setIsPagesOpen}>
-        <SidebarMenuItem className="flex flex-col">
-          <CollapsibleTrigger asChild>
-              <SidebarMenuButton
-                className="justify-between w-full"
-                isActive={arePagesActive}
-                closeSheetOnClick={false}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText />
-                  <span>Page Settings</span>
-                </div>
-                <ChevronDown className={cn("h-4 w-4 transition-transform", isPagesOpen && "rotate-180")} />
-              </SidebarMenuButton>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="w-full">
-            <SidebarMenu className="pl-6 pt-1">
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive('/admin/pages')}>
-                    <Link href="/admin/pages">About & Legal</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive('/admin/pages/homepage')}>
-                    <Link href="/admin/pages/homepage">Homepage Sections</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive('/admin/pages/promo-cards')}>
-                    <Link href="/admin/pages/promo-cards">Promo Cards</Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-          </CollapsibleContent>
-        </SidebarMenuItem>
-      </Collapsible>
+      { (userRole === 'Admin' || userRole === 'Editor') &&
+        <Collapsible asChild open={isMarketingOpen} onOpenChange={setIsMarketingOpen}>
+          <SidebarMenuItem className="flex flex-col">
+            <CollapsibleTrigger asChild>
+                <SidebarMenuButton
+                  className="justify-between w-full"
+                  isActive={areMarketingActive}
+                  closeSheetOnClick={false}
+                >
+                  <div className="flex items-center gap-2">
+                    <Megaphone />
+                    <span>Marketing</span>
+                  </div>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", isMarketingOpen && "rotate-180")} />
+                </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="w-full">
+              <SidebarMenu className="pl-6 pt-1">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/marketing/popup')}>
+                      <Link href="/admin/marketing/popup">Popup Campaign</Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/marketing/email')}>
+                      <Link href="/admin/marketing/email">Email Marketing</Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+              </SidebarMenu>
+            </CollapsibleContent>
+          </SidebarMenuItem>
+        </Collapsible>
+      }
       
+      { (userRole === 'Admin' || userRole === 'Editor') &&
+        <Collapsible asChild open={isPagesOpen} onOpenChange={setIsPagesOpen}>
+          <SidebarMenuItem className="flex flex-col">
+            <CollapsibleTrigger asChild>
+                <SidebarMenuButton
+                  className="justify-between w-full"
+                  isActive={arePagesActive}
+                  closeSheetOnClick={false}
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText />
+                    <span>Page Settings</span>
+                  </div>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", isPagesOpen && "rotate-180")} />
+                </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="w-full">
+              <SidebarMenu className="pl-6 pt-1">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/pages')}>
+                      <Link href="/admin/pages">About & Legal</Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/pages/homepage')}>
+                      <Link href="/admin/pages/homepage">Homepage Sections</Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                   <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/admin/pages/promo-cards')}>
+                      <Link href="/admin/pages/promo-cards">Promo Cards</Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+              </SidebarMenu>
+            </CollapsibleContent>
+          </SidebarMenuItem>
+        </Collapsible>
+      }
+      
+      { userRole === 'Admin' &&
         <Collapsible asChild open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <SidebarMenuItem className="flex flex-col">
           <CollapsibleTrigger asChild>
@@ -358,6 +386,7 @@ export default function AdminLayout({
           </CollapsibleContent>
         </SidebarMenuItem>
       </Collapsible>
+      }
     </SidebarMenu>
   );
 

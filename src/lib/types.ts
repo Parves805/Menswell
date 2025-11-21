@@ -163,11 +163,14 @@ export interface TestimonialsSettings {
     testimonials: Testimonial[];
 }
 
+export type AdminRole = 'Admin' | 'Editor' | 'Viewer';
+
 export interface AdminUser {
     id: string;
     name: string;
     email: string;
     password?: string;
+    role: AdminRole;
 }
 
 export interface Coupon {

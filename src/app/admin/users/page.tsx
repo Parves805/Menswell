@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,8 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import type { AdminUser } from '@/lib/types';
+import type { AdminUser, AdminRole } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle, UserCog } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -24,9 +26,12 @@ const adminUserSchema = z.object({
     name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
     email: z.string().email({ message: 'A valid email is required.' }),
     password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
+    role: z.enum(['Admin', 'Editor', 'Viewer'], { required_error: 'Role is required.' }),
 });
 
 type AdminUserFormValues = z.infer<typeof adminUserSchema>;
+
+const ROLES: AdminRole[] = ['Admin', 'Editor', 'Viewer'];
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState<AdminUser[]>([]);
@@ -37,7 +42,7 @@ export default function AdminUsersPage() {
 
     const form = useForm<AdminUserFormValues>({
         resolver: zodResolver(adminUserSchema),
-        defaultValues: { name: '', email: '', password: '' },
+        defaultValues: { name: '', email: '', password: '', role: 'Editor' },
     });
     
     useEffect(() => {
@@ -71,6 +76,7 @@ export default function AdminUsersPage() {
                 name: data.name,
                 email: data.email,
                 password: data.password, // Note: In a real app, this should be hashed.
+                role: data.role,
             });
             toast({ title: 'Admin Added', description: `Admin user "${data.name}" has been created.` });
         } catch (error) {
@@ -99,7 +105,7 @@ export default function AdminUsersPage() {
                 <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <CardTitle className="text-2xl md:text-3xl flex items-center gap-2"><UserCog /> Admin Users</CardTitle>
-                        <CardDescription>Add, remove, and manage admin accounts.</CardDescription>
+                        <CardDescription>Add, remove, and manage admin accounts with different roles.</CardDescription>
                     </div>
                      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
@@ -122,6 +128,16 @@ export default function AdminUsersPage() {
                                     )} />
                                     <FormField control={form.control} name="password" render={({ field }) => (
                                         <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl><FormMessage /></FormItem>
+                                    )} />
+                                    <FormField control={form.control} name="role" render={({ field }) => (
+                                        <FormItem><FormLabel>Role</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl><SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger></FormControl>
+                                                <SelectContent>
+                                                    {ROLES.map(role => <SelectItem key={role} value={role}>{role}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        <FormMessage /></FormItem>
                                     )} />
                                     <DialogFooter>
                                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
@@ -156,6 +172,7 @@ export default function AdminUsersPage() {
                                 <TableRow>
                                     <TableHead>User</TableHead>
                                     <TableHead>Email</TableHead>
+                                    <TableHead>Role</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -171,6 +188,7 @@ export default function AdminUsersPage() {
                                              </div>
                                          </TableCell>
                                          <TableCell>{user.email}</TableCell>
+                                         <TableCell>{user.role}</TableCell>
                                          <TableCell className="text-right">
                                              <AlertDialog>
                                                 <AlertDialogTrigger asChild>
