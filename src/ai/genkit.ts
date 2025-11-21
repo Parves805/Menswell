@@ -11,9 +11,9 @@ if (apiKey) {
   });
 } else {
   // This warning will appear in the server console if the key is missing.
-  console.warn("\n[BazaarGo] WARNING: GOOGLE_API_KEY is not set.");
-  console.warn("[BazaarGo] AI features like product recommendations will be disabled.");
-  console.warn("[BazaarGo] Get a key from https://aistudio.google.com/app/apikey and add it to your .env file.\n");
+  console.warn("\n[Menswell] WARNING: GOOGLE_API_KEY is not set.");
+  console.warn("[Menswell] AI features like product recommendations will be disabled.");
+  console.warn("[Menswell] Get a key from https://aistudio.google.com/app/apikey and add it to your .env file.\n");
   
   // Initialize with a model but no key to prevent crashing, but AI calls will fail with a clear error.
   ai = genkit({

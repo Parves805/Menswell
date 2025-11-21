@@ -9,7 +9,7 @@ import { Truck } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Track Order | BazaarGo',
+  title: 'Track Order | Menswell',
 };
 
 export default function TrackOrderPage() {

@@ -11,7 +11,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'BazaarGo',
+  title: 'Menswell',
   description: 'Your one-stop online marketplace.',
 };
 

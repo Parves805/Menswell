@@ -26,11 +26,11 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
-const VIEWING_HISTORY_KEY = 'bazaargoProductViewHistory';
+const VIEWING_HISTORY_KEY = 'menswellProductViewHistory';
 const MAX_HISTORY_LENGTH = 10;
-const REVIEWS_KEY = 'bazaargoProductReviews';
+const REVIEWS_KEY = 'menswellProductReviews';
 const USER_PROFILE_KEY = 'userProfile';
-const ORDERS_KEY = 'bazaargoUserOrders';
+const ORDERS_KEY = 'menswellUserOrders';
 
 const reviewSchema = z.object({
   rating: z.number().min(1, { message: "Please select a rating." }).max(5),

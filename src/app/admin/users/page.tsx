@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -18,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 
-const ADMIN_USERS_KEY = 'bazaargoAdminUsers';
+const ADMIN_USERS_KEY = 'menswellAdminUsers';
 
 const adminUserSchema = z.object({
     name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),

@@ -11,7 +11,7 @@ import { firestore } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const defaultContent = `Last Updated: November 2025
-Welcome to BazaarGo. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services.
+Welcome to Menswell. By accessing or using our website, you agree to comply with and be bound by the following Terms and Conditions. Please read them carefully before using our services.
 
 ### 1. General
 By visiting our Site or purchasing something from us, you engage in our “Service” and agree to be bound by these Terms and Conditions...

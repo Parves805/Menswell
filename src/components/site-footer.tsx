@@ -12,7 +12,7 @@ import { collection, doc, onSnapshot } from 'firebase/firestore';
 
 export function SiteFooter() {
   const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ 
-    storeName: 'BazaarGo',
+    storeName: 'Menswell',
     tagline: 'Your one-stop online marketplace.' 
   });
   const [categories, setCategories] = useState<Category[]>([]);
@@ -45,7 +45,7 @@ export function SiteFooter() {
              <Link href="/" className="mb-4 flex items-center space-x-2">
                 {logoToDisplay ? (
                     <div className="relative" style={{width: '120px', height: '32px'}}>
-                       <Image src={logoToDisplay} alt={settings.storeName || 'BazaarGo'} fill style={{objectFit: 'contain'}} />
+                       <Image src={logoToDisplay} alt={settings.storeName || 'Menswell'} fill style={{objectFit: 'contain'}} />
                     </div>
                 ) : (
                     <>

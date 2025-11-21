@@ -28,7 +28,7 @@ const contactSchema = z.object({
 type ContactFormInputs = z.infer<typeof contactSchema>;
 
 const defaultContactInfo = {
-    email: 'support@bazaargo.com',
+    email: 'support@menswell.com',
     phone: '+880 123 456 7890',
     address: '123 Bazaar Street, Dhaka, Bangladesh'
 };

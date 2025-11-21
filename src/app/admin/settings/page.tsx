@@ -37,11 +37,11 @@ interface AiSettings {
 }
 
 const defaultWebsiteSettings: WebsiteSettings = {
-  storeName: 'BazaarGo',
+  storeName: 'Menswell',
   logoUrl: '',
   footerLogoUrl: '',
   tagline: 'Your one-stop online marketplace.',
-  contactEmail: 'support@bazaargo.com',
+  contactEmail: 'support@menswell.com',
   contactPhone: '+1 (234) 567-890',
   address: '123 Bazaar Street, Dhaka, Bangladesh',
   shippingRates: [],

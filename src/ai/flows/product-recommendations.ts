@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -57,7 +58,7 @@ export async function getProductRecommendations(
     const result = await getProductRecommendationsFlow(input);
     return { recommendedProducts: result.recommendedProducts, error: null };
   } catch (e: any) {
-    console.error("[BazaarGo AI] Error in getProductRecommendationsFlow:", e.message);
+    console.error("[Menswell AI] Error in getProductRecommendationsFlow:", e.message);
     let errorMessage = 'An unexpected error occurred while generating recommendations.';
     if (e.message?.includes('API_KEY_INVALID') || e.message?.includes('Api key not valid')) {
         errorMessage = 'The Google AI API key is missing or invalid. Please check your .env file to enable AI features.';

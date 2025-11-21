@@ -92,7 +92,7 @@ const prompt = ai.definePrompt({
   }) },
   output: { format: 'text' },
   prompt: `
-You are an expert email designer for an e-commerce store called "BazaarGo".
+You are an expert email designer for an e-commerce store called "Menswell".
 Your task is to generate a professional, modern, and clean HTML order status update email.
 
 The new status for the order is: **{{newStatus}}**.
@@ -106,7 +106,7 @@ Use the following information to tailor the email content:
 1.  **Use Inline CSS:** All styles must be inline CSS for maximum compatibility.
 2.  **Professional & Friendly Tone:** The email should be clear, reassuring, and reflect the status change.
 3.  **Clear Structure:** Include a header with the email title, a main message body, a brief order summary, customer details, and a footer.
-4.  **Brand Colors:** Use BazaarGo's brand colors: Primary: #F26522, Background: #F9EBE1, Text: #333333.
+4.  **Brand Colors:** Use Menswell's brand colors: Primary: #F26522, Background: #F9EBE1, Text: #333333.
 5.  **Do NOT include any placeholders.** Generate the full, complete HTML.
 6.  **Currency:** The currency is Bangladeshi Taka (৳). Ensure you use the '৳' symbol before all prices.
 

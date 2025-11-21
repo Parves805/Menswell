@@ -33,7 +33,7 @@ export function SiteHeader() {
   const [isMounted, setIsMounted] = useState(false);
   const [notifications, setNotifications] = useState<{ id: string; message: string; imageUrl?: string; timestamp: string; read: boolean }[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ storeName: 'BazaarGo' });
+  const [settings, setSettings] = useState<Partial<WebsiteSettings>>({ storeName: 'Menswell' });
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -112,15 +112,15 @@ export function SiteHeader() {
     <>
       {settings.logoUrl ? (
          <div className="relative" style={{width: '120px', height: isMobile ? '24px' : '32px'}}>
-            <Image src={settings.logoUrl} alt={settings.storeName || 'BazaarGo'} fill style={{objectFit: 'contain'}} />
+            <Image src={settings.logoUrl} alt={settings.storeName || 'Menswell'} fill style={{objectFit: 'contain'}} />
          </div>
       ) : (
         <>
             <ShoppingBag className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline">{settings.storeName || 'BazaarGo'}</span>
+            <span className="font-bold font-headline">{settings.storeName || 'Menswell'}</span>
         </>
       )}
-      {!settings.logoUrl && isMobile && <span className="font-bold font-headline">{settings.storeName || 'BazaarGo'}</span>}
+      {!settings.logoUrl && isMobile && <span className="font-bold font-headline">{settings.storeName || 'Menswell'}</span>}
     </>
   );
 
@@ -365,5 +365,3 @@ export function SiteHeader() {
     </header>
   );
 }
-
-    

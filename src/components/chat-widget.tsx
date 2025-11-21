@@ -15,7 +15,7 @@ import { firestore } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 
 
-const GUEST_ID_KEY = 'bazaargoGuestId';
+const GUEST_ID_KEY = 'menswellGuestId';
 const USER_PROFILE_KEY = 'userProfile';
 
 interface Message {

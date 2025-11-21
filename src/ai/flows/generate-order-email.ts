@@ -62,7 +62,7 @@ const prompt = ai.definePrompt({
   input: { schema: z.object({ orderJson: z.string() }) },
   output: { format: 'text' },
   prompt: `
-You are an expert email designer for an e-commerce store called "BazaarGo".
+You are an expert email designer for an e-commerce store called "Menswell".
 Your task is to generate a professional, modern, and clean HTML order confirmation email based on the provided order details.
 
 **Instructions:**
@@ -72,7 +72,7 @@ Your task is to generate a professional, modern, and clean HTML order confirmati
 4.  **Order Summary Table:** Create a table for the ordered items with columns for Image, Product, Quantity, and Price.
 5.  **Totals Section:** Clearly display the subtotal, shipping cost, and the final total.
 6.  **Responsive Design:** Use a single-column layout that works well on both desktop and mobile. Use a container with a max-width of 600px.
-7.  **Brand Colors:** Use BazaarGo's brand colors: Primary: #F26522, Background: #F9EBE1, Text: #333333.
+7.  **Brand Colors:** Use Menswell's brand colors: Primary: #F26522, Background: #F9EBE1, Text: #333333.
 8.  **Do NOT include any placeholders.** Generate the full, complete HTML.
 9.  **Date Formatting:** Format the order date nicely (e.g., July 20, 2024).
 10. **Currency:** The currency is Bangladeshi Taka (৳). Ensure you use the '৳' symbol before all prices.

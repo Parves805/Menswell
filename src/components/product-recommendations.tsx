@@ -12,7 +12,7 @@ import { Terminal } from 'lucide-react';
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 
-const RECOMMENDATIONS_CACHE_KEY = 'aiProductRecommendations';
+const RECOMMENDATIONS_CACHE_KEY = 'aiProductRecommendations_menswell';
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 interface ProductRecommendationsProps {

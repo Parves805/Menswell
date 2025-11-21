@@ -10,7 +10,7 @@ import { HelpCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'FAQ | BazaarGo',
+  title: 'FAQ | Menswell',
 };
 
 const faqs = [
@@ -44,7 +44,7 @@ export default function FAQPage() {
         <div className="text-center mb-12">
             <HelpCircle className="mx-auto h-12 w-12 text-primary mb-4" />
             <h1 className="text-4xl font-bold font-headline">Frequently Asked Questions</h1>
-            <p className="text-muted-foreground mt-2">Find answers to common questions about shopping with BazaarGo.</p>
+            <p className="text-muted-foreground mt-2">Find answers to common questions about shopping with Menswell.</p>
         </div>
         
         <div className="max-w-3xl mx-auto">

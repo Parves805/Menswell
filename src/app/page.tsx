@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -19,8 +20,8 @@ import { TestimonialSlider } from '@/components/testimonial-slider';
 import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 
-const VIEWING_HISTORY_KEY = 'bazaargoProductViewHistory';
-const POPUP_SEEN_SESSION_KEY = 'bazaargoPopupSeenSession';
+const VIEWING_HISTORY_KEY = 'menswellProductViewHistory';
+const POPUP_SEEN_SESSION_KEY = 'menswellPopupSeenSession';
 
 interface Slide {
     url: string;

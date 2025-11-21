@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +23,7 @@ import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, si
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Define keys
-const ALL_USERS_KEY = 'bazaargoAllUsers';
+const ALL_USERS_KEY = 'menswellAllUsers';
 const USER_PROFILE_KEY = 'userProfile';
 
 const loginSchema = z.object({

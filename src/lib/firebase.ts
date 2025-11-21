@@ -45,9 +45,9 @@ if (
     isFirebaseConfigured = false;
 
     if (typeof window !== 'undefined') {
-        console.warn("\n[BazaarGo] WARNING: Firebase configuration is missing or incomplete.");
-        console.warn("[BazaarGo] Google Authentication will be disabled.");
-        console.warn("[BazaarGo] Please ensure all NEXT_PUBLIC_FIREBASE_* variables are set in your .env or .env.local file.\n");
+        console.warn("\n[Menswell] WARNING: Firebase configuration is missing or incomplete.");
+        console.warn("[Menswell] Google Authentication will be disabled.");
+        console.warn("[Menswell] Please ensure all NEXT_PUBLIC_FIREBASE_* variables are set in your .env or .env.local file.\n");
     }
 }
 

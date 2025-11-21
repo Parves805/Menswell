@@ -14,10 +14,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const defaultAboutUsSettings: AboutUsSettings = {
-    headline: 'Welcome to BazaarGo',
+    headline: 'Welcome to Menswell',
     subheadline: '— Where Style Meets Confidence —',
     storyTitle: 'Our Story',
-    storyText: 'BazaarGo is a young and vibrant clothing brand built for today’s generation. We design fashion that blends comfort, confidence, and creativity — made especially for students and young adults who want to look sharp without trying too hard.',
+    storyText: 'Menswell is a young and vibrant clothing brand built for today’s generation. We design fashion that blends comfort, confidence, and creativity — made especially for students and young adults who want to look sharp without trying too hard.',
     storyImageUrl: 'https://scontent.fcgp7-1.fna.fbcdn.net/v/t39.30808-6/441006129_122158359262109539_589311497273397987_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeGq_vD7gB8fU-1pMv_dJg_i0bRPk42-yObRtE-Tjb7I5rT0Z1-sA3HqU2-F5-7K8P09K7Z7n7f3z8o8y9mY8P09&_nc_ohc=8x2q8p7q8gYQ7kNvgGCtWq-&_nc_ht=scontent.fcgp7-1.fna&oh=00_AYDR_G9WjK_O8zY9g_J8oXf3e9V8k8b7c8d9g_B9a9b8A&oe=669B0B7A',
     audienceTitle: 'Our Audience',
     audienceText: 'Our target customers are 16–28-year-old school, college, and university students who believe that style is more than just what you wear — it’s how you express yourself.',
@@ -28,7 +28,7 @@ const defaultAboutUsSettings: AboutUsSettings = {
 
 
 export default function AboutPage() {
-  const [storeName, setStoreName] = useState('BazaarGo');
+  const [storeName, setStoreName] = useState('Menswell');
   const [aboutUs, setAboutUs] = useState<AboutUsSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
