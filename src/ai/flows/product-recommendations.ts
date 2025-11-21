@@ -75,6 +75,7 @@ const productRecommendationsPrompt = ai.definePrompt({
   name: 'productRecommendationsPrompt',
   input: {schema: GetProductRecommendationsInputSchema},
   output: {schema: GetProductRecommendationsOutputSchema},
+  model: 'gemini-1.5-flash-latest',
   prompt: `You are an expert product recommendation engine for an e-commerce store specializing in men's apparel.
 
 Based on the products the user has recently viewed, you must recommend a list of other products from the full catalog that they might be interested in.
