@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import type { Coupon, Order } from '@/lib/types';
+import type { Coupon, Order, WebsiteSettings } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle, CalendarIcon, Ticket, Eye, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { firestore } from '@/lib/firebase';
@@ -46,6 +46,7 @@ export default function AdminCouponsPage() {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [viewingOrdersFor, setViewingOrdersFor] = useState<string | null>(null);
     const { toast } = useToast();
+    const [websiteSettings, setWebsiteSettings] = useState<WebsiteSettings | null>(null);
 
     const form = useForm<CouponFormValues>({
         resolver: zodResolver(couponSchema),
@@ -55,6 +56,12 @@ export default function AdminCouponsPage() {
     const ordersForCoupon = viewingOrdersFor ? orders.filter(o => o.coupon?.code === viewingOrdersFor) : [];
 
     useEffect(() => {
+        const settingsUnsub = onSnapshot(doc(firestore, "settings", "store"), (doc) => {
+            if (doc.exists() && doc.data().websiteSettings) {
+                setWebsiteSettings(doc.data().websiteSettings);
+            }
+        });
+        
         const couponUnsub = onSnapshot(collection(firestore, "coupons"), (couponSnapshot) => {
             const fetchedCoupons = couponSnapshot.docs.map(doc => {
                 const data = doc.data();
@@ -84,6 +91,9 @@ export default function AdminCouponsPage() {
                 
                 setCoupons(couponsWithUsage);
                 setIsLoading(false);
+            }, (error) => {
+                console.error("Error fetching orders:", error);
+                setIsLoading(false);
             });
 
             return () => orderUnsub();
@@ -93,7 +103,10 @@ export default function AdminCouponsPage() {
             setIsLoading(false);
         });
 
-        return () => couponUnsub();
+        return () => {
+            settingsUnsub();
+            couponUnsub();
+        }
     }, [toast]);
     
     const generateRandomCode = () => {
@@ -103,35 +116,59 @@ export default function AdminCouponsPage() {
 
     const handleDownloadPdf = async () => {
         if (!viewingOrdersFor || ordersForCoupon.length === 0) return;
-        
+
         const { default: jsPDF } = await import('jspdf');
         const { default: autoTable } = await import('jspdf-autotable');
 
         const doc = new jsPDF();
         
+        const addHeader = () => {
+            if (websiteSettings?.logoUrl) {
+                try {
+                    // Assuming the logo URL is directly usable or CORS is configured.
+                    // For cross-origin images, they need to be fetched and converted to a data URI.
+                    // This is a simplified approach.
+                    doc.addImage(websiteSettings.logoUrl, 'PNG', 150, 10, 40, 15);
+                } catch (e) {
+                    console.error("Could not add logo to PDF:", e);
+                }
+            }
+            doc.setFontSize(18);
+            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
+            
+             if (websiteSettings) {
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text(websiteSettings.storeName, 14, 30);
+                doc.text(websiteSettings.address, 14, 35);
+             }
+        };
+        
+        addHeader();
+
         const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0);
 
-        doc.setFontSize(18);
-        doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Total Orders: ${ordersForCoupon.length}`, 14, 30);
-
         autoTable(doc, {
-            startY: 35,
+            startY: 45,
             head: [['Order ID', 'Customer', 'Date', 'Subtotal']],
             body: ordersForCoupon.map(order => [
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
-                `BDT ${(order.subtotal || 0).toFixed(2)}`
+                `BDT ${order.subtotal?.toFixed(2)}`
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
                  ['Total', '', '', `BDT ${totalSubtotal.toFixed(2)}`]
-            ]
+            ],
+            didDrawPage: function (data) {
+                // To repeat header on each page
+                if (data.pageNumber > 1) {
+                    addHeader();
+                }
+            }
         });
-
+        
         doc.save(`coupon_${viewingOrdersFor}_usage_report.pdf`);
     };
 
@@ -361,3 +398,4 @@ export default function AdminCouponsPage() {
         </div>
     );
 }
+
