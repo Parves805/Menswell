@@ -5,7 +5,7 @@ import {googleAI} from '@genkit-ai/googleai';
 let ai;
 const apiKey = process.env.GOOGLE_API_KEY;
 
-const defaultModel = 'gemini-pro';
+const defaultModel = 'gemini-1.5-flash';
 
 if (apiKey) {
   ai = genkit({
