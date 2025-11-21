@@ -65,6 +65,7 @@ export default function AdminCouponsPage() {
         const couponUnsub = onSnapshot(collection(firestore, "coupons"), (couponSnapshot) => {
             const fetchedCoupons = couponSnapshot.docs.map(doc => {
                 const data = doc.data();
+                // Firestore timestamps need to be converted to JS Date objects
                 const expiryDate = data.expiryDate?.toDate ? data.expiryDate.toDate() : new Date(data.expiryDate);
                 return {
                     id: doc.id,
@@ -123,25 +124,34 @@ export default function AdminCouponsPage() {
         const doc = new jsPDF();
         
         const addHeader = () => {
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            // Add Logo
             if (websiteSettings?.logoUrl) {
                 try {
-                    // Assuming the logo URL is directly usable or CORS is configured.
-                    // For cross-origin images, they need to be fetched and converted to a data URI.
-                    // This is a simplified approach.
-                    doc.addImage(websiteSettings.logoUrl, 'PNG', 150, 10, 40, 15);
+                    doc.addImage(websiteSettings.logoUrl, 'PNG', 14, 15, 40, 10);
                 } catch (e) {
                     console.error("Could not add logo to PDF:", e);
+                    doc.setFontSize(12);
+                    doc.text(websiteSettings.storeName || 'Menswell', 14, 20);
                 }
+            } else if (websiteSettings?.storeName) {
+                doc.setFontSize(12);
+                doc.text(websiteSettings.storeName, 14, 20);
             }
-            doc.setFontSize(18);
-            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
-            
-             if (websiteSettings) {
-                doc.setFontSize(10);
+
+            // Add Contact Info
+            if (websiteSettings) {
+                doc.setFontSize(9);
                 doc.setTextColor(100);
-                doc.text(websiteSettings.storeName, 14, 30);
-                doc.text(websiteSettings.address, 14, 35);
-             }
+                doc.text(websiteSettings.contactEmail || '', 14, 30);
+                doc.text(websiteSettings.contactPhone || '', 14, 35);
+            }
+
+            // Add Title
+            doc.setFontSize(18);
+            doc.setTextColor(0);
+            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
         };
         
         addHeader();
@@ -155,14 +165,13 @@ export default function AdminCouponsPage() {
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
-                `BDT ${order.subtotal?.toFixed(2)}`
+                `BDT ${order.subtotal?.toFixed(2) || '0.00'}`
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                 ['Total', '', '', `BDT ${totalSubtotal.toFixed(2)}`]
+                 ['Total Orders', ordersForCoupon.length, 'Total Subtotal', `BDT ${totalSubtotal.toFixed(2)}`]
             ],
             didDrawPage: function (data) {
-                // To repeat header on each page
                 if (data.pageNumber > 1) {
                     addHeader();
                 }
@@ -361,7 +370,7 @@ export default function AdminCouponsPage() {
                                     <TableHead>Order ID</TableHead>
                                     <TableHead>Customer</TableHead>
                                     <TableHead>Date</TableHead>
-                                    <TableHead className="text-right">Total</TableHead>
+                                    <TableHead className="text-right">Subtotal</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -375,7 +384,7 @@ export default function AdminCouponsPage() {
                                             </TableCell>
                                             <TableCell>{order.shippingInfo.name}</TableCell>
                                             <TableCell>{format(new Date(order.date), "PPP")}</TableCell>
-                                            <TableCell className="text-right">BDT {order.total.toLocaleString('en-IN')}</TableCell>
+                                            <TableCell className="text-right">BDT {(order.subtotal || order.total).toLocaleString('en-IN', {minimumFractionDigits: 2})}</TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
@@ -399,3 +408,5 @@ export default function AdminCouponsPage() {
     );
 }
 
+
+    
