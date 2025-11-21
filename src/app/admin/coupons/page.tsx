@@ -18,7 +18,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import type { Coupon, Order } from '@/lib/types';
-import { Loader2, Trash2, PlusCircle, CalendarIcon, Ticket, Eye } from 'lucide-react';
+import { Loader2, Trash2, PlusCircle, CalendarIcon, Ticket, Eye, Download } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
@@ -95,6 +95,31 @@ export default function AdminCouponsPage() {
     const generateRandomCode = () => {
         const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
         form.setValue('code', `SALE${randomPart}`);
+    };
+
+    const handleDownloadPdf = async () => {
+        if (!viewingOrdersFor || ordersForCoupon.length === 0) return;
+        
+        const { default: jsPDF } = await import('jspdf');
+        const { default: autoTable } = await import('jspdf-autotable');
+
+        const doc = new jsPDF();
+        
+        doc.setFontSize(18);
+        doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
+
+        autoTable(doc, {
+            startY: 30,
+            head: [['Order ID', 'Customer', 'Date', 'Total']],
+            body: ordersForCoupon.map(order => [
+                `#${order.id.slice(-6)}`,
+                order.shippingInfo.name,
+                format(new Date(order.date), "PPP"),
+                `৳${order.total.toLocaleString('en-IN')}`
+            ]),
+        });
+
+        doc.save(`coupon_${viewingOrdersFor}_usage.pdf`);
     };
 
     const handleAddCoupon = async (data: CouponFormValues) => {
@@ -311,7 +336,11 @@ export default function AdminCouponsPage() {
                             </TableBody>
                         </Table>
                     </ScrollArea>
-                    <DialogFooter>
+                    <DialogFooter className="sm:justify-between">
+                         <Button variant="outline" onClick={handleDownloadPdf} disabled={ordersForCoupon.length === 0}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Download PDF
+                        </Button>
                         <Button variant="outline" onClick={() => setViewingOrdersFor(null)}>Close</Button>
                     </DialogFooter>
                 </DialogContent>
