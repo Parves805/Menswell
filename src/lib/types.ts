@@ -187,3 +187,5 @@ export interface Slide {
   dataAiHint: string;
   link?: string;
 }
+
+    

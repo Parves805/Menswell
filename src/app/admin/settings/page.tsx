@@ -36,13 +36,13 @@ interface AiSettings {
 
 const defaultWebsiteSettings: WebsiteSettings = {
   storeName: 'Menswell',
-  logoUrl: '',
+  logoUrl: 'https://menswell.stapler.studio/uploads/1763734414_c2738fc124cf4ebc.png',
   footerLogoUrl: '',
   tagline: 'Your one-stop online marketplace.',
   contactEmail: 'support@menswell.com',
   contactPhone: '+1 (234) 567-890',
   address: '123 Bazaar Street, Dhaka, Bangladesh',
-  shippingRates: [],
+  shippingRates: ([]);
 };
 
 const defaultAiSettings: AiSettings = {
@@ -602,3 +602,5 @@ export default function AdminSettingsPage() {
         </div>
     );
 }
+
+    
