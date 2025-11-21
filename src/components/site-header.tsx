@@ -20,6 +20,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import type { Category, WebsiteSettings, Product } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
@@ -44,6 +51,7 @@ export function SiteHeader() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
 
   useEffect(() => {
@@ -128,6 +136,8 @@ export function SiteHeader() {
     const query = formData.get('query') as string;
     if (query) {
       setIsSearchOpen(false);
+      setIsMobileSearchOpen(false);
+      setSearchQuery('');
       router.push(`/search?q=${encodeURIComponent(query)}`);
     }
   };
@@ -156,7 +166,7 @@ export function SiteHeader() {
   }
 
   const logoContent = (isMobile: boolean = false) => (
-    <>
+    <Link href="/" className="flex items-center space-x-2 shrink-0">
       {settings.logoUrl ? (
          <div className="relative" style={{width: '120px', height: isMobile ? '24px' : '32px'}}>
             <Image src={settings.logoUrl} alt={settings.storeName || 'Menswell'} fill style={{objectFit: 'contain'}} />
@@ -167,8 +177,7 @@ export function SiteHeader() {
             <span className="font-bold font-headline">{settings.storeName || 'Menswell'}</span>
         </>
       )}
-      {!settings.logoUrl && isMobile && <span className="font-bold font-headline">{settings.storeName || 'Menswell'}</span>}
-    </>
+    </Link>
   );
 
   const notificationDropdownContent = (
@@ -217,9 +226,9 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Left Side: Logo & Mobile Menu */}
-        <div className="flex items-center gap-4">
+      <div className="container flex h-16 items-center justify-between gap-2">
+        {/* Left Side: Mobile Menu & Logo */}
+        <div className="flex items-center gap-2">
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -232,9 +241,7 @@ export function SiteHeader() {
                   <SheetHeader className="p-4 border-b">
                     <SheetTitle className="text-left sr-only">Main Menu</SheetTitle>
                     <SheetClose asChild>
-                      <Link href="/" className="inline-flex items-center space-x-2">
-                        {logoContent(true)}
-                      </Link>
+                      {logoContent(true)}
                     </SheetClose>
                   </SheetHeader>
                   <nav className="flex flex-col space-y-1 p-4">
@@ -270,13 +277,13 @@ export function SiteHeader() {
               </SheetContent>
             </Sheet>
           </div>
-          <Link href="/" className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:block">
             {logoContent()}
-          </Link>
+          </div>
         </div>
 
-        {/* Center: Search Bar */}
-        <div className="flex-1 flex justify-center px-4 lg:px-8">
+        {/* Center: Search Bar (Desktop) */}
+        <div className="hidden md:flex flex-1 justify-center px-4 lg:px-8">
             <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
                 <PopoverTrigger asChild>
                     <form onSubmit={handleSearch} className="w-full max-w-lg relative">
@@ -319,6 +326,47 @@ export function SiteHeader() {
         {/* Right Side: Icons */}
         <div className="flex items-center">
             <nav className="flex items-center">
+              
+              {/* Mobile Search Icon */}
+              <div className="md:hidden">
+                <Dialog open={isMobileSearchOpen} onOpenChange={setIsMobileSearchOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <Search className="h-6 w-6" />
+                            <span className="sr-only">Search</span>
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="top-1/4">
+                        <DialogHeader>
+                            <DialogTitle>Search for products</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleSearch} className="w-full relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input 
+                                name="query" 
+                                type="search" 
+                                placeholder="What are you looking for?" 
+                                className="pl-12 h-12 text-base" 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                autoComplete="off"
+                            />
+                        </form>
+                         <ScrollArea className="max-h-64 mt-2">
+                            {searchResults.map(product => (
+                                <Link key={product.id} href={`/product/${product.id}`} className="flex items-center gap-4 p-2 rounded-md hover:bg-accent" onClick={() => setIsMobileSearchOpen(false)}>
+                                    <Image src={product.images[0]} alt={product.name} width={40} height={40} className="rounded-md object-cover"/>
+                                    <div className="flex-grow overflow-hidden">
+                                        <p className="font-medium truncate">{product.name}</p>
+                                    </div>
+                                    <p className="text-sm font-semibold">৳{product.price}</p>
+                                </Link>
+                            ))}
+                        </ScrollArea>
+                    </DialogContent>
+                </Dialog>
+              </div>
+
               {/* Desktop Icons */}
               <div className="hidden md:flex items-center space-x-1">
                   <Button asChild variant="ghost" size="icon" className="relative">
@@ -398,7 +446,7 @@ export function SiteHeader() {
                   </DropdownMenu>
               </div>
 
-               {/* Mobile Icons */}
+               {/* Mobile Notification Icon */}
               <div className="md:hidden">
                 <DropdownMenu onOpenChange={(open) => { if (open) handleMarkNotificationsAsRead(); }}>
                     <DropdownMenuTrigger asChild>
