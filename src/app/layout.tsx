@@ -32,13 +32,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getWebsiteSettings();
   const storeName = settings?.storeName || 'Menswell';
   const description = settings?.tagline || 'Your one-stop online marketplace.';
-  const logoUrl = settings?.logoUrl || '/favicon.ico'; // Fallback to a default favicon
 
   return {
     title: storeName,
     description: description,
     icons: {
-      icon: logoUrl,
+      icon: 'https://menswell.stapler.studio/uploads/1763738788_a0955b83556997cb.png',
     },
   };
 }
