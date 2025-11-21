@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'genkit';
 
 const CartItemSchema = z.object({
@@ -60,7 +61,7 @@ const prompt = ai.definePrompt({
   name: 'generateOrderEmailPrompt',
   input: { schema: z.object({ orderJson: z.string() }) },
   output: { format: 'text' },
-  model: 'gemini-pro',
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `
 You are an expert email designer for an e-commerce store called "Menswell".
 Your task is to generate a professional, modern, and clean HTML order confirmation email based on the provided order details.
