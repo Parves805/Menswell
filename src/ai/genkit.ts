@@ -1,4 +1,3 @@
-
 import { genkit } from "genkit";
 import { googleAI } from "@genkit-ai/googleai";
 
@@ -8,7 +7,7 @@ const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY;
 if (apiKey) {
   ai = genkit({
     plugins: [googleAI({ apiKey })],
-    model: "gemini-pro",
+    model: "gemini-1.5-flash",
   });
 } else {
   console.warn("\n[Menswell] WARNING: GOOGLE_GENAI_API_KEY is not set.");
@@ -19,7 +18,7 @@ if (apiKey) {
   // The generate calls will fail gracefully with a proper error.
   ai = genkit({
     plugins: [googleAI({ apiKey: "" })],
-    model: "gemini-pro",
+    model: "gemini-1.5-flash",
   });
 }
 
