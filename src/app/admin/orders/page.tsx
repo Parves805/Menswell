@@ -108,7 +108,8 @@ export default function AdminOrdersPage() {
     };
     
     const subtotal = selectedOrder?.items.reduce((acc, item) => acc + item.price * item.quantity, 0) ?? 0;
-    const shipping = selectedOrder ? selectedOrder.total - subtotal : 0;
+    const shipping = selectedOrder?.shippingCost ?? 0;
+    const discount = selectedOrder?.discount ?? 0;
 
     return (
       <>
@@ -234,6 +235,12 @@ export default function AdminOrdersPage() {
                                                 <span className="text-muted-foreground">Subtotal</span>
                                                 <span>৳{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
+                                             {discount > 0 && (
+                                                <div className="flex justify-between text-green-600">
+                                                    <span className="text-muted-foreground">Discount ({selectedOrder.coupon?.code})</span>
+                                                    <span>- ৳{discount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                </div>
+                                            )}
                                             <div className="flex justify-between">
                                                 <span className="text-muted-foreground">Shipping</span>
                                                 <span>৳{shipping.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>

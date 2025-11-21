@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,14 +15,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import type { Coupon } from '@/lib/types';
-import { Loader2, Trash2, PlusCircle, CalendarIcon, Ticket } from 'lucide-react';
+import type { Coupon, Order } from '@/lib/types';
+import { Loader2, Trash2, PlusCircle, CalendarIcon, Ticket, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const couponSchema = z.object({
     code: z.string().min(4, { message: 'Code must be at least 4 characters.' }).regex(/^[a-zA-Z0-9]+$/, { message: 'Code can only contain letters and numbers.' }),
@@ -31,34 +34,62 @@ const couponSchema = z.object({
 });
 type CouponFormValues = z.infer<typeof couponSchema>;
 
+interface CouponWithUsage extends Coupon {
+    usageCount: number;
+}
+
 export default function AdminCouponsPage() {
-    const [coupons, setCoupons] = useState<Coupon[]>([]);
+    const [coupons, setCoupons] = useState<CouponWithUsage[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [viewingOrdersFor, setViewingOrdersFor] = useState<string | null>(null);
     const { toast } = useToast();
 
     const form = useForm<CouponFormValues>({
         resolver: zodResolver(couponSchema),
         defaultValues: { code: '', discountType: 'fixed', discountValue: 0 },
     });
+    
+    const ordersForCoupon = viewingOrdersFor ? orders.filter(o => o.coupon?.code === viewingOrdersFor) : [];
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(firestore, "coupons"), (snapshot) => {
-            const fetchedCoupons = snapshot.docs.map(doc => ({
+        const couponUnsub = onSnapshot(collection(firestore, "coupons"), (couponSnapshot) => {
+            const fetchedCoupons = couponSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-                expiryDate: (doc.data().expiryDate as any).toDate() // Convert Firestore Timestamp to Date
+                expiryDate: (doc.data().expiryDate as any).toDate()
             } as Coupon));
-            setCoupons(fetchedCoupons);
-            setIsLoading(false);
+
+            const orderUnsub = onSnapshot(collection(firestore, "orders"), (orderSnapshot) => {
+                const fetchedOrders: Order[] = orderSnapshot.docs.map(doc => doc.data() as Order);
+                setOrders(fetchedOrders);
+
+                const couponUsageMap = new Map<string, number>();
+                fetchedOrders.forEach(order => {
+                    if (order.coupon?.code) {
+                        couponUsageMap.set(order.coupon.code, (couponUsageMap.get(order.coupon.code) || 0) + 1);
+                    }
+                });
+
+                const couponsWithUsage: CouponWithUsage[] = fetchedCoupons.map(coupon => ({
+                    ...coupon,
+                    usageCount: couponUsageMap.get(coupon.code) || 0,
+                }));
+                
+                setCoupons(couponsWithUsage);
+                setIsLoading(false);
+            });
+
+            return () => orderUnsub();
         }, (error) => {
             console.error("Error fetching coupons: ", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch coupons.' });
             setIsLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => couponUnsub();
     }, [toast]);
     
     const generateRandomCode = () => {
@@ -201,6 +232,7 @@ export default function AdminCouponsPage() {
                                     <TableHead>Code</TableHead>
                                     <TableHead>Discount</TableHead>
                                     <TableHead>Expires</TableHead>
+                                    <TableHead>Usage</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -209,8 +241,13 @@ export default function AdminCouponsPage() {
                                      <TableRow key={coupon.id}>
                                          <TableCell className="font-medium">{coupon.code}</TableCell>
                                          <TableCell>{coupon.discountType === 'percentage' ? `${coupon.discountValue}%` : `৳${coupon.discountValue}`}</TableCell>
-                                         <TableCell>{format(new Date(coupon.expiryDate.toDate()), 'PPP')}</TableCell>
-                                         <TableCell className="text-right">
+                                         <TableCell>{format(new Date(coupon.expiryDate.toDate ? coupon.expiryDate.toDate() : coupon.expiryDate), 'PPP')}</TableCell>
+                                         <TableCell>{coupon.usageCount}</TableCell>
+                                         <TableCell className="text-right space-x-2">
+                                              <Button variant="outline" size="icon" onClick={() => setViewingOrdersFor(coupon.code)} disabled={coupon.usageCount === 0}>
+                                                <Eye className="h-4 w-4" />
+                                                <span className="sr-only">View Orders</span>
+                                              </Button>
                                              <AlertDialog>
                                                 <AlertDialogTrigger asChild>
                                                     <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /><span className="sr-only">Delete</span></Button>
@@ -235,6 +272,50 @@ export default function AdminCouponsPage() {
                     )}
                 </CardContent>
             </Card>
+
+             {/* View Orders Dialog */}
+            <Dialog open={!!viewingOrdersFor} onOpenChange={(isOpen) => !isOpen && setViewingOrdersFor(null)}>
+                <DialogContent className="sm:max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>Orders using coupon: {viewingOrdersFor}</DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[60vh]">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Order ID</TableHead>
+                                    <TableHead>Customer</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead className="text-right">Total</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {ordersForCoupon.length > 0 ? (
+                                    ordersForCoupon.map(order => (
+                                        <TableRow key={order.id}>
+                                            <TableCell>
+                                                <Link href="/admin/orders" className="font-medium text-primary hover:underline">
+                                                    #{order.id.slice(-6)}
+                                                </Link>
+                                            </TableCell>
+                                            <TableCell>{order.shippingInfo.name}</TableCell>
+                                            <TableCell>{format(new Date(order.date), "PPP")}</TableCell>
+                                            <TableCell className="text-right">৳{order.total.toLocaleString('en-IN')}</TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">No orders found for this coupon.</TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setViewingOrdersFor(null)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
