@@ -124,14 +124,19 @@ export default function AdminCouponsPage() {
         const doc = new jsPDF();
         
         const addHeader = () => {
-            const pageHeight = doc.internal.pageSize.getHeight();
-            
+            // Add Title first
+            doc.setFontSize(18);
+            doc.setTextColor(0);
+            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+
             // Add Logo
             if (websiteSettings?.logoUrl) {
                 try {
-                    doc.addImage(websiteSettings.logoUrl, 'PNG', 14, 15, 40, 10);
+                    // Let jspdf auto-detect the format
+                    doc.addImage(websiteSettings.logoUrl, '', 14, 15, 40, 12);
                 } catch (e) {
                     console.error("Could not add logo to PDF:", e);
+                    // Fallback to text if image fails
                     doc.setFontSize(12);
                     doc.text(websiteSettings.storeName || 'Menswell', 14, 20);
                 }
@@ -140,18 +145,13 @@ export default function AdminCouponsPage() {
                 doc.text(websiteSettings.storeName, 14, 20);
             }
 
-            // Add Contact Info
+            // Add Contact Info below logo/name
             if (websiteSettings) {
                 doc.setFontSize(9);
                 doc.setTextColor(100);
                 doc.text(websiteSettings.contactEmail || '', 14, 30);
                 doc.text(websiteSettings.contactPhone || '', 14, 35);
             }
-
-            // Add Title
-            doc.setFontSize(18);
-            doc.setTextColor(0);
-            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
         };
         
         addHeader();
@@ -165,7 +165,7 @@ export default function AdminCouponsPage() {
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
-                `BDT ${order.subtotal?.toFixed(2) || '0.00'}`
+                `BDT ${(order.subtotal || 0).toFixed(2)}`
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
@@ -407,6 +407,3 @@ export default function AdminCouponsPage() {
         </div>
     );
 }
-
-
-    
