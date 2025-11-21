@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Printer } from "lucide-react"
+import { MoreHorizontal, Printer, Download } from "lucide-react"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -65,6 +65,36 @@ export default function AdminOrdersPage() {
       window.addEventListener('afterprint', handleAfterPrint);
 
       window.print();
+    };
+
+    const handleExportToExcel = async () => {
+        if (orders.length === 0) {
+            toast({ title: 'No Orders', description: 'There are no orders to export.' });
+            return;
+        }
+
+        const XLSX = await import('xlsx');
+        
+        const dataToExport = orders.map(order => ({
+            'Order ID': `#${order.id.slice(-6)}`,
+            'Date': format(new Date(order.date), "PPP p"),
+            'Customer Name': order.shippingInfo.name,
+            'Customer Email': order.shippingInfo.email,
+            'Customer Phone': order.shippingInfo.phone,
+            'Address': `${order.shippingInfo.street}, ${order.shippingInfo.city}, ${order.shippingInfo.state} - ${order.shippingInfo.zip}`,
+            'Total Amount': order.total,
+            'Status': order.status,
+            'Payment Method': order.paymentDetails?.method || 'N/A',
+            'Coupon Used': order.coupon?.code || 'None',
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Orders');
+        
+        XLSX.writeFile(workbook, 'Orders_Report.xlsx');
+        
+        toast({ title: 'Export Successful', description: 'All orders have been exported to an Excel file.' });
     };
 
 
@@ -133,9 +163,15 @@ export default function AdminOrdersPage() {
             }
         `}</style>
         <Card className="non-printable">
-            <CardHeader>
-                <CardTitle className="text-2xl md:text-3xl">Orders</CardTitle>
-                <CardDescription>Manage customer orders here.</CardDescription>
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <CardTitle className="text-2xl md:text-3xl">Orders</CardTitle>
+                    <CardDescription>Manage customer orders here.</CardDescription>
+                </div>
+                <Button onClick={handleExportToExcel} variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export to Excel
+                </Button>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
