@@ -20,7 +20,7 @@
     --secondary: 24 50% 88%;
     --secondary-foreground: 20 15% 15%;
 
-    --muted: 24 50% 88%;
+    --muted: 0 0% 95%; /* Updated from 24 50% 88% to match background */
     --muted-foreground: 20 15% 45%;
 
     --accent: 354 89% 54%; /* #F2223A */
