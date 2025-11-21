@@ -131,8 +131,7 @@ export default function AdminCouponsPage() {
                 try {
                     const img = new Image();
                     img.crossOrigin = 'Anonymous';
-                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                    img.src = proxyUrl + websiteSettings.logoUrl;
+                    img.src = websiteSettings.logoUrl;
 
                     await new Promise<void>((resolve, reject) => {
                         img.onload = () => {
@@ -161,9 +160,11 @@ export default function AdminCouponsPage() {
                 doc.text((websiteSettings.storeName || '').toUpperCase(), 14, 20);
             }
             
-            doc.setFontSize(9);
+            doc.setFontSize(11);
             doc.setTextColor(100);
             doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 26);
+            
+            doc.setFontSize(9);
             doc.text('01617574456', 14, 32);
             doc.text('hridoygd4456@gmail.com', 14, 36);
             doc.text('Road-21, Sector-11, Uttara, Dhaka, Bangladesh', 14, 40);
