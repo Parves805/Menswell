@@ -5,11 +5,11 @@ import {googleAI} from '@genkit-ai/googleai';
 let ai;
 const apiKey = process.env.GOOGLE_API_KEY;
 
-const defaultModel = 'gemini-1.5-flash';
+const defaultModel = 'gemini-1.5-flash-latest';
 
 if (apiKey) {
   ai = genkit({
-    plugins: [googleAI({ apiKey })],
+    plugins: [googleAI({ apiKey, apiVersion: 'v1beta' })],
   });
 } else {
   // This warning will appear in the server console if the key is missing.
@@ -24,4 +24,3 @@ if (apiKey) {
 }
 
 export { ai, defaultModel };
-
