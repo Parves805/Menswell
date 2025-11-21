@@ -148,7 +148,7 @@ export default function OrdersPage() {
                                         ))}
                                     </div>
                                     <Separator />
-                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <h4 className="font-semibold mb-2">Shipping To</h4>
                                             <div className="text-sm text-muted-foreground">
