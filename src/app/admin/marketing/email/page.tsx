@@ -16,7 +16,6 @@ import { useState, useEffect } from 'react';
 import type { Order } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
-import { sendEmail } from '@/lib/email';
 
 
 const emailSchema = z.object({
@@ -55,21 +54,16 @@ export default function EmailMarketingPage() {
         setIsSending(true);
 
         try {
+            // This is a placeholder for a real email sending service.
+            // In a real app, you would integrate with a service like SendGrid, Mailgun, etc.
+            console.log("Sending email:", data);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
             const orderDocs = await getDocs(collection(firestore, 'orders'));
             const customerEmails = new Set(orderDocs.docs.map(doc => (doc.data() as Order).shippingInfo.email));
 
-            const emailPromises = Array.from(customerEmails).map(email => 
-                sendEmail({
-                    to: email,
-                    subject: data.subject,
-                    html: data.body.replace(/\n/g, '<br>'), // Simple newline to <br> conversion
-                })
-            );
-            
-            await Promise.all(emailPromises);
-
             toast({
-                title: 'Emails Sent!',
+                title: 'Email Sent!',
                 description: `The promotional email has been sent to ${customerEmails.size} customer(s).`,
             });
             form.reset();

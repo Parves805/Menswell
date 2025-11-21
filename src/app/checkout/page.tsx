@@ -24,8 +24,6 @@ import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings, ShippingRate, Coupon } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
-import { generateOrderConfirmationEmail } from '@/ai/flows/generate-order-email';
-import { sendEmail } from '@/lib/email';
 
 
 const checkoutSchema = z.object({
@@ -240,20 +238,13 @@ export default function CheckoutPage() {
         const orderRef = doc(firestore, 'orders', orderId);
         await setDoc(orderRef, order);
         
-        // Generate and send confirmation email
-        const emailHtml = await generateOrderConfirmationEmail({ order });
-        await sendEmail({
-            to: order.shippingInfo.email,
-            subject: `Your Menswell Order #${orderId.slice(-6)} is confirmed!`,
-            html: emailHtml,
-        });
         toast({
-            title: 'Confirmation Email Sent',
-            description: 'Check your inbox for the order details.',
+            title: 'Order Placed!',
+            description: 'Your order has been successfully placed.',
         });
 
     } catch (error: any) {
-        console.error("Failed to save order or send email", error);
+        console.error("Failed to save order", error);
          toast({
             variant: 'destructive',
             title: 'Order Failed',
