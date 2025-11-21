@@ -9,11 +9,40 @@ import { ChatProvider } from '@/context/chat-context';
 import { ChatWidget } from '@/components/chat-widget';
 import { ThemeProvider } from '@/components/theme-provider';
 import Script from 'next/script';
+import { doc, getDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
 
-export const metadata: Metadata = {
-  title: 'Menswell',
-  description: 'Your one-stop online marketplace.',
-};
+// This function can be used to fetch settings on the server
+async function getWebsiteSettings() {
+    try {
+        if (!firestore) return null;
+        const settingsDoc = await getDoc(doc(firestore, "settings", "store"));
+        if (settingsDoc.exists()) {
+            return settingsDoc.data().websiteSettings || null;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching website settings for metadata:", error);
+        return null;
+    }
+}
+
+// Generate metadata dynamically
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getWebsiteSettings();
+  const storeName = settings?.storeName || 'Menswell';
+  const description = settings?.tagline || 'Your one-stop online marketplace.';
+  const logoUrl = settings?.logoUrl || '/favicon.ico'; // Fallback to a default favicon
+
+  return {
+    title: storeName,
+    description: description,
+    icons: {
+      icon: logoUrl,
+    },
+  };
+}
+
 
 export default function RootLayout({
   children,
