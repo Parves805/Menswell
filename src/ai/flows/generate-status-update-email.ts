@@ -8,7 +8,6 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'genkit';
 
 const CartItemSchema = z.object({
@@ -91,7 +90,6 @@ const prompt = ai.definePrompt({
     message: z.string(),
   }) },
   output: { format: 'text' },
-  model: 'gemini-1.5-flash-latest',
   prompt: `
 You are an expert email designer for an e-commerce store called "Menswell".
 Your task is to generate a professional, modern, and clean HTML order status update email.
