@@ -105,8 +105,8 @@ export default function AdminCouponsPage() {
 
         const doc = new jsPDF();
         
-        const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + order.subtotal, 0);
-        const totalDiscount = ordersForCoupon.reduce((sum, order) => sum + order.discount, 0);
+        const totalSubtotal = ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0);
+        const totalDiscount = ordersForCoupon.reduce((sum, order) => sum + (order.discount || 0), 0);
 
         doc.setFontSize(18);
         doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 22);
@@ -121,14 +121,14 @@ export default function AdminCouponsPage() {
                 `#${order.id.slice(-6)}`,
                 order.shippingInfo.name,
                 format(new Date(order.date), "PPP"),
-                `৳${order.subtotal.toLocaleString('en-IN')}`,
-                `৳${order.discount.toLocaleString('en-IN')}`,
-                `৳${order.shippingCost.toLocaleString('en-IN')}`,
-                `৳${order.total.toLocaleString('en-IN')}`
+                `৳${(order.subtotal || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+                `৳${(order.discount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+                `৳${(order.shippingCost || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+                `৳${order.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
             ]),
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
-                ['Total', '', '', `৳${totalSubtotal.toLocaleString('en-IN')}`, `৳${totalDiscount.toLocaleString('en-IN')}`, '', '']
+                 ['Total', '', '', `৳${totalSubtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, `৳${totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, '', '']
             ]
         });
 
