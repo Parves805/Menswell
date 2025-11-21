@@ -152,21 +152,18 @@ export default function AdminCouponsPage() {
                     if(websiteSettings.storeName){
                         doc.setFontSize(22);
                         doc.setTextColor(themeSettings?.primary || '#000000');
-                        doc.text(websiteSettings.storeName, 14, 20);
+                        doc.text((websiteSettings.storeName || '').toUpperCase(), 14, 20);
                     }
                 }
             } else if (websiteSettings?.storeName) {
                 doc.setFontSize(22);
                 doc.setTextColor(themeSettings?.primary || '#000000');
-                doc.text(websiteSettings.storeName, 14, 20);
+                doc.text((websiteSettings.storeName || '').toUpperCase(), 14, 20);
             }
-            
-            doc.setFontSize(12);
-            doc.setTextColor(0);
-            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 26);
             
             doc.setFontSize(9);
             doc.setTextColor(100);
+            doc.text(`Orders Using Coupon: ${viewingOrdersFor}`, 14, 26);
             doc.text('01617574456', 14, 32);
             doc.text('hridoygd4456@gmail.com', 14, 36);
             doc.text('Road-21, Sector-11, Uttara, Dhaka, Bangladesh', 14, 40);
@@ -183,6 +180,9 @@ export default function AdminCouponsPage() {
                 format(new Date(order.date), "PPP"),
                 `BDT ${order.subtotal?.toFixed(2) || '0.00'}`
             ]),
+            headStyles: {
+                fillColor: themeSettings?.primary || '#F26522',
+            },
             footStyles: { fillColor: [230, 230, 230], textColor: 0, fontStyle: 'bold' },
             foot: [
                 ['Total Orders', ordersForCoupon.length.toString(), 'Total Subtotal', `BDT ${ordersForCoupon.reduce((sum, order) => sum + (order.subtotal || 0), 0).toFixed(2)}`]
