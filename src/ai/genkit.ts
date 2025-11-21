@@ -7,8 +7,8 @@ const apiKey = process.env.GOOGLE_GENAI_API_KEY || process.env.GOOGLE_API_KEY;
 
 if (apiKey) {
   ai = genkit({
-    plugins: [googleAI({ apiKey, apiVersion: "v1beta" })],
-    model: "models/gemini-1.5-flash",
+    plugins: [googleAI({ apiKey })],
+    model: 'gemini-1.5-flash-latest',
   });
 } else {
   // This warning will appear in the server console if the key is missing.
@@ -19,7 +19,7 @@ if (apiKey) {
   // Initialize with a model but no key to prevent crashing, but AI calls will fail with a clear error.
   ai = genkit({
     plugins: [googleAI({ apiKey: '' })],
-    model: "models/gemini-1.5-flash",
+    model: 'gemini-1.5-flash-latest',
   });
 }
 
