@@ -15,7 +15,8 @@ import { Loader2, Send, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import type { Order } from '@/lib/types';
 import { firestore } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, getDocs } from 'firebase/firestore';
+import { sendEmail } from '@/lib/email';
 
 
 const emailSchema = z.object({
@@ -53,20 +54,36 @@ export default function EmailMarketingPage() {
     const onSubmit = async (data: EmailFormValues) => {
         setIsSending(true);
 
-        console.log("Sending email to:", data.recipients);
-        console.log("Subject:", data.subject);
-        console.log("Body:", data.body);
-        
-        // Simulate API call for sending email
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+            const orderDocs = await getDocs(collection(firestore, 'orders'));
+            const customerEmails = new Set(orderDocs.docs.map(doc => (doc.data() as Order).shippingInfo.email));
 
-        toast({
-            title: 'Email Sent!',
-            description: `The promotional email has been sent to ${customerCount} customer(s).`,
-        });
-        
-        form.reset();
-        setIsSending(false);
+            const emailPromises = Array.from(customerEmails).map(email => 
+                sendEmail({
+                    to: email,
+                    subject: data.subject,
+                    html: data.body.replace(/\n/g, '<br>'), // Simple newline to <br> conversion
+                })
+            );
+            
+            await Promise.all(emailPromises);
+
+            toast({
+                title: 'Emails Sent!',
+                description: `The promotional email has been sent to ${customerEmails.size} customer(s).`,
+            });
+            form.reset();
+
+        } catch (error) {
+            console.error("Failed to send marketing emails", error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to send emails. Check console for details.',
+            });
+        } finally {
+            setIsSending(false);
+        }
     };
 
     return (
@@ -120,9 +137,9 @@ export default function EmailMarketingPage() {
                                 name="body"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email Body</FormLabel>
+                                        <FormLabel>Email Body (supports HTML)</FormLabel>
                                         <FormControl>
-                                            <Textarea placeholder="Write your email content here..." {...field} rows={10}/>
+                                            <Textarea placeholder="<h1>Big Sale!</h1><p>Get your favorite products now.</p>" {...field} rows={10}/>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -145,5 +162,3 @@ export default function EmailMarketingPage() {
         </div>
     );
 }
-
-    

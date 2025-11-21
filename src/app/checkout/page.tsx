@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -23,6 +24,8 @@ import { CreditCard, Truck, Loader2 } from 'lucide-react';
 import type { Order, PaymentGatewaySettings, ShippingRate, Coupon } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { doc, setDoc, getDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
+import { generateOrderConfirmationEmail } from '@/ai/flows/generate-order-email';
+import { sendEmail } from '@/lib/email';
 
 
 const checkoutSchema = z.object({
@@ -174,7 +177,7 @@ export default function CheckoutPage() {
           setCouponError('Invalid coupon code.');
       } else {
           const couponDoc = querySnapshot.docs[0];
-          const couponData = couponDoc.data() as Coupon;
+          const couponData = couponDoc.data() as Omit<Coupon, 'id'>;
           
           if (new Date(couponData.expiryDate.toDate()) < new Date()) {
               setCouponError('This coupon has expired.');
@@ -236,6 +239,19 @@ export default function CheckoutPage() {
     try {
         const orderRef = doc(firestore, 'orders', orderId);
         await setDoc(orderRef, order);
+        
+        // Generate and send confirmation email
+        const emailHtml = await generateOrderConfirmationEmail({ order });
+        await sendEmail({
+            to: order.shippingInfo.email,
+            subject: `Your Menswell Order #${orderId.slice(-6)} is confirmed!`,
+            html: emailHtml,
+        });
+        toast({
+            title: 'Confirmation Email Sent',
+            description: 'Check your inbox for the order details.',
+        });
+
     } catch (error: any) {
         console.error("Failed to save order or send email", error);
          toast({

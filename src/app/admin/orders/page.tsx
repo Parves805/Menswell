@@ -1,3 +1,4 @@
+
 'use client'; 
 
 import { useState, useEffect, useRef } from 'react';
@@ -32,6 +33,7 @@ import { firestore } from '@/lib/firebase';
 import { collection, doc, onSnapshot, query, setDoc, orderBy } from 'firebase/firestore';
 import { generateStatusUpdateEmail } from '@/ai/flows/generate-status-update-email';
 import { OrderInvoice } from '@/components/admin/order-invoice';
+import { sendEmail } from '@/lib/email';
 
 
 const statusColors: { [key: string]: string } = {
@@ -99,10 +101,13 @@ export default function AdminOrdersPage() {
             }
             toast({ title: 'Status Updated', description: `Order status changed to ${newStatus}.` });
             
-            // Send email notification - Temporarily disabled
-            /*
             try {
-                await generateStatusUpdateEmail({ order: { ...orderToUpdate, status: newStatus }, newStatus });
+                const emailHtml = await generateStatusUpdateEmail({ order: { ...orderToUpdate, status: newStatus }, newStatus });
+                await sendEmail({
+                    to: orderToUpdate.shippingInfo.email,
+                    subject: `Update on your Menswell order #${orderToUpdate.id.slice(-6)}`,
+                    html: emailHtml,
+                });
                  toast({
                     title: 'Email Sent',
                     description: `Status update email sent to ${orderToUpdate.shippingInfo.email}.`,
@@ -115,8 +120,6 @@ export default function AdminOrdersPage() {
                     description: 'Could not send status update email.',
                 });
             }
-            */
-
 
         } catch (error) {
             console.error("Failed to update order status", error);
