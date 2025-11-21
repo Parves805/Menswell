@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,9 +16,9 @@ import type { AdminUser } from '@/lib/types';
 import { Loader2, Trash2, PlusCircle, UserCog } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { firestore } from '@/lib/firebase';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, query, where, getDocs } from 'firebase/firestore';
 
-
-const ADMIN_USERS_KEY = 'menswellAdminUsers';
 
 const adminUserSchema = z.object({
     name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -42,55 +41,56 @@ export default function AdminUsersPage() {
     });
     
     useEffect(() => {
-        try {
-            const storedUsers = localStorage.getItem(ADMIN_USERS_KEY);
-            if (storedUsers) {
-                setUsers(JSON.parse(storedUsers));
-            }
-        } catch(e) {
-            console.error("Failed to load admin users from localStorage", e);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not load admin users.' });
-        } finally {
+        const unsubscribe = onSnapshot(collection(firestore, 'adminUsers'), (snapshot) => {
+            const fetchedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdminUser));
+            setUsers(fetchedUsers);
             setIsLoading(false);
-        }
+        }, (error) => {
+            console.error("Error fetching admin users: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch admin users.' });
+            setIsLoading(false);
+        });
+        
+        return () => unsubscribe();
     }, [toast]);
     
-    const saveUsersToStorage = (updatedUsers: AdminUser[]) => {
-        try {
-            localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(updatedUsers));
-            setUsers(updatedUsers);
-        } catch (e) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not save admin users.' });
-        }
-    };
-
-    const handleAddUser = (data: AdminUserFormValues) => {
+    const handleAddUser = async (data: AdminUserFormValues) => {
         setIsSubmitting(true);
         
-        if (users.some(u => u.email === data.email)) {
+        const q = query(collection(firestore, 'adminUsers'), where('email', '==', data.email));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
             toast({ variant: 'destructive', title: 'Error', description: 'An admin with this email already exists.' });
             setIsSubmitting(false);
             return;
         }
 
-        const newUser: AdminUser = {
-            id: `admin_${Date.now()}`,
-            ...data
-        };
+        try {
+            await addDoc(collection(firestore, 'adminUsers'), {
+                name: data.name,
+                email: data.email,
+                password: data.password, // Note: In a real app, this should be hashed.
+            });
+            toast({ title: 'Admin Added', description: `Admin user "${data.name}" has been created.` });
+        } catch (error) {
+            console.error("Error adding admin:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not create admin user.' });
+        }
         
-        const updatedUsers = [...users, newUser];
-        saveUsersToStorage(updatedUsers);
-
-        toast({ title: 'Admin Added', description: `Admin user "${data.name}" has been created.` });
         setIsSubmitting(false);
         setIsAddDialogOpen(false);
         form.reset();
     };
 
-    const handleDeleteUser = (userId: string) => {
-        const updatedUsers = users.filter(u => u.id !== userId);
-        saveUsersToStorage(updatedUsers);
-        toast({ title: 'Admin Deleted', description: 'The admin user has been removed.' });
+    const handleDeleteUser = async (userId: string) => {
+        try {
+            await deleteDoc(doc(firestore, "adminUsers", userId));
+            toast({ title: 'Admin Deleted', description: 'The admin user has been removed.' });
+        } catch (error) {
+            console.error("Error deleting admin:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not delete admin user.' });
+        }
     };
 
     return (

@@ -13,10 +13,8 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { AdminUser, WebsiteSettings } from '@/lib/types';
 import Image from 'next/image';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
-
-const ADMIN_USERS_KEY = 'menswellAdminUsers';
 
 const adminLoginSchema = z.object({
   email: z.string().email({ message: 'আপনার ইমেল ঠিকানাটি সঠিক নয়। অনুগ্রহ করে একটি সঠিক ইমেল ব্যবহার করুন।' }),
@@ -37,23 +35,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([defaultAdmin]);
   const [logoUrl, setLogoUrl] = useState('');
-
-  useEffect(() => {
-    // This effect fetches the admin users from localStorage when the component mounts.
-    const loadUsers = () => {
-        try {
-            const storedUsersJSON = localStorage.getItem(ADMIN_USERS_KEY);
-            const storedUsers = storedUsersJSON ? JSON.parse(storedUsersJSON) : [];
-            setAdminUsers([defaultAdmin, ...storedUsers]);
-        } catch (e) {
-            console.error("Failed to parse admin users from localStorage", e);
-            setAdminUsers([defaultAdmin]);
-        }
-    };
-    loadUsers();
-  }, []);
 
   useEffect(() => {
     // This effect fetches the logo URL from Firestore.
@@ -77,44 +59,54 @@ export default function AdminLoginPage() {
     },
   });
 
-  const onSubmit = (data: AdminLoginFormValues) => {
+  const onSubmit = async (data: AdminLoginFormValues) => {
     setIsLoading(true);
 
-    // Re-fetch users from local storage right before submission
-    // to ensure the list is up-to-date.
-    let currentAdminUsers = [defaultAdmin];
-    try {
-        const storedUsersJSON = localStorage.getItem(ADMIN_USERS_KEY);
-        const storedUsers = storedUsersJSON ? JSON.parse(storedUsersJSON) : [];
-        currentAdminUsers = [defaultAdmin, ...storedUsers];
-    } catch (e) {
-        console.error("Failed to parse admin users from localStorage on submit", e);
-    }
-    setAdminUsers(currentAdminUsers);
-
-
-    setTimeout(() => {
-      const user = currentAdminUsers.find(
-        (u) => u.email === data.email && u.password === data.password
-      );
-
-      if (user) {
+    // Check default admin first
+    if (data.email === defaultAdmin.email && data.password === defaultAdmin.password) {
         localStorage.setItem('isAdminAuthenticated', 'true');
         toast({
           title: 'Login Successful',
           description: 'Welcome to the Admin Panel.',
         });
         router.push('/admin');
-      } else {
+        setIsLoading(false);
+        return;
+    }
+
+    try {
+        const q = query(
+            collection(firestore, 'adminUsers'), 
+            where('email', '==', data.email), 
+            where('password', '==', data.password)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            localStorage.setItem('isAdminAuthenticated', 'true');
+            toast({
+                title: 'Login Successful',
+                description: 'Welcome to the Admin Panel.',
+            });
+            router.push('/admin');
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Login Failed',
+                description: 'Invalid email or password.',
+            });
+            form.setError("root", { type: "manual", message: "Invalid email or password." });
+        }
+    } catch (error) {
+        console.error("Error logging in:", error);
         toast({
             variant: 'destructive',
-            title: 'Login Failed',
-            description: 'Invalid email or password.',
+            title: 'Login Error',
+            description: 'An error occurred while trying to log in.',
         });
-        form.setError("root", { type: "manual", message: "Invalid email or password." });
-      }
-      setIsLoading(false);
-    }, 1000);
+    }
+
+    setIsLoading(false);
   };
 
   return (
