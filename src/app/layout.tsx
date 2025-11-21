@@ -34,7 +34,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = settings?.tagline || 'Your one-stop online marketplace.';
 
   return {
-    title: storeName,
+    title: {
+      default: storeName,
+      template: `%s | ${storeName}`,
+    },
     description: description,
     icons: {
       icon: 'https://menswell.stapler.studio/uploads/1763738788_a0955b83556997cb.png',
