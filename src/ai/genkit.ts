@@ -21,6 +21,6 @@ if (apiKey) {
   });
 }
 
-const defaultModel = 'gemini-1.5-flash-latest';
+const defaultModel = 'gemini-1.5-flash';
 
 export { ai, defaultModel };
