@@ -21,9 +21,9 @@ import { useToast } from '@/hooks/use-toast';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { CreditCard, Truck, Loader2 } from 'lucide-react';
-import type { Order, PaymentGatewaySettings, ShippingRate } from '@/lib/types';
+import type { Order, PaymentGatewaySettings, ShippingRate, Coupon } from '@/lib/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, getDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
 
 
 const checkoutSchema = z.object({
@@ -38,14 +38,6 @@ const checkoutSchema = z.object({
     required_error: "আপনাকে একটি পেমেন্ট পদ্ধতি বেছে নিতে হবে।",
   }),
   transactionId: z.string().optional(),
-}).refine(data => {
-    if ((data.paymentMethod === 'bkash' || data.paymentMethod === 'nagad' || data.paymentMethod === 'rocket') && (!data.transactionId || data.transactionId.trim().length < 5)) {
-        return false;
-    }
-    return true;
-}, {
-    message: "একটি সঠিক লেনদেন আইডি প্রয়োজন।",
-    path: ["transactionId"],
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -68,6 +60,13 @@ export default function CheckoutPage() {
     rocketNumber: '',
   });
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [discount, setDiscount] = useState(0);
+  const [couponError, setCouponError] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -87,7 +86,7 @@ export default function CheckoutPage() {
   const selectedShippingZoneId = form.watch('shippingZone');
   
   const shippingCost = shippingRates.find(rate => rate.id === selectedShippingZoneId)?.cost ?? 0;
-  const total = subtotal + shippingCost;
+  const total = subtotal - discount + shippingCost;
 
 
   useEffect(() => {
@@ -150,6 +149,43 @@ export default function CheckoutPage() {
 
     return () => unsub();
   }, [totalItems, router, isProcessing, form]);
+  
+  useEffect(() => {
+    if (appliedCoupon) {
+      if (appliedCoupon.discountType === 'percentage') {
+        setDiscount((subtotal * appliedCoupon.discountValue) / 100);
+      } else {
+        setDiscount(appliedCoupon.discountValue);
+      }
+    } else {
+      setDiscount(0);
+    }
+  }, [appliedCoupon, subtotal]);
+
+  const handleApplyCoupon = async () => {
+      if (!couponCode) return;
+      setIsApplyingCoupon(true);
+      setCouponError('');
+      setAppliedCoupon(null);
+      
+      const q = query(collection(firestore, 'coupons'), where('code', '==', couponCode.toUpperCase()));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+          setCouponError('Invalid coupon code.');
+      } else {
+          const couponDoc = querySnapshot.docs[0];
+          const couponData = couponDoc.data() as Coupon;
+          
+          if (new Date(couponData.expiryDate) < new Date()) {
+              setCouponError('This coupon has expired.');
+          } else {
+              setAppliedCoupon({ ...couponData, id: couponDoc.id });
+              toast({ title: 'Coupon Applied!', description: `You received a discount.` });
+          }
+      }
+      setIsApplyingCoupon(false);
+  }
 
 
   const onSubmit = async (data: CheckoutFormValues) => {
@@ -161,6 +197,9 @@ export default function CheckoutPage() {
       id: orderId,
       date: new Date().toISOString(),
       items: cartItems,
+      subtotal: subtotal,
+      discount: discount,
+      shippingCost: shippingCost,
       total: total,
       shippingInfo: {
         name: data.name,
@@ -176,6 +215,7 @@ export default function CheckoutPage() {
           transactionId: data.transactionId || null,
       },
       status: 'Processing' as const,
+      coupon: appliedCoupon ? { code: appliedCoupon.code, discount: discount } : null,
     };
     
      // Also save profile data to local storage for guests/persistence
@@ -468,11 +508,26 @@ export default function CheckoutPage() {
                     ))}
                   </div>
                   <Separator />
+                   <div className="space-y-2">
+                        <div className="flex gap-2">
+                            <Input placeholder="Coupon Code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} disabled={!!appliedCoupon} />
+                            <Button type="button" onClick={handleApplyCoupon} disabled={isApplyingCoupon || !!appliedCoupon}>
+                                {isApplyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Apply'}
+                            </Button>
+                        </div>
+                        {couponError && <p className="text-sm text-destructive">{couponError}</p>}
+                    </div>
                   <div className="space-y-2">
                       <div className="flex justify-between">
                           <span className="text-muted-foreground">মোট মূল্য</span>
                           <span>৳{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
+                      {appliedCoupon && (
+                          <div className="flex justify-between text-green-600">
+                            <span className="text-muted-foreground">Discount ({appliedCoupon.code})</span>
+                            <span>- ৳{discount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          </div>
+                      )}
                       <div className="flex justify-between">
                           <span className="text-muted-foreground">ডেলিভারি চার্জ</span>
                           <span>৳{shippingCost.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -507,4 +562,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

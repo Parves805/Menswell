@@ -36,6 +36,7 @@ import {
   FileText,
   UserCog,
   ImageIcon,
+  Ticket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -192,6 +193,14 @@ export default function AdminLayout({
           <Link href="/admin/categories">
             <LayoutGrid />
             Categories
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={isActive('/admin/coupons')}>
+          <Link href="/admin/coupons">
+            <Ticket />
+            Coupons
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>

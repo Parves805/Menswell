@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -34,6 +35,9 @@ export interface Order {
   id: string;
   date: string; // ISO Date String
   items: CartItem[];
+  subtotal: number;
+  discount: number;
+  shippingCost: number;
   total: number;
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   shippingInfo: {
@@ -49,6 +53,10 @@ export interface Order {
       method: string;
       transactionId?: string | null;
   };
+  coupon?: {
+      code: string;
+      discount: number;
+  } | null;
 }
 
 export interface Review {
@@ -160,4 +168,13 @@ export interface AdminUser {
     name: string;
     email: string;
     password?: string;
+}
+
+export interface Coupon {
+    id: string;
+    code: string;
+    discountType: 'fixed' | 'percentage';
+    discountValue: number;
+    expiryDate: Date | any; // Can be Date object or Firestore Timestamp
+    createdAt?: any; // Firestore Timestamp
 }
